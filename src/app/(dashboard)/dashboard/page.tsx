@@ -1,12 +1,11 @@
-import SheetComponent from "@/components/SheetComponent";
 
-function page() {
+
+function DashboardPage() {
   return (
-    <div>
+    <div className="pt-24">
       <h1>This is our dashboard page</h1>
-      <SheetComponent />
     </div>
   );
 }
 
-export default page;
+export default DashboardPage;

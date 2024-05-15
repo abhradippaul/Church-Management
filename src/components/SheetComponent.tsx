@@ -1,32 +1,65 @@
 import {
   Sheet,
   SheetContent,
-  SheetDescription,
   SheetHeader,
-  SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { ReactElement } from "react";
+import { Menu } from "lucide-react";
+import NavigationMenuComponent from "@/my_components/Navbar/NavigationMenuComponent";
+import ScrollAreaComponent from "./ScrollAreaComponent";
+import { memo } from "react";
 
-interface SheetComponentProps {
-  trigger: ReactElement;
+const Pages = [
+  {
+    title: "Dashboard",
+    path: "/dashboard",
+  },
+  {
+    title: "Users",
+    path: "/users",
+  },
+  {
+    title: "Tags",
+    path: "/tags",
+  },
+  {
+    title: "Events",
+    path: "/events",
+  },
+];
+
+interface UserInfoValue {
+  name: string;
+  imageUrl: string;
+  role: string;
 }
 
-function SheetComponent({ trigger }: SheetComponentProps) {
+function SheetComponent({ userInfo }: { userInfo: UserInfoValue }) {
   return (
     <Sheet>
-      <SheetTrigger>{trigger}</SheetTrigger>
+      <SheetTrigger>
+        <Menu className="size-8" />
+      </SheetTrigger>
       <SheetContent side="left">
         <SheetHeader>
-          <SheetTitle>Are you absolutely sure?</SheetTitle>
-          <SheetDescription>
-            This action cannot be undone. This will permanently delete your
-            account and remove your data from our servers.
-          </SheetDescription>
+          <div className="w-full my-4 flex items-center px-4">
+            <img
+              src={userInfo.imageUrl}
+              alt="image"
+              className="size-12 rounded-full mr-4"
+            />
+            <div className="flex flex-col justify-center">
+              <h1 className="mt-1 sm:text-lg">{userInfo.name}</h1>
+              <p className="text-slate-300 text-sm">{userInfo.role}</p>
+            </div>
+          </div>
         </SheetHeader>
+        <ScrollAreaComponent>
+          <NavigationMenuComponent heading="Pages" props={Pages} />
+        </ScrollAreaComponent>
       </SheetContent>
     </Sheet>
   );
 }
 
-export default SheetComponent;
+export default memo(SheetComponent);
