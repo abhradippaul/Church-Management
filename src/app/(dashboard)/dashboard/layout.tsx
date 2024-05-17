@@ -27,7 +27,7 @@ export default async function RootLayout({
       <body suppressHydrationWarning>
         <RightSideNavbar />
         <Navbar userInfo={UserInfo} />
-        <div className="px-4 max-w-7xl mx-auto">{children}</div>
+        <div className="px-2 md:px-4 max-w-7xl mx-auto">{children}</div>
       </body>
     </html>
   );

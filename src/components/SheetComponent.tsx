@@ -9,32 +9,15 @@ import NavigationMenuComponent from "@/my_components/Navbar/NavigationMenuCompon
 import ScrollAreaComponent from "./ScrollAreaComponent";
 import { memo } from "react";
 
-const Pages = [
-  {
-    title: "Dashboard",
-    path: "/dashboard",
-  },
-  {
-    title: "Users",
-    path: "/users",
-  },
-  {
-    title: "Tags",
-    path: "/tags",
-  },
-  {
-    title: "Events",
-    path: "/events",
-  },
-];
-
 interface UserInfoValue {
-  name: string;
-  imageUrl: string;
-  role: string;
+  userInfo: { name: string; imageUrl: string; role: string };
+  Pages: {
+    title: string;
+    path: string;
+  }[];
 }
 
-function SheetComponent({ userInfo }: { userInfo: UserInfoValue }) {
+function SheetComponent({ userInfo, Pages }: UserInfoValue) {
   return (
     <Sheet>
       <SheetTrigger>
