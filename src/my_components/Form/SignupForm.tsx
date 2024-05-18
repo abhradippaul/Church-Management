@@ -15,12 +15,15 @@ import { Input } from "@/components/ui/input";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
+import { Toaster } from "@/components/ui/toaster";
+import { toast } from "@/components/ui/use-toast";
 
 function SignupForm() {
   let formSchema = z.object({
     email: z.string().email(),
     password: z.string().min(4),
     name: z.string(),
+    image: z.string(),
   });
 
   let form = useForm<z.infer<typeof formSchema>>({
@@ -29,15 +32,20 @@ function SignupForm() {
       email: "",
       password: "",
       name: "",
+      image: "",
     },
   });
 
   let onSubmit = (values: z.infer<typeof formSchema>) => {
     console.log(values);
+    toast({
+      title: "Success",
+      description: "You have successfully signed up",
+    });
   };
 
   return (
-    <div>
+    <>
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -46,11 +54,12 @@ function SignupForm() {
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Name : </FormLabel>
+                  <FormLabel>Church Name : </FormLabel>
                   <FormControl>
                     <Input
                       placeholder="Name should be unique"
                       type="name"
+                      required
                       {...field}
                       autoComplete="name"
                     />
@@ -65,11 +74,12 @@ function SignupForm() {
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Username</FormLabel>
+                  <FormLabel>Church Email : </FormLabel>
                   <FormControl>
                     <Input
                       placeholder="abc@gmail.com"
                       type="email"
+                      required
                       autoComplete="username"
                       {...field}
                     />
@@ -89,9 +99,24 @@ function SignupForm() {
                     <Input
                       placeholder="password"
                       type="password"
+                      required
                       {...field}
                       autoComplete="current-password"
                     />
+                  </FormControl>
+                  <FormMessage className="text-red-600" />
+                </FormItem>
+              )}
+            />
+            <div className="my-4"></div>
+            <FormField
+              control={form.control}
+              name="image"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Upload Image : </FormLabel>
+                  <FormControl>
+                    <Input type="file" required {...field} />
                   </FormControl>
                   <FormMessage className="text-red-600" />
                 </FormItem>
@@ -108,7 +133,8 @@ function SignupForm() {
           </form>
         </Form>
       </CardContent>
-    </div>
+      <Toaster />
+    </>
   );
 }
 

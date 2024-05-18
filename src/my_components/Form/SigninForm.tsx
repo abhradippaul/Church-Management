@@ -1,6 +1,6 @@
 "use client";
 
-import { CardContent } from "@/components/ui/card";
+import { CardContent, CardFooter } from "@/components/ui/card";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
+import Link from "next/link";
 
 function SigninForm() {
   let formSchema = z.object({
@@ -44,11 +45,12 @@ function SigninForm() {
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Username</FormLabel>
+                  <FormLabel>Username : </FormLabel>
                   <FormControl>
                     <Input
                       placeholder="abc@gmail.com"
                       type="email"
+                      required
                       autoComplete="username"
                       {...field}
                     />
@@ -68,6 +70,7 @@ function SigninForm() {
                     <Input
                       placeholder="password"
                       type="password"
+                      required
                       {...field}
                       autoComplete="current-password"
                     />
@@ -86,6 +89,17 @@ function SigninForm() {
           </form>
         </Form>
       </CardContent>
+      <CardFooter>
+        <div className="flex w-full items-center justify-end text-zinc-300 text-base md:text-lg">
+          Create Account.
+          <Link
+            href="/sign-up"
+            className="ml-2 hover:text-white transition font-semibold text-lg md:text-xl"
+          >
+            Sign Up
+          </Link>
+        </div>
+      </CardFooter>
     </div>
   );
 }

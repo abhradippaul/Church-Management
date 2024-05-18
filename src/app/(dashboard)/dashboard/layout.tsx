@@ -1,5 +1,10 @@
+import dynamic from "next/dynamic";
 import Navbar from "@/my_components/Navbar/Navbar";
-import RightSideNavbar from "@/my_components/Navbar/RightSideNavbar";
+// import RightSideNavbar from "@/my_components/Navbar/RightSideNavbar";
+
+const RightSideNavbar = dynamic(
+  () => import("@/my_components/Navbar/RightSideNavbar")
+);
 
 export const metadata = {
   title: "XYZ | Dashboard",
@@ -27,7 +32,9 @@ export default async function RootLayout({
       <body suppressHydrationWarning>
         <RightSideNavbar />
         <Navbar userInfo={UserInfo} />
-        <div className="px-2 md:px-4 max-w-7xl mx-auto">{children}</div>
+        <div className="px-2 md:px-4 max-w-7xl mx-auto min-h-dvh">
+          {children}
+        </div>
       </body>
     </html>
   );

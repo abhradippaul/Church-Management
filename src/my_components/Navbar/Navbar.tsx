@@ -1,3 +1,4 @@
+import CommandComponent from "@/components/CommandComponent";
 import NavigationMenuComponent from "@/components/NavigationMenuComponent";
 import SheetComponent from "@/components/SheetComponent";
 import TooltipComponent from "@/components/TooltipComponent";
@@ -32,7 +33,7 @@ const Pages = [
 function Navbar({ userInfo }: { userInfo: UserInfoValue }) {
   return (
     <div className="w-full flex items-center justify-between fixed top-0 left-0 right-0  bg-slate-900">
-      <div className="max-w-7xl w-full mx-auto flex items-center justify-between py-4 px-2 md:px-4">
+      <div className="max-w-7xl w-full mx-auto flex items-center justify-between py-4 px-2 gap-x-4 md:px-4">
         <div className="flex md:hidden">
           <SheetComponent userInfo={userInfo} Pages={Pages} />
         </div>
@@ -42,29 +43,32 @@ function Navbar({ userInfo }: { userInfo: UserInfoValue }) {
         <div className="hidden md:block">
           <NavigationMenuComponent Pages={Pages} />
         </div>
-        <TooltipComponent
-          hoverElement={
-            <img
-              src={userInfo.imageUrl}
-              alt="image"
-              className="size-10 rounded-full"
-            />
-          }
-        >
-          <div className="flex flex-col justify-center">
-            <div className="my-1">
-              <h1 className="text-base text-zinc-200">{userInfo.name}</h1>
-              <p className="text-zinc-300 text-sm">{userInfo.role}</p>
+        <div className="max-w-[300px] w-[90%] flex items-center justify-between">
+          <CommandComponent commandInput="church" />
+          <TooltipComponent
+            hoverElement={
+              <img
+                src={userInfo.imageUrl}
+                alt="image"
+                className="size-10 rounded-full ml-8"
+              />
+            }
+          >
+            <div className="flex flex-col justify-center">
+              <div className="my-1">
+                <h1 className="text-base text-zinc-200">{userInfo.name}</h1>
+                <p className="text-zinc-300 text-sm">{userInfo.role}</p>
+              </div>
+              <div className="flex w-full items-center justify-between my-1 group hover:bg-slate-900 rounded-md cursor-pointer p-1">
+                {" "}
+                <h1 className="text-base text-zinc-200 group-hover:text-white">
+                  Sign Out
+                </h1>{" "}
+                <LogOut className="size-4 ml-4 text-zinc-300 group-hover:text-white" />
+              </div>
             </div>
-            <div className="flex w-full items-center justify-between my-1 group hover:bg-slate-900 rounded-md cursor-pointer p-1">
-              {" "}
-              <h1 className="text-base text-zinc-200 group-hover:text-white">
-                Sign Out
-              </h1>{" "}
-              <LogOut className="size-4 ml-4 text-zinc-300 group-hover:text-white" />
-            </div>
-          </div>
-        </TooltipComponent>
+          </TooltipComponent>
+        </div>
       </div>
     </div>
   );
