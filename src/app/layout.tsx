@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Roboto } from "next/font/google";
 import "@/app/globals.css";
 import { ThemeProvider } from "@/my_components/providers/ThemeProvider";
-import Navbar from "@/my_components/Navbar/Navbar";
 
 const inter = Roboto({
   weight: "400",
@@ -25,7 +24,6 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning={true}>
       <body className={inter.className} suppressHydrationWarning={true}>
         <ThemeProvider attribute="class" defaultTheme="dark">
-          {/* <Navbar /> */}
           {children}
         </ThemeProvider>
       </body>

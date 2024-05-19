@@ -1,9 +1,11 @@
-import CommandComponent from "@/components/CommandComponent";
 import NavigationMenuComponent from "@/components/NavigationMenuComponent";
-import SheetComponent from "@/components/SheetComponent";
-import TooltipComponent from "@/components/TooltipComponent";
 import { LogOut } from "lucide-react";
 import { memo } from "react";
+import dynamic from "next/dynamic";
+
+const CommandComponent = dynamic(() => import("@/components/CommandComponent"));
+const TooltipComponent = dynamic(() => import("@/components/TooltipComponent"));
+const SheetComponent = dynamic(() => import("@/components/SheetComponent"));
 
 interface UserInfoValue {
   name: string;
@@ -17,8 +19,8 @@ const Pages = [
     path: "/dashboard",
   },
   {
-    title: "Users",
-    path: "/users",
+    title: "People",
+    path: "/people",
   },
   {
     title: "Tags",
@@ -44,7 +46,7 @@ function Navbar({ userInfo }: { userInfo: UserInfoValue }) {
           <NavigationMenuComponent Pages={Pages} />
         </div>
         <div className="max-w-[300px] w-[90%] flex items-center justify-between">
-          <CommandComponent commandInput="church" />
+          <CommandComponent />
           <TooltipComponent
             hoverElement={
               <img
