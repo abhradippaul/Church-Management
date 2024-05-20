@@ -9,13 +9,15 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
+import { toast } from "@/components/ui/use-toast";
+import { useEffect } from "react";
+import { Toaster } from "@/components/ui/toaster";
 
 function SigninForm() {
   let formSchema = z.object({
@@ -32,11 +34,29 @@ function SigninForm() {
   });
 
   let onSubmit = (values: z.infer<typeof formSchema>) => {
-    console.log(values);
+    console.log(values.email);
   };
 
+  useEffect(() => {
+    const error = form.formState.errors;
+
+    if (error) {
+      if (error.email?.message) {
+        toast({
+          title: "Error in email field",
+          description: error.email?.message,
+        });
+      } else if (error.password?.message) {
+        toast({
+          title: "Error in password field",
+          description: error.password?.message,
+        });
+      }
+    }
+  }, [form.formState.errors]);
+
   return (
-    <div>
+    <>
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -55,7 +75,6 @@ function SigninForm() {
                       {...field}
                     />
                   </FormControl>
-                  <FormMessage className="text-red-600" />
                 </FormItem>
               )}
             />
@@ -75,7 +94,6 @@ function SigninForm() {
                       autoComplete="current-password"
                     />
                   </FormControl>
-                  <FormMessage className="text-red-600" />
                 </FormItem>
               )}
             />
@@ -100,7 +118,8 @@ function SigninForm() {
           </Link>
         </div>
       </CardFooter>
-    </div>
+      <Toaster />
+    </>
   );
 }
 

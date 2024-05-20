@@ -15,9 +15,9 @@ function page() {
         <CardDescription>Create an account</CardDescription>
       </CardHeader>
       <SignupForm
-        email="Church Email"
+        email="Admin Email"
         image="Upload Image"
-        name="Church Name"
+        name="Admin Name"
         password="Password"
       />
     </Card>

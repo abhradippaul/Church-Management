@@ -4,7 +4,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import SigninForm from "@/my_components/Form/SigninForm";
+import dynamic from "next/dynamic";
+
+const SigninForm = dynamic(() => import("@/my_components/Form/SigninForm"));
 
 function page() {
   return (
