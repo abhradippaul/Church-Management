@@ -10,22 +10,20 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import VerifyEmailSchema from "@/schema/VerifyEmailSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 function page() {
-  const formSchema = z.object({
-    emailOtp: z.string().min(6),
-  });
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<z.infer<typeof VerifyEmailSchema>>({
+    resolver: zodResolver(VerifyEmailSchema),
     defaultValues: {
       emailOtp: "",
     },
   });
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
+  const onSubmit = (values: z.infer<typeof VerifyEmailSchema>) => {
     console.log(values);
   };
   return (

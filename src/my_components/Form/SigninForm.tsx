@@ -3,38 +3,45 @@
 import { CardContent, CardFooter } from "@/components/ui/card";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import { Form } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "@/components/ui/use-toast";
-import { useEffect } from "react";
+import { memo, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
+import SignInSchema from "@/schema/SignInSchema";
+import CustomFormInput from "./CustomFormInput";
+
+const SignInFormValue = [
+  {
+    label: "Church Email",
+    inputName: "email",
+    type: "email",
+    placeholder: "Enter an email",
+    autoComplete: "email",
+  },
+  {
+    label: "Password",
+    inputName: "password",
+    type: "password",
+    placeholder: "Enter a password",
+    autoComplete: "password",
+  },
+];
 
 function SigninForm() {
-  let formSchema = z.object({
-    email: z.string().email(),
-    password: z.string().min(4),
-  });
-
-  let form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  let form = useForm<z.infer<typeof SignInSchema>>({
+    resolver: zodResolver(SignInSchema),
     defaultValues: {
       email: "",
       password: "",
     },
   });
 
-  let onSubmit = (values: z.infer<typeof formSchema>) => {
-    console.log(values.email);
+  let onSubmit = (values: z.infer<typeof SignInSchema>) => {
+    console.log(values);
   };
 
   useEffect(() => {
@@ -60,43 +67,19 @@ function SigninForm() {
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Username : </FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="abc@gmail.com"
-                      type="email"
-                      required
-                      autoComplete="username"
-                      {...field}
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-            <div className="my-4"></div>
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Password : </FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="password"
-                      type="password"
-                      required
-                      {...field}
-                      autoComplete="current-password"
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
+            {SignInFormValue.map((e) => (
+              <CustomFormInput
+                key={e.label}
+                control={form.control}
+                inputName={e.inputName}
+                label={e.label}
+                type={e.type}
+                placeholder={e.placeholder}
+                disabled={form.formState.isSubmitting}
+                autoComplete={e.autoComplete}
+              />
+            ))}
+
             <Button variant="secondary" size="lg" className="text-lg mt-8">
               {form.formState.isSubmitting ? (
                 <Loader2 className="size-6 animate-spin" />
@@ -123,4 +106,4 @@ function SigninForm() {
   );
 }
 
-export default SigninForm;
+export default memo(SigninForm);

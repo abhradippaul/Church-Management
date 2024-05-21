@@ -3,40 +3,58 @@
 import { CardContent } from "@/components/ui/card";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import { Form } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { Toaster } from "@/components/ui/toaster";
 import { toast } from "@/components/ui/use-toast";
-import { memo, useEffect } from "react";
+import { ChangeEvent, memo, useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
+import SignUpSchema from "@/schema/SignUpSchema";
+import axios from "axios";
+// import CustomFormInput from "./CustomFormInput";
+// import { uploadCloudinary } from "@/lib/Cloudinary";
+import dynamic from "next/dynamic";
 
-interface SignupFormProps {
-  email: string;
-  password: string;
-  name: string;
-  image: string;
-}
+const CustomFormInput = dynamic(() => import("./CustomFormInput"));
 
-function SignupForm({ email, image, name, password }: SignupFormProps) {
+const SignUpFormValue = [
+  {
+    label: "Church Name",
+    inputName: "name",
+    type: "text",
+    placeholder: "Enter a name",
+    autoComplete: "name",
+  },
+  {
+    label: "Church Email",
+    inputName: "email",
+    type: "email",
+    placeholder: "Enter an email",
+    autoComplete: "email",
+  },
+  {
+    label: "Password",
+    inputName: "password",
+    type: "password",
+    placeholder: "Enter a password",
+    autoComplete: "password",
+  },
+  {
+    label: "Upload Image",
+    inputName: "image",
+    type: "file",
+  },
+];
+
+function SignupForm() {
   const pathName = usePathname();
-  let formSchema = z.object({
-    email: z.string().email(),
-    password: z.string().min(4),
-    name: z.string(),
-    image: z.string(),
-  });
+  const [isUploadedImage, setIsUploadedImage] = useState("");
+  const [isImageLoading, setIsImageLoading] = useState(false);
 
-  let form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  let form = useForm<z.infer<typeof SignUpSchema>>({
+    resolver: zodResolver(SignUpSchema),
     defaultValues: {
       email: "",
       password: "",
@@ -45,10 +63,28 @@ function SignupForm({ email, image, name, password }: SignupFormProps) {
     },
   });
 
-  let onSubmit = (values: z.infer<typeof formSchema>) => {
-    console.log(values);
+  let onSubmit = async (values: z.infer<typeof SignUpSchema>) => {
+    values.image = isUploadedImage;
     if (pathName.includes("/admin")) {
       console.log("This is an admin page");
+    } else {
+      const res = await axios.post("/api/v1/sign-up", values);
+      console.log(values);
+      console.log(res);
+    }
+  };
+
+  const uploadImage = async (e: ChangeEvent<HTMLInputElement>) => {
+    const image = e.target.files;
+    if (image?.length) {
+      setIsImageLoading(true);
+      const { public_id } = await (
+        await import("@/lib/Cloudinary")
+      ).uploadCloudinary(image);
+      if (public_id) {
+        setIsUploadedImage(public_id);
+        setIsImageLoading(false);
+      }
     }
   };
 
@@ -83,86 +119,27 @@ function SignupForm({ email, image, name, password }: SignupFormProps) {
     <CardContent>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{name} : </FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Name should be unique"
-                    type="text"
-                    disabled={form.formState.isSubmitSuccessful}
-                    required
-                    {...field}
-                    autoComplete="name"
-                  />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-          <div className="my-4"></div>
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{email} : </FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="abc@gmail.com"
-                    type="email"
-                    required
-                    disabled={form.formState.isSubmitSuccessful}
-                    autoComplete="username"
-                    {...field}
-                  />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-          <div className="my-4"></div>
-          <FormField
-            control={form.control}
-            name="password"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{password} : </FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="password"
-                    type="password"
-                    required
-                    disabled={form.formState.isSubmitSuccessful}
-                    {...field}
-                    autoComplete="current-password"
-                  />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-          <div className="my-4"></div>
-          <FormField
-            control={form.control}
-            name="image"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{image} : </FormLabel>
-                <FormControl>
-                  <Input
-                    type="file"
-                    required
-                    disabled={form.formState.isSubmitSuccessful}
-                    {...field}
-                  />
-                </FormControl>
-              </FormItem>
-            )}
-          />
+          {SignUpFormValue.map((e) => (
+            <CustomFormInput
+              key={e.label}
+              control={form.control}
+              inputName={e.inputName}
+              label={e.label}
+              type={e.type}
+              placeholder={e.placeholder}
+              disabled={form.formState.isSubmitting}
+              autoComplete={e.autoComplete}
+              imageUpload={e.type === "file" ? uploadImage : null}
+            />
+          ))}
 
-          <Button variant="secondary" size="lg" className="text-lg mt-8">
-            {form.formState.isSubmitting ? (
+          <Button
+            variant="secondary"
+            size="lg"
+            disabled={form.formState.isSubmitting || isImageLoading}
+            className="text-lg mt-8"
+          >
+            {form.formState.isSubmitting || isImageLoading ? (
               <Loader2 className="size-6 animate-spin" />
             ) : (
               "Submit"
@@ -174,5 +151,4 @@ function SignupForm({ email, image, name, password }: SignupFormProps) {
     </CardContent>
   );
 }
-
 export default memo(SignupForm);

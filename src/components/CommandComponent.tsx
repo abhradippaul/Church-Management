@@ -30,7 +30,7 @@ function CommandComponent() {
     <>
       <div
         onClick={() => setOpen((prev) => !prev)}
-        className="group px-2 py-1 cursor-pointer rounded-md flex items-center justify-between gap-x-2 w-full hover:bg-zinc-700/10 dark:hover:bg-zinc-700/50 transition"
+        className="group px-2 py-1 cursor-pointer border rounded-md flex items-center justify-between gap-x-2 w-full hover:bg-zinc-700/10 dark:hover:bg-zinc-700/50 transition"
       >
         <div className="flex items-center justify-center gap-x-2">
           <Search className="size-4 text-zinc-500 dark:text-zinc-300" />
