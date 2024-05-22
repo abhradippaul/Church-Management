@@ -7,6 +7,7 @@ export default async function dbConnect() {
     return;
   }
   try {
+    console.log("New connection");
     const dbResponse = await mongoose.connect(process.env.DB_URL!);
     isConnected = dbResponse.connections[0].readyState;
   } catch (err) {

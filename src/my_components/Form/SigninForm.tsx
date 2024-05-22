@@ -9,10 +9,12 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "@/components/ui/use-toast";
-import { memo, useEffect } from "react";
+import { memo, useCallback, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import SignInSchema from "@/schema/SignInSchema";
 import CustomFormInput from "./CustomFormInput";
+import axios from "axios";
+import { useRouter } from "next/navigation";
 
 const SignInFormValue = [
   {
@@ -32,6 +34,7 @@ const SignInFormValue = [
 ];
 
 function SigninForm() {
+  const router = useRouter();
   let form = useForm<z.infer<typeof SignInSchema>>({
     resolver: zodResolver(SignInSchema),
     defaultValues: {
@@ -40,11 +43,27 @@ function SigninForm() {
     },
   });
 
-  let onSubmit = (values: z.infer<typeof SignInSchema>) => {
-    console.log(values);
-  };
+  const onSubmit = useCallback(async (values: z.infer<typeof SignInSchema>) => {
+    try {
+      const { data } = await axios.post("/api/v1/sign-in", values);
+      console.log(data);
+      if (data.success) {
+        router.push("/dashboard");
+      } else {
+        toast({
+          title: "Error",
+          description: data.message,
+        });
+      }
+    } catch (err: any) {
+      toast({
+        title: "Error",
+        description: err?.response?.data?.message,
+      });
+    }
+  }, []);
 
-  useEffect(() => {
+  const methodForUseEffect = useCallback(() => {
     const error = form.formState.errors;
 
     if (error) {
@@ -61,6 +80,8 @@ function SigninForm() {
       }
     }
   }, [form.formState.errors]);
+
+  useEffect(methodForUseEffect, [form.formState.errors]);
 
   return (
     <>

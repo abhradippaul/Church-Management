@@ -76,7 +76,7 @@ function SignupForm() {
         } else {
           toast({
             title: "Error",
-            description: data.message,
+            description: data?.message,
           });
         }
       } catch (err: any) {

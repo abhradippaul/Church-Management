@@ -12,6 +12,6 @@ export function createToken(payload: PayloadValue) {
   };
 }
 
-export function verifyToken(token: string) {
-  return verify(token, "123");
+export function verifyToken(token: string): PayloadValue {
+  return verify(token, "123") as PayloadValue;
 }
