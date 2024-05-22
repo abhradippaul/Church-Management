@@ -8,7 +8,7 @@ export interface AdminInterfaceValue extends Document {
   refresh_token: string;
   is_verified: boolean;
   verify_code: string;
-  verify_expiry: Date;
+  verify_expiry: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -43,7 +43,7 @@ const AdminSchema = new Schema<AdminInterfaceValue>(
       type: String,
     },
     verify_expiry: {
-      type: Date,
+      type: Number,
     },
   },
   { timestamps: true }

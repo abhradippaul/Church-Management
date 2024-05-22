@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { CardContent } from "@/components/ui/card";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -9,15 +10,13 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { Toaster } from "@/components/ui/toaster";
 import { toast } from "@/components/ui/use-toast";
-import { ChangeEvent, memo, useEffect, useState } from "react";
-import { usePathname } from "next/navigation";
+import { memo, useCallback, useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import SignUpSchema from "@/schema/SignUpSchema";
 import axios from "axios";
-// import CustomFormInput from "./CustomFormInput";
-// import { uploadCloudinary } from "@/lib/Cloudinary";
-import dynamic from "next/dynamic";
 
 const CustomFormInput = dynamic(() => import("./CustomFormInput"));
+const CustomImageInput = dynamic(() => import("./CustomImageInput"));
 
 const SignUpFormValue = [
   {
@@ -41,17 +40,14 @@ const SignUpFormValue = [
     placeholder: "Enter a password",
     autoComplete: "password",
   },
-  {
-    label: "Upload Image",
-    inputName: "image",
-    type: "file",
-  },
 ];
 
 function SignupForm() {
   const pathName = usePathname();
+  const router = useRouter();
   const [isUploadedImage, setIsUploadedImage] = useState("");
   const [isImageLoading, setIsImageLoading] = useState(false);
+  const imageUrl = process.env.NEXT_PUBLIC_IMAGE_URL;
 
   let form = useForm<z.infer<typeof SignUpSchema>>({
     resolver: zodResolver(SignUpSchema),
@@ -63,32 +59,37 @@ function SignupForm() {
     },
   });
 
-  let onSubmit = async (values: z.infer<typeof SignUpSchema>) => {
-    values.image = isUploadedImage;
-    if (pathName.includes("/admin")) {
-      console.log("This is an admin page");
-    } else {
-      const res = await axios.post("/api/v1/sign-up", values);
-      console.log(values);
-      console.log(res);
-    }
-  };
-
-  const uploadImage = async (e: ChangeEvent<HTMLInputElement>) => {
-    const image = e.target.files;
-    if (image?.length) {
-      setIsImageLoading(true);
-      const { public_id } = await (
-        await import("@/lib/Cloudinary")
-      ).uploadCloudinary(image);
-      if (public_id) {
-        setIsUploadedImage(public_id);
-        setIsImageLoading(false);
+  let onSubmit = useCallback(
+    async (values: z.infer<typeof SignUpSchema>) => {
+      values.image = isUploadedImage;
+      try {
+        const { data } = await axios.post(
+          `/api/v1/sign-up?type=${
+            pathName.includes("/admin") ? "admin" : "owner"
+          }`,
+          values
+        );
+        if (data.success) {
+          router.push(
+            `/sign-up/${data.data._id}/verify-email?type=${data.data.type}`
+          );
+        } else {
+          toast({
+            title: "Error",
+            description: data.message,
+          });
+        }
+      } catch (err: any) {
+        toast({
+          title: "Error",
+          description: err?.response?.data?.message,
+        });
       }
-    }
-  };
+    },
+    [isUploadedImage]
+  );
 
-  useEffect(() => {
+  const methodForUseEffect = useCallback(() => {
     const error = form.formState.errors;
     if (error) {
       if (error.name) {
@@ -115,6 +116,8 @@ function SignupForm() {
     }
   }, [form.formState.errors]);
 
+  useEffect(methodForUseEffect, [form.formState.errors]);
+
   return (
     <CardContent>
       <Form {...form}>
@@ -124,14 +127,37 @@ function SignupForm() {
               key={e.label}
               control={form.control}
               inputName={e.inputName}
-              label={e.label}
+              label={
+                pathName.includes("/admin")
+                  ? e.label.replaceAll("Church", "Admin")
+                  : e.label
+              }
               type={e.type}
               placeholder={e.placeholder}
               disabled={form.formState.isSubmitting}
               autoComplete={e.autoComplete}
-              imageUpload={e.type === "file" ? uploadImage : null}
             />
           ))}
+
+          {isImageLoading ? (
+            <div className="w-full flex items-center justify-center mt-4 h-10">
+              <Loader2 className="size-8 animate-spin" />
+            </div>
+          ) : isUploadedImage ? (
+            <div className="mt-4 flex items-center justify-center">
+              <img
+                src={`${imageUrl}/w_250/q_35/f_auto/${isUploadedImage}`}
+                className="size-24 rounded-full object-cover"
+                alt="uploaded image"
+              />
+            </div>
+          ) : (
+            <CustomImageInput
+              control={form.control}
+              setIsImageLoading={setIsImageLoading}
+              setIsUploadedImage={setIsUploadedImage}
+            />
+          )}
 
           <Button
             variant="secondary"
@@ -139,7 +165,7 @@ function SignupForm() {
             disabled={form.formState.isSubmitting || isImageLoading}
             className="text-lg mt-8"
           >
-            {form.formState.isSubmitting || isImageLoading ? (
+            {form.formState.isSubmitting ? (
               <Loader2 className="size-6 animate-spin" />
             ) : (
               "Submit"

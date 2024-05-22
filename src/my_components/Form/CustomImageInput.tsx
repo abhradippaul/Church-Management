@@ -1,0 +1,68 @@
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import {
+  ChangeEvent,
+  Dispatch,
+  SetStateAction,
+  memo,
+  useCallback,
+} from "react";
+
+interface CustomImageInputProps {
+  setIsImageLoading: Dispatch<SetStateAction<boolean>>;
+  setIsUploadedImage: Dispatch<SetStateAction<string>>;
+  control: any;
+}
+
+function CustomImageInput({
+  control,
+  setIsImageLoading,
+  setIsUploadedImage,
+}: CustomImageInputProps) {
+  const uploadImage = useCallback(async (e: ChangeEvent<HTMLInputElement>) => {
+    const image = e.target.files;
+    if (image?.length) {
+      setIsImageLoading(true);
+      const { public_id } = await (
+        await import("@/lib/Cloudinary")
+      ).uploadCloudinary(image);
+      if (public_id) {
+        setIsUploadedImage(public_id);
+        setIsImageLoading(false);
+      }
+    }
+  }, []);
+
+  return (
+    <div>
+      <div className="my-4"></div>
+      <FormField
+        control={control}
+        name="input"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Upload Image : </FormLabel>
+            <FormControl>
+              <Input
+                type="file"
+                required
+                {...field}
+                onChange={(e) => {
+                  field.onChange(e);
+                  uploadImage(e);
+                }}
+              />
+            </FormControl>
+          </FormItem>
+        )}
+      />
+    </div>
+  );
+}
+
+export default memo(CustomImageInput);

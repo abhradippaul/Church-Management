@@ -3,15 +3,16 @@ import {
   FormField,
   FormItem,
   FormLabel,
+  FormMessage,
 } from "@/components/ui/form";
 import { Input, InputProps } from "@/components/ui/input";
-import { ChangeEvent, memo } from "react";
+import { memo } from "react";
 
 interface CustomFormInputProps extends InputProps {
   label: string;
   control: any;
   inputName: string;
-  imageUpload?: ((e: ChangeEvent<HTMLInputElement>) => void) | null;
+  formMessage?: string;
 }
 
 function CustomFormInput({
@@ -23,7 +24,7 @@ function CustomFormInput({
   type = "text",
   placeholder,
   autoComplete,
-  imageUpload,
+  formMessage,
 }: CustomFormInputProps) {
   return (
     <div>
@@ -42,14 +43,11 @@ function CustomFormInput({
                 disabled={disabled}
                 {...field}
                 autoComplete={autoComplete}
-                onChange={(e) => {
-                  field.onChange(e);
-                  if (imageUpload) {
-                    imageUpload(e);
-                  }
-                }}
               />
             </FormControl>
+            {formMessage && (
+              <FormMessage className="text-zinc-400">{formMessage}</FormMessage>
+            )}
           </FormItem>
         )}
       />

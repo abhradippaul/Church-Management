@@ -19,6 +19,7 @@ export const uploadCloudinary = async (image: FileList) => {
       process.env.NEXT_PUBLIC_CLOUDINARY_URL!,
       newFormData
     );
+    console.log(data);
     return data;
   } catch (err) {
     return null;

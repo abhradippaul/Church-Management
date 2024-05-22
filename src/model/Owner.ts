@@ -8,7 +8,7 @@ export interface OwnerInterfaceValue extends Document {
   refresh_token: string;
   is_verified: boolean;
   verify_code: string;
-  verify_expiry: Date;
+  verify_expiry: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -43,7 +43,7 @@ const OwnerSchema = new Schema<OwnerInterfaceValue>(
       type: String,
     },
     verify_expiry: {
-      type: Date,
+      type: Number,
     },
   },
   { timestamps: true }

@@ -14,12 +14,7 @@ function page() {
         <CardTitle>Signup Form</CardTitle>
         <CardDescription>Create an account</CardDescription>
       </CardHeader>
-      <SignupForm
-        email="Admin Email"
-        image="Upload Image"
-        name="Admin Name"
-        password="Password"
-      />
+      <SignupForm />
     </Card>
   );
 }
