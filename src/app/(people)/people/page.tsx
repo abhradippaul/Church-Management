@@ -1,7 +1,7 @@
 import dynamic from "next/dynamic";
-import TableComponent from "@/components/TableComponent";
 
-const AddPersonButton = dynamic(() => import("../AddPersonButton"));
+const TableComponent = dynamic(() => import("@/components/TableComponent"));
+const UserCreateDialog = dynamic(() => import("../UserCreateDialog"));
 
 const tableHeading = ["Name", "Email", "Age", ""];
 const tableRow = [
@@ -20,7 +20,7 @@ function page() {
         <h1 className="text-lg text-zinc-200">
           {tableRow.length} people found
         </h1>
-        <AddPersonButton />
+        <UserCreateDialog />
       </div>
       <TableComponent
         type="people"

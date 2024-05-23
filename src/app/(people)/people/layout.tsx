@@ -1,5 +1,6 @@
 import Navbar from "@/my_components/Navbar/Navbar";
-import TestProvider from "@/my_components/providers/TestProvider";
+import PeopleProvider from "@/my_components/providers/PeopleProvider";
+import axios from "axios";
 
 export const metadata = {
   title: "XYZ | People",
@@ -22,10 +23,11 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  // const { data } = await axios.get("/api/v1/people");
   return (
-    <TestProvider props="this is my props from context api">
+    <PeopleProvider peopleInfo="this is my props from context api">
       <Navbar userInfo={UserInfo} />
       <div className="px-2 md:px-4 max-w-7xl mx-auto min-h-dvh">{children}</div>
-    </TestProvider>
+    </PeopleProvider>
   );
 }
