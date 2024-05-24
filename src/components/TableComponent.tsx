@@ -1,3 +1,4 @@
+"use client";
 import {
   Table,
   TableBody,
@@ -9,21 +10,30 @@ import {
 import { Trash } from "lucide-react";
 import { memo } from "react";
 import dynamic from "next/dynamic";
+import { usePeopleContext } from "@/my_components/providers/PeopleProvider";
 
 const TooltipComponent = dynamic(() => import("./TooltipComponent"));
 
 interface TableComponentProps {
   type: "people";
   tableHeading: string[];
-  tableRow: {
-    imageUrl: string;
-    name: string;
-    email: string;
-    age: string;
-  }[];
+  // tableRow: {
+  //   imageUrl: string;
+  //   name: string;
+  //   email: string;
+  //   age: string;
+  // }[];
 }
 
-function TableComponent({ tableHeading, tableRow }: TableComponentProps) {
+interface PeopleInfoValue {
+  _id: string;
+  name: string;
+  email: string;
+  date_of_birth: string;
+}
+
+function TableComponent({ tableHeading }: TableComponentProps) {
+  const { peopleInfo } = usePeopleContext();
   return (
     <Table>
       <TableHeader>
@@ -34,25 +44,30 @@ function TableComponent({ tableHeading, tableRow }: TableComponentProps) {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {tableRow.map(({ email, imageUrl, name, age }, i) => (
-          <TableRow key={i} className="cursor-pointer">
-            <TableCell>
-              {imageUrl}
-              {name}
-            </TableCell>
-            <TableCell>{email}</TableCell>
-            <TableCell>{age}</TableCell>
-            <TableCell>
-              <TooltipComponent
-                hoverElement={
-                  <Trash className="size-4 text-red-700 hover:text-red-600 transition" />
-                }
-              >
-                <h1>Delete People</h1>
-              </TooltipComponent>
-            </TableCell>
-          </TableRow>
-        ))}
+        {peopleInfo.map(
+          ({ email, name, date_of_birth }: PeopleInfoValue, i: number) => (
+            <TableRow key={i} className="cursor-pointer">
+              <TableCell>
+                {/* {imageUrl} */}
+                {name}
+              </TableCell>
+              <TableCell>{email}</TableCell>
+              <TableCell>
+                {new Date().getFullYear() -
+                  new Date(date_of_birth).getFullYear()}
+              </TableCell>
+              <TableCell>
+                <TooltipComponent
+                  hoverElement={
+                    <Trash className="size-4 text-red-700 hover:text-red-600 transition" />
+                  }
+                >
+                  <h1>Delete People</h1>
+                </TooltipComponent>
+              </TableCell>
+            </TableRow>
+          )
+        )}
       </TableBody>
     </Table>
   );

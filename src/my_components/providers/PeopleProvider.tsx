@@ -27,11 +27,18 @@ export const usePeopleContext = () => {
   return useContext(CreatePeopleContext);
 };
 
+interface PeopleInfoProps {
+  _id: string;
+  name: string;
+  email: string;
+  date_of_birth: string;
+}
+
 function PeopleProvider({
   peopleInfo,
   children,
 }: {
-  peopleInfo: any;
+  peopleInfo: PeopleInfoProps[];
   children: ReactNode;
 }) {
   const [isFormError, setIsFormError] = useState(false);

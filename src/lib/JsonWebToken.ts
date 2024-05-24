@@ -3,6 +3,7 @@ import { sign, verify } from "jsonwebtoken";
 interface PayloadValue {
   _id: string;
   role: "admin" | "owner";
+  userId?: string;
 }
 
 export function createToken(payload: PayloadValue) {

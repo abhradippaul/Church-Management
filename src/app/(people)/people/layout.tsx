@@ -1,6 +1,10 @@
 import Navbar from "@/my_components/Navbar/Navbar";
 import PeopleProvider from "@/my_components/providers/PeopleProvider";
 import axios from "axios";
+import dynamic from "next/dynamic";
+import { headers, cookies } from "next/headers";
+import UserCreateDialog from "../UserCreateDialog";
+// const UserCreateDialog = dynamic(() => import("../UserCreateDialog"));
 
 export const metadata = {
   title: "XYZ | People",
@@ -23,11 +27,34 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // const { data } = await axios.get("/api/v1/people");
+  let peopleInfo;
+  try {
+    const host = headers().get("host");
+    const cookieStore = cookies();
+    const access_token = cookieStore.get("access_token");
+    const { data } = await axios.get(`http://${host}/api/v1/people`, {
+      headers: {
+        Cookie: `${access_token?.name}=${access_token?.value}`,
+      },
+    });
+    if (data.success) {
+      peopleInfo = data.data;
+    }
+  } catch (err: any) {
+    console.log(err);
+  }
   return (
-    <PeopleProvider peopleInfo="this is my props from context api">
+    <PeopleProvider peopleInfo={peopleInfo.Peoples}>
       <Navbar userInfo={UserInfo} />
-      <div className="px-2 md:px-4 max-w-7xl mx-auto min-h-dvh">{children}</div>
+      <div className="px-2 md:px-4 max-w-7xl mx-auto min-h-dvh">
+        <div className="pt-24 flex flex-col">
+          <div className="mb-8 mt-4 flex items-center justify-between">
+            <h1 className="text-lg text-zinc-200">{peopleInfo.PeopleCount} people found</h1>
+            <UserCreateDialog />
+          </div>
+          {children}
+        </div>
+      </div>
     </PeopleProvider>
   );
 }

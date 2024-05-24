@@ -3,8 +3,11 @@ import { z } from "zod";
 export default z.object({
   name: z.string().min(1, "Name is required"),
   gender: z.enum(["male", "female", "others", ""]),
-  dateOfBirth: z.string().min(1, "Date of Birth is required"),
+  date_of_birth: z.coerce.date(),
   address: z.string().min(1, "Address is required"),
-  phoneNumber: z.string().min(10, "Phone number should be at least 10 digits"),
+  phone_number: z
+    .string()
+    .min(10, "Phone number should be at least 10 digits")
+    .max(10, "Phone number should be less than 11"),
   email: z.string().email("Enter a valid email"),
 });

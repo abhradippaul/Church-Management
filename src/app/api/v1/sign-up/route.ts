@@ -1,6 +1,6 @@
 import { SendVerificationEmail } from "@/helpers/SendVerificationEmail";
 import dbConnect from "@/lib/DbConnect";
-import AdminModel, { AdminInterfaceValue } from "@/model/Admin";
+import AdminModel from "@/model/Admin";
 import OwnerModel from "@/model/Owner";
 import { ApiResponse } from "@/types/ApiResponse";
 import { NextRequest, NextResponse } from "next/server";

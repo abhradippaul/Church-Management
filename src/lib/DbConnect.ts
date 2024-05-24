@@ -4,6 +4,7 @@ let isConnected = 0;
 
 export default async function dbConnect() {
   if (isConnected) {
+    console.log("Old connection");
     return;
   }
   try {
