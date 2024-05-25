@@ -39,11 +39,22 @@ interface PeopleInfoProps {
   }[];
 }
 
+interface SpecificPeople {
+  _id: string;
+  name: string;
+  email: string;
+  date_of_birth: string;
+  phone_number: string;
+  gender: string;
+  address: string;
+  image: string;
+}
+
 function PeopleProvider({
   peopleInfo,
   children,
 }: {
-  peopleInfo: PeopleInfoProps;
+  peopleInfo: PeopleInfoProps | SpecificPeople;
   children: ReactNode;
 }) {
   const [isFormError, setIsFormError] = useState(false);

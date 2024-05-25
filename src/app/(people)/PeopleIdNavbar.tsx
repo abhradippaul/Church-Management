@@ -4,7 +4,7 @@ import UserCreateDialog from "./UserCreateDialog";
 function PeopleIdNavbar() {
   return (
     <div className="mb-8 mt-4 flex items-center justify-end">
-      <UserCreateDialog />
+      <UserCreateDialog type="create" />
     </div>
   );
 }

@@ -75,21 +75,23 @@ const itemsForSelectInput = [
 ];
 
 function UserCreateForm() {
-  const { setIsFormError } = usePeopleContext();
+  const { setIsFormError, peopleInfo } = usePeopleContext();
   const router = useRouter();
-  const [isUploadedImage, setIsUploadedImage] = useState("");
+  const [isUploadedImage, setIsUploadedImage] = useState(
+    peopleInfo.image || ""
+  );
   const [isImageLoading, setIsImageLoading] = useState(false);
   const imageUrl = process.env.NEXT_PUBLIC_IMAGE_URL;
   const form = useForm<z.infer<typeof CreateUserSchema>>({
     resolver: zodResolver(CreateUserSchema),
     defaultValues: {
-      name: "",
-      email: "",
-      phone_number: "",
-      gender: "",
-      address: "",
-      date_of_birth: "",
-      image: "",
+      name: peopleInfo.name || "",
+      email: peopleInfo.email || "",
+      phone_number: peopleInfo.phone_number || "",
+      gender: peopleInfo.gender || "",
+      address: peopleInfo.address || "",
+      date_of_birth: peopleInfo.date_of_birth || "",
+      image: peopleInfo.image || "",
     },
   });
   const onSubmit = useCallback(
