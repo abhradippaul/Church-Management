@@ -5,6 +5,7 @@ import {
   ReactNode,
   SetStateAction,
   createContext,
+  memo,
   useContext,
   useState,
 } from "react";
@@ -28,17 +29,21 @@ export const usePeopleContext = () => {
 };
 
 interface PeopleInfoProps {
-  _id: string;
-  name: string;
-  email: string;
-  date_of_birth: string;
+  PeopleCount: number;
+  Peoples: {
+    _id: string;
+    name: string;
+    email: string;
+    date_of_birth: string;
+    image: string;
+  }[];
 }
 
 function PeopleProvider({
   peopleInfo,
   children,
 }: {
-  peopleInfo: PeopleInfoProps[];
+  peopleInfo: PeopleInfoProps;
   children: ReactNode;
 }) {
   const [isFormError, setIsFormError] = useState(false);
@@ -49,4 +54,4 @@ function PeopleProvider({
   );
 }
 
-export default PeopleProvider;
+export default memo(PeopleProvider);

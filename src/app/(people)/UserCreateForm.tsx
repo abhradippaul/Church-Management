@@ -8,11 +8,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { memo, useCallback, useEffect } from "react";
+import { memo, useCallback, useEffect, useState } from "react";
 import { toast } from "@/components/ui/use-toast";
 import { usePeopleContext } from "@/my_components/providers/PeopleProvider";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const CustomSelectImput = dynamic(
   () => import("@/my_components/Form/CustomSelectInput")
@@ -20,8 +21,8 @@ const CustomSelectImput = dynamic(
 const CustomFormInput = dynamic(
   () => import("@/my_components/Form/CustomFormInput")
 );
-const CustomDateInput = dynamic(
-  () => import("@/my_components/Form/CustomDateInput")
+const CustomImageInput = dynamic(
+  () => import("@/my_components/Form/CustomImageInput")
 );
 const CustomTextArea = dynamic(
   () => import("@/my_components/Form/CustomTextArea")
@@ -49,6 +50,13 @@ const CreateUserFormValue = [
     placeholder: "Enter a ph no",
     autoComplete: "phone number",
   },
+  {
+    label: "Date Of Birth",
+    inputName: "date_of_birth",
+    type: "text",
+    placeholder: "MM/DD/YYYY",
+    autoComplete: "Date of birth",
+  },
 ];
 
 const itemsForSelectInput = [
@@ -69,6 +77,9 @@ const itemsForSelectInput = [
 function UserCreateForm() {
   const { setIsFormError } = usePeopleContext();
   const router = useRouter();
+  const [isUploadedImage, setIsUploadedImage] = useState("");
+  const [isImageLoading, setIsImageLoading] = useState(false);
+  const imageUrl = process.env.NEXT_PUBLIC_IMAGE_URL;
   const form = useForm<z.infer<typeof CreateUserSchema>>({
     resolver: zodResolver(CreateUserSchema),
     defaultValues: {
@@ -77,10 +88,13 @@ function UserCreateForm() {
       phone_number: "",
       gender: "",
       address: "",
+      date_of_birth: "",
+      image: "",
     },
   });
   const onSubmit = useCallback(
     async (values: z.infer<typeof CreateUserSchema>) => {
+      values.image = isUploadedImage;
       try {
         const { data } = await axios.post("/api/v1/people", values);
         if (data.success) {
@@ -100,7 +114,7 @@ function UserCreateForm() {
         });
       }
     },
-    []
+    [isUploadedImage]
   );
 
   const methodForUseEffect = useCallback(() => {
@@ -119,50 +133,73 @@ function UserCreateForm() {
   useEffect(methodForUseEffect, [form.formState.errors]);
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)}>
-        {CreateUserFormValue.map((e) => (
-          <CustomFormInput
-            key={e.inputName}
+    <ScrollArea>
+      <Form {...form}>
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="max-h-[80dvh] px-6"
+        >
+          {CreateUserFormValue.map((e) => (
+            <CustomFormInput
+              key={e.inputName}
+              control={form.control}
+              inputName={e.inputName}
+              label={e.label}
+              type={e.type}
+              placeholder={e.placeholder}
+              disabled={form.formState.isSubmitting}
+              autoComplete={e.autoComplete}
+            />
+          ))}
+          <CustomSelectImput
             control={form.control}
-            inputName={e.inputName}
-            label={e.label}
-            type={e.type}
-            placeholder={e.placeholder}
-            disabled={form.formState.isSubmitting}
-            autoComplete={e.autoComplete}
+            inputName="gender"
+            label="Gender"
+            placeholder="Gender"
+            items={itemsForSelectInput}
           />
-        ))}
-        <CustomSelectImput
-          control={form.control}
-          inputName="gender"
-          label="Gender"
-          placeholder="Gender"
-          items={itemsForSelectInput}
-        />
-        <div className="my-4"></div>
-        <CustomDateInput
-          control={form.control}
-          inputName="date_of_birth"
-          label="Date of Birth"
-        />
 
-        <CustomTextArea
-          control={form.control}
-          inputName="address"
-          label="Enter the address"
-          placeholder="Enter the address"
-        />
+          <CustomTextArea
+            control={form.control}
+            inputName="address"
+            label="Enter the address"
+            placeholder="Enter the address"
+          />
 
-        <Button className="text-lg mt-4" disabled={form.formState.isSubmitting}>
-          {form.formState.isSubmitting ? (
-            <Loader2 className="size-6 animate-spin" />
+          {isImageLoading ? (
+            <div className="w-full flex items-center justify-center mt-4 h-10">
+              <Loader2 className="size-8 animate-spin" />
+            </div>
+          ) : isUploadedImage ? (
+            <div className="mt-4 flex items-center justify-center">
+              <img
+                src={`${imageUrl}/w_250/q_35/f_auto/${isUploadedImage}`}
+                className="size-24 rounded-full object-cover"
+                alt="uploaded image"
+              />
+            </div>
           ) : (
-            "Submit"
+            <CustomImageInput
+              type="people"
+              control={form.control}
+              setIsImageLoading={setIsImageLoading}
+              setIsUploadedImage={setIsUploadedImage}
+            />
           )}
-        </Button>
-      </form>
-    </Form>
+
+          <Button
+            className="text-lg mt-4"
+            disabled={form.formState.isSubmitting}
+          >
+            {form.formState.isSubmitting ? (
+              <Loader2 className="size-6 animate-spin" />
+            ) : (
+              "Submit"
+            )}
+          </Button>
+        </form>
+      </Form>
+    </ScrollArea>
   );
 }
 

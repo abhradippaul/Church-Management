@@ -7,13 +7,18 @@ import axios from "axios";
 //   api_secret: process.env.CLOUDINARY_API_SECRET,
 // });
 
-export const uploadCloudinary = async (image: FileList) => {
+export const uploadCloudinary = async (
+  image: FileList,
+  type: "sign-up" | "people"
+) => {
   try {
     const newFormData = new FormData();
     newFormData.append("file", image[0]);
     newFormData.append(
       "upload_preset",
-      process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET!
+      type === "sign-up"
+        ? process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET!
+        : process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET_PEOPLE!
     );
     const { data } = await axios.post(
       process.env.NEXT_PUBLIC_CLOUDINARY_URL!,

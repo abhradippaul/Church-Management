@@ -44,16 +44,10 @@ export default async function RootLayout({
     console.log(err);
   }
   return (
-    <PeopleProvider peopleInfo={peopleInfo.Peoples}>
+    <PeopleProvider peopleInfo={peopleInfo}>
       <Navbar userInfo={UserInfo} />
       <div className="px-2 md:px-4 max-w-7xl mx-auto min-h-dvh">
-        <div className="pt-24 flex flex-col">
-          <div className="mb-8 mt-4 flex items-center justify-between">
-            <h1 className="text-lg text-zinc-200">{peopleInfo.PeopleCount} people found</h1>
-            <UserCreateDialog />
-          </div>
-          {children}
-        </div>
+        <div className="pt-24 flex flex-col">{children}</div>
       </div>
     </PeopleProvider>
   );

@@ -17,12 +17,14 @@ interface CustomImageInputProps {
   setIsImageLoading: Dispatch<SetStateAction<boolean>>;
   setIsUploadedImage: Dispatch<SetStateAction<string>>;
   control: any;
+  type: "sign-up" | "people";
 }
 
 function CustomImageInput({
   control,
   setIsImageLoading,
   setIsUploadedImage,
+  type,
 }: CustomImageInputProps) {
   const uploadImage = useCallback(async (e: ChangeEvent<HTMLInputElement>) => {
     const image = e.target.files;
@@ -30,7 +32,7 @@ function CustomImageInput({
       setIsImageLoading(true);
       const { public_id } = await (
         await import("@/lib/Cloudinary")
-      ).uploadCloudinary(image);
+      ).uploadCloudinary(image, type);
       if (public_id) {
         setIsUploadedImage(public_id);
         setIsImageLoading(false);

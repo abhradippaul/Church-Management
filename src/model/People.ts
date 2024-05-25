@@ -7,7 +7,8 @@ export interface PeopleInterfaceValue extends Document {
   gender: "male" | "female" | "others";
   address: string;
   church: Types.ObjectId;
-  date_of_birth: Date;
+  date_of_birth: string;
+  image: string;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -37,7 +38,11 @@ const PeopleSchema = new Schema<PeopleInterfaceValue>(
       required: true,
     },
     date_of_birth: {
-      type: Date,
+      type: String,
+      required: true,
+    },
+    image: {
+      type: String,
       required: true,
     },
     church: {

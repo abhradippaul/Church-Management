@@ -153,6 +153,7 @@ function SignupForm() {
             </div>
           ) : (
             <CustomImageInput
+              type="sign-up"
               control={form.control}
               setIsImageLoading={setIsImageLoading}
               setIsUploadedImage={setIsUploadedImage}

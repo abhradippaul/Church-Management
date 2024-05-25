@@ -1,6 +1,7 @@
-function page({ params }: { params: { peopleId: string } }) {
-  console.log(params);
-  return <div>route</div>;
+function page() {
+  return <div>
+    
+  </div>;
 }
 
 export default page;

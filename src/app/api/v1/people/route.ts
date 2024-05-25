@@ -1,6 +1,9 @@
+import {
+  isPeopleExistAggregate,
+  peopleDetailsAggregate,
+} from "@/aggregation/People";
 import dbConnect from "@/lib/DbConnect";
 import { verifyToken } from "@/lib/JsonWebToken";
-import OwnerModel from "@/model/Owner";
 import PeopleModel from "@/model/People";
 import { ApiResponse } from "@/types/ApiResponse";
 import mongoose from "mongoose";
@@ -38,6 +41,7 @@ export async function GET(req: NextRequest) {
     let newUserId;
 
     if (verifiedData.role === "admin") {
+      // Checking is the admin exist
       const isAdmin = await PeopleModel.findOne(
         { _id: verifiedData._id },
         { _id: 1 }
@@ -67,38 +71,8 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    data = await OwnerModel.aggregate([
-      {
-        $match: {
-          _id: new mongoose.Types.ObjectId(verifiedData._id),
-        },
-      },
-      {
-        $lookup: {
-          from: "peoples",
-          localField: "_id",
-          foreignField: "church",
-          as: "Peoples",
-        },
-      },
-      {
-        $addFields: {
-          PeopleCount: {
-            $size: "$Peoples",
-          },
-        },
-      },
-      {
-        $project: {
-          _id: 0,
-          "Peoples._id": 1,
-          "Peoples.name": 1,
-          "Peoples.date_of_birth": 1,
-          "Peoples.email": 1,
-          PeopleCount: 1,
-        },
-      },
-    ]);
+    // Getting the people info of that owner
+    data = await peopleDetailsAggregate(verifiedData._id);
 
     if (!data?.length) {
       return NextResponse.json<ApiResponse>({
@@ -123,7 +97,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   dbConnect();
   try {
-    const { name, date_of_birth, gender, address, phone_number, email } =
+    const { name, date_of_birth, gender, address, phone_number, email, image } =
       await req.json();
     const access_token = req.cookies.get("access_token")?.value;
     if (!access_token) {
@@ -145,7 +119,8 @@ export async function POST(req: NextRequest) {
       !gender ||
       !address ||
       !phone_number ||
-      !email
+      !email ||
+      !image
     ) {
       return NextResponse.json<ApiResponse>({
         success: false,
@@ -153,14 +128,13 @@ export async function POST(req: NextRequest) {
       });
     }
 
+    // Checking the people already exists or not
     const isUserAlreadyExists = await PeopleModel.findOne(
       {
         $or: [{ phone_number }, { email }],
       },
       { _id: 1 }
     );
-
-    console.log(isUserAlreadyExists);
 
     if (isUserAlreadyExists) {
       return NextResponse.json<ApiResponse>({
@@ -177,7 +151,9 @@ export async function POST(req: NextRequest) {
       phone_number,
       church: verifiedData._id,
       email,
+      image,
     });
+
     if (!isUserCreated?._id) {
       return NextResponse.json<ApiResponse>({
         success: false,
@@ -196,5 +172,73 @@ export async function POST(req: NextRequest) {
       },
       { status: 500 }
     );
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  dbConnect();
+  try {
+    // peopleId is the id of the people that will be deleted
+    const peopleId = req.nextUrl.searchParams.get("peopleId");
+    const access_token = req.cookies.get("access_token")?.value;
+
+    if (!access_token || !peopleId) {
+      return NextResponse.json<ApiResponse>({
+        success: false,
+        message: "You are not logged in or does not provide people id",
+      });
+    }
+
+    const verifiedData = verifyToken(access_token);
+
+    if (!verifiedData?._id || !verifiedData?.role) {
+      return NextResponse.json<ApiResponse>({
+        success: false,
+        message: "You are not logged in",
+      });
+    }
+    console.log(peopleId);
+
+    // Checking is the people under the owner or not
+    const isPeopleExist = await isPeopleExistAggregate(
+      verifiedData._id,
+      peopleId
+    );
+
+    if (!isPeopleExist?.length) {
+      return NextResponse.json<ApiResponse>({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    if (!isPeopleExist[0].isValid) {
+      return NextResponse.json<ApiResponse>({
+        success: false,
+        message: "Validation failed",
+      });
+    }
+
+    // If everything is verified then deleting the person
+    const isPeopleDeleted = await PeopleModel.deleteOne({
+      _id: peopleId,
+    });
+
+    if (!isPeopleDeleted?.deletedCount) {
+      return NextResponse.json<ApiResponse>({
+        success: false,
+        message: "Failed to delete user",
+      });
+    }
+
+    return NextResponse.json<ApiResponse>({
+      success: true,
+      message: "User deleted successfully",
+    });
+  } catch (err: any) {
+    return NextResponse.json<ApiResponse>({
+      success: false,
+      message: err.message,
+    });
   }
 }
