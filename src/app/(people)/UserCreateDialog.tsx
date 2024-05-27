@@ -24,8 +24,12 @@ function UserCreateDialog({ type }: { type: "create" | "edit" }) {
           )}
         </div>
       }
-      dialogTitle="Create a new user"
-      dialogDescription="Create a new user who has visited the church"
+      dialogTitle={type === "create" ? "Create a new user" : "Update the user"}
+      dialogDescription={
+        type === "create"
+          ? "Create a new user who has visited the church"
+          : "Update the user who has visited the church"
+      }
       dialogContent={<UserCreateForm />}
     />
   );

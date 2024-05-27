@@ -1,6 +1,7 @@
 "use client";
 
 import { usePeopleContext } from "@/my_components/providers/PeopleProvider";
+import { Loader2, Mail, MapPin, Phone, UserRound } from "lucide-react";
 
 const imageUrl = process.env.NEXT_PUBLIC_IMAGE_URL;
 
@@ -9,29 +10,25 @@ function page() {
 
   const info = [
     {
-      title: "Full Name",
-      value: peopleInfo.name,
+      title: <Phone />,
+      value: peopleInfo.phone_number,
     },
     {
-      title: "Email",
-      value: peopleInfo.name,
+      title: <Mail />,
+      value: peopleInfo.email,
     },
     {
-      title: "Age",
+      title: <UserRound />,
       value:
         new Date().getFullYear() -
         new Date(peopleInfo.date_of_birth).getFullYear(),
     },
     {
-      title: "Gender",
+      title: <UserRound />,
       value: peopleInfo.gender,
     },
     {
-      title: "Phone Number",
-      value: peopleInfo.phone_number,
-    },
-    {
-      title: "Address",
+      title: <MapPin />,
       value: peopleInfo.address,
     },
   ];
@@ -47,9 +44,12 @@ function page() {
           />
         </div>
         <div className="flex flex-col w-1/2">
+          <h1 className="text-xl font-semibold text-zinc-300 mb-4">
+            {peopleInfo.name}
+          </h1>
           {info.map((e) => (
-            <div className="px-6 py-4 flex" key={e.title}>
-              <h1 className="mr-4">{e.title} :</h1>{" "}
+            <div className="px-2 py-4 flex" key={e.value}>
+              {e.title}
               <p className="ml-4">{e.value}</p>
             </div>
           ))}

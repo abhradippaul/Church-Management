@@ -8,6 +8,13 @@ import PeopleModel from "@/model/People";
 import { ApiResponse } from "@/types/ApiResponse";
 import mongoose from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
+import { v2 as cloudinary } from "cloudinary";
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 export async function GET(req: NextRequest) {
   dbConnect();
@@ -197,7 +204,6 @@ export async function DELETE(req: NextRequest) {
         message: "You are not logged in",
       });
     }
-    console.log(peopleId);
 
     // Checking is the people under the owner or not
     const isPeopleExist = await isPeopleExistAggregate(
@@ -212,10 +218,21 @@ export async function DELETE(req: NextRequest) {
       });
     }
 
-    if (!isPeopleExist[0].isValid) {
+    if (!isPeopleExist[0]?.Peoples?.image) {
       return NextResponse.json<ApiResponse>({
         success: false,
         message: "Validation failed",
+      });
+    }
+
+    const cloudinaryResponse = await cloudinary.uploader.destroy(
+      isPeopleExist[0]?.Peoples?.image
+    );
+
+    if (cloudinaryResponse.result !== "ok") {
+      return NextResponse.json<ApiResponse>({
+        success: false,
+        message: "Failed to delete image from cloudinary",
       });
     }
 
@@ -234,6 +251,7 @@ export async function DELETE(req: NextRequest) {
     return NextResponse.json<ApiResponse>({
       success: true,
       message: "User deleted successfully",
+      data: isPeopleExist,
     });
   } catch (err: any) {
     return NextResponse.json<ApiResponse>({

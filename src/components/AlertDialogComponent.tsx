@@ -9,13 +9,13 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { ReactNode, memo } from "react";
+import { ReactNode, memo, useEffect, useState } from "react";
 
 interface AlertDialogComponentProps {
   trigger: ReactNode;
   title: string;
   description: string;
-  onActionClick: (_id: string) => Promise<any>;
+  onActionClick: (_id: string) => void;
   _id: string;
 }
 
@@ -26,18 +26,37 @@ function AlertDialogComponent({
   title,
   _id,
 }: AlertDialogComponentProps) {
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) {
+    return null;
+  }
+
   return (
     <AlertDialog>
-      <AlertDialogTrigger>{trigger}</AlertDialogTrigger>
+      <AlertDialogTrigger
+        onClick={(e) => {
+          e.stopPropagation();
+        }}
+      >
+        {trigger}
+      </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>
           <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogCancel onClick={(e) => e.stopPropagation()}>
+            Cancel
+          </AlertDialogCancel>
           <AlertDialogAction
-            onClick={async () => {
+            onClick={async (e) => {
+              e.stopPropagation();
               await onActionClick(_id);
             }}
           >

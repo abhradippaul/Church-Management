@@ -47,6 +47,7 @@ function CustomSelectInput({
             <FormLabel>{label} : </FormLabel>
             <Select
               onValueChange={field.onChange}
+              defaultValue={field.value}
               disabled={disabled}
               required={required}
             >

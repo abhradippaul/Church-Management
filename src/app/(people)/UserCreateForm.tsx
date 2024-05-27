@@ -195,6 +195,8 @@ function UserCreateForm() {
           >
             {form.formState.isSubmitting ? (
               <Loader2 className="size-6 animate-spin" />
+            ) : peopleInfo?.name ? (
+              "Update"
             ) : (
               "Submit"
             )}

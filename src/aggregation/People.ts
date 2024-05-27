@@ -12,25 +12,26 @@ export async function isPeopleExistAggregate(userId: string, peopleId: string) {
         localField: "_id",
         foreignField: "church",
         as: "Peoples",
+        pipeline: [
+          {
+            $match: {
+              _id: new mongoose.Types.ObjectId(peopleId),
+            },
+          },
+        ],
       },
     },
     {
       $addFields: {
-        isValid: {
-          $cond: {
-            if: {
-              $in: [new mongoose.Types.ObjectId(peopleId), "$Peoples._id"],
-            },
-            then: true,
-            else: false,
-          },
+        Peoples: {
+          $first: "$Peoples",
         },
       },
     },
     {
       $project: {
         _id: 0,
-        isValid: 1,
+        Peoples: 1,
       },
     },
   ]);

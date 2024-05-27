@@ -1,11 +1,6 @@
-// import { v2 as cloudinary } from "cloudinary";
+
 import axios from "axios";
 
-// cloudinary.config({
-//   cloud_name: process.env.CLOUDINARY_NAME,
-//   api_key: process.env.CLOUDINARY_API_KEY,
-//   api_secret: process.env.CLOUDINARY_API_SECRET,
-// });
 
 export const uploadCloudinary = async (
   image: FileList,
@@ -24,7 +19,6 @@ export const uploadCloudinary = async (
       process.env.NEXT_PUBLIC_CLOUDINARY_URL!,
       newFormData
     );
-    console.log(data);
     return data;
   } catch (err) {
     return null;
@@ -33,9 +27,7 @@ export const uploadCloudinary = async (
 
 // export const deleteCloudinary = async (public_id: string) => {
 //   try {
-//     const cloudinaryResponse = await cloudinary.api.delete_resources([
-//       public_id,
-//     ]);
+//     const cloudinaryResponse = await cloudinary.uploader.destroy(public_id);
 //     return cloudinaryResponse;
 //   } catch (err) {
 //     return null;

@@ -1,4 +1,5 @@
 import Navbar from "@/my_components/Navbar/Navbar";
+import SubNavbarForTags from "@/my_components/Navbar/SubNavbarForTags";
 import { ReactNode } from "react";
 
 export const metadata = {
@@ -37,14 +38,45 @@ async function layout({ children }: { children: ReactNode }) {
   return (
     <div>
       <Navbar userInfo={UserInfo} />
-      <div className="px-2 md:px-4 max-w-7xl mx-auto min-h-dvh">
-        <div className="pt-24 flex flex-col">
-          {/* <div className="mb-8 mt-4 flex items-center justify-between">
-            <h1 className="text-lg text-zinc-200">
-              {peopleInfo.PeopleCount} people found
-            </h1>
-            <UserCreateDialog />
-          </div> */}
+      <div className="px-2 md:px-4 max-w-7xl mx-auto min-h-dvh border">
+        <div className="pt-20 flex flex-col">
+          <div className="mb-8 mt-4 flex items-center justify-between">
+            <SubNavbarForTags
+              menu={[
+                {
+                  trigger: "Auto Tags",
+                  items: [
+                    { items: { item: "Male", path: "male" } },
+                    { items: { item: "Female", path: "female" } },
+                    { items: { item: "Others", path: "others" } },
+                  ],
+                },
+                {
+                  trigger: "Custom Tags",
+                  items: [
+                    {
+                      subItems: {
+                        trigger: "First",
+                        subItems: [{ item: "First sub", path: "firstsub" }],
+                      },
+                    },
+                    {
+                      subItems: {
+                        trigger: "Second",
+                        subItems: [{ item: "Second sub", path: "secondsub" }],
+                      },
+                    },
+                    {
+                      items: {
+                        item: "Third",
+                        path: "third",
+                      },
+                    },
+                  ],
+                },
+              ]}
+            />
+          </div>
           {children}
         </div>
       </div>
