@@ -1,13 +1,13 @@
 import { Schema, model, models, Model, Types } from "mongoose";
 
-export interface TagsGroupInterfaceValue extends Document {
+export interface TagGroupInterfaceValue extends Document {
   name: string;
   church: Types.ObjectId;
   createdAt?: Date;
   updatedAt?: Date;
 }
 
-const TagsGroupSchema = new Schema<TagsGroupInterfaceValue>(
+const TagGroupSchema = new Schema<TagGroupInterfaceValue>(
   {
     name: {
       type: String,
@@ -22,8 +22,8 @@ const TagsGroupSchema = new Schema<TagsGroupInterfaceValue>(
   { timestamps: true }
 );
 
-const TagsGroupModel =
-  (models.TagsGroup as Model<TagsGroupInterfaceValue>) ||
-  model<TagsGroupInterfaceValue>("TagsGroup", TagsGroupSchema);
+const TagGroupModel =
+  (models.TagGroup as Model<TagGroupInterfaceValue>) ||
+  model<TagGroupInterfaceValue>("TagGroup", TagGroupSchema);
 
-export default TagsGroupModel;
+export default TagGroupModel;

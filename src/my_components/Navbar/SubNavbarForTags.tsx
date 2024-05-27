@@ -36,18 +36,18 @@ function SubNavbarForTags({ menu }: SubNavbarForTagsProps) {
   return (
     <Menubar>
       {menu.map(({ items, trigger }) => (
-        <MenubarMenu>
+        <MenubarMenu key={trigger}>
           <MenubarTrigger className="cursor-pointer">{trigger}</MenubarTrigger>
           <MenubarContent>
             {items.map(({ subItems, items }) =>
               items ? (
-                <MenubarItem>{items.item}</MenubarItem>
+                <MenubarItem key={items.item}>{items.item}</MenubarItem>
               ) : (
-                <MenubarSub>
+                <MenubarSub key={subItems?.trigger}>
                   <MenubarSubTrigger>{subItems?.trigger}</MenubarSubTrigger>
                   <MenubarSubContent>
                     {subItems?.subItems.map(({ item, path }) => (
-                      <MenubarItem>{item}</MenubarItem>
+                      <MenubarItem key={item}>{item}</MenubarItem>
                     ))}
                   </MenubarSubContent>
                 </MenubarSub>

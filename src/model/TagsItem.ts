@@ -1,14 +1,14 @@
 import { Schema, model, models, Model, Types } from "mongoose";
 
-export interface TagsItemInterfaceValue extends Document {
+export interface TagItemInterfaceValue extends Document {
   name: string;
-  tags_group: Types.ObjectId;
+  tag_group: Types.ObjectId;
   church: Types.ObjectId;
   createdAt?: Date;
   updatedAt?: Date;
 }
 
-const TagsItemSchema = new Schema<TagsItemInterfaceValue>(
+const TagItemSchema = new Schema<TagItemInterfaceValue>(
   {
     name: {
       type: String,
@@ -18,16 +18,16 @@ const TagsItemSchema = new Schema<TagsItemInterfaceValue>(
       type: Schema.Types.ObjectId,
       ref: "Owner",
     },
-    tags_group: {
+    tag_group: {
       type: Schema.Types.ObjectId,
-      ref: "TagsGroup",
+      ref: "TagGroup",
     },
   },
   { timestamps: true }
 );
 
-const TagsItemModel =
-  (models.TagsItem as Model<TagsItemInterfaceValue>) ||
-  model<TagsItemInterfaceValue>("TagsItem", TagsItemSchema);
+const TagItemModel =
+  (models.TagItem as Model<TagItemInterfaceValue>) ||
+  model<TagItemInterfaceValue>("TagItem", TagItemSchema);
 
-export default TagsItemModel;
+export default TagItemModel;
