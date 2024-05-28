@@ -1,3 +1,4 @@
+"use client";
 
 import {
   Select,
@@ -6,12 +7,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useTagsContext } from "@/my_components/providers/TagsProvider";
+import { memo } from "react";
 
 function TagSelect() {
+  const { setDialogType } = useTagsContext();
   return (
-    <Select defaultValue="tags">
-      <SelectTrigger className="border-none min-w-[120px] flex items-center justify-between">
-        <SelectValue placeholder="Theme" className="" />
+    <Select
+      defaultValue="tags"
+      onValueChange={(e) => setDialogType(e as "tags" | "groups")}
+    >
+      <SelectTrigger className="border-none min-w-[140px] flex items-center justify-between">
+        <SelectValue />
       </SelectTrigger>
       <SelectContent>
         <SelectItem value="tags">Create Tags</SelectItem>
@@ -20,5 +27,4 @@ function TagSelect() {
     </Select>
   );
 }
-
-export default TagSelect;
+export default memo(TagSelect);

@@ -1,8 +1,7 @@
+import { getTagsInfoAggregate } from "@/aggregation/Tags";
 import dbConnect from "@/lib/DbConnect";
 import { verifyToken } from "@/lib/JsonWebToken";
-import OwnerModel from "@/model/Owner";
 import { ApiResponse } from "@/types/ApiResponse";
-import mongoose from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
@@ -25,39 +24,7 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    const tagsInfo = await OwnerModel.aggregate([
-      {
-        $match: {
-          _id: new mongoose.Types.ObjectId(verifiedData._id),
-        },
-      },
-      {
-        $lookup: {
-          from: "taggroups",
-          localField: "_id",
-          foreignField: "church",
-          as: "Tag_Group",
-          pipeline: [
-            {
-              $lookup: {
-                from: "tagitems",
-                localField: "_id",
-                foreignField: "tag_group",
-                as: "Tags_Item",
-              },
-            },
-          ],
-        },
-      },
-      {
-        $lookup: {
-          from: "tagitems",
-          localField: "_id",
-          foreignField: "church",
-          as: "Tags_Item",
-        },
-      },
-    ]);
+    const tagsInfo = await getTagsInfoAggregate(verifiedData._id);
 
     if (!tagsInfo.length) {
       return NextResponse.json<ApiResponse>({
