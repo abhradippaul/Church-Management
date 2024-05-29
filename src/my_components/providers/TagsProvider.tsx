@@ -10,6 +10,20 @@ import {
   useState,
 } from "react";
 
+interface ItemValue {
+  items?: {
+    item: string;
+    path: string;
+  };
+  subItems?: {
+    trigger: string;
+    subItems: {
+      item: string;
+      path: string;
+    }[];
+  };
+}
+
 interface TagsContextValue {
   dialogType: "tags" | "groups";
   setDialogType: Dispatch<SetStateAction<"tags" | "groups">>;
@@ -23,6 +37,7 @@ interface TagsContextValue {
         };
       }[]
     | [];
+  tagsInfo: ItemValue[];
 }
 
 const CreateTagsContext = createContext<TagsContextValue>({
@@ -31,6 +46,7 @@ const CreateTagsContext = createContext<TagsContextValue>({
   isFormError: false,
   setIsFormError: () => {},
   groupOptions: [],
+  tagsInfo: [],
 });
 
 const TagsContextProvider = CreateTagsContext.Provider;
@@ -42,8 +58,10 @@ export const useTagsContext = () => {
 function TagsProvider({
   children,
   groupOptions,
+  tagsInfo,
 }: {
   children: ReactNode;
+  tagsInfo: ItemValue[];
   groupOptions:
     | {
         subItems: {
@@ -63,6 +81,7 @@ function TagsProvider({
         isFormError,
         setIsFormError,
         groupOptions,
+        tagsInfo,
       }}
     >
       {children}

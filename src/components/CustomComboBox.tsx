@@ -43,7 +43,6 @@ function CustomComboBox({
   placeholderForEmptyValue,
   control,
   inputName,
-  disabled,
   label,
 }: CustomComboBoxProps) {
   const [open, setOpen] = useState(false);
@@ -64,7 +63,7 @@ function CustomComboBox({
                   aria-expanded={open}
                   className="w-[200px] justify-between"
                 >
-                  {field?.value
+                  {field.value
                     ? options?.find(
                         ({ subItems }) => subItems._id === field.value
                       )?.subItems.trigger
@@ -73,8 +72,8 @@ function CustomComboBox({
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-[200px] p-0">
-                <Command {...field}>
-                  <CommandInput placeholder={placeholder} disabled={disabled} />
+                <Command>
+                  <CommandInput placeholder={placeholder} />
                   <CommandList>
                     <CommandEmpty>{placeholderForEmptyValue}</CommandEmpty>
                     <CommandGroup>
@@ -82,10 +81,9 @@ function CustomComboBox({
                         options?.map(({ subItems }) => (
                           <CommandItem
                             key={subItems._id}
-                            value={subItems._id}
-                            onSelect={(currentValue) => {
-                              field.onChange(currentValue);
-                              // setValue(currentValue === value ? "" : currentValue);
+                            value={subItems.trigger}
+                            onSelect={() => {
+                              field.onChange(subItems._id);
                               setOpen(false);
                             }}
                           >

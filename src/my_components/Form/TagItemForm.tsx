@@ -29,8 +29,10 @@ function TagItemForm() {
   const onSubmit = useCallback(
     async (values: z.infer<typeof CreateTagItemSchema>) => {
       try {
-        const { data } = await axios.post("/api/v1/tags/tag-item", values);
-        console.log(data);
+        const { data } = await axios.post(
+          `/api/v1/tags/${dialogType === "tags" ? "tag-item" : "tag-group"}`,
+          values
+        );
         if (data.success) {
           router.refresh();
         } else {

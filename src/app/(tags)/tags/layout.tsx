@@ -35,8 +35,8 @@ async function layout({ children }: { children: ReactNode }) {
   return (
     <div>
       <Navbar userInfo={UserInfo} />
-      <TagsProvider groupOptions={data.group_Info}>
-        <div className="px-2 md:px-4 max-w-7xl mx-auto min-h-dvh border">
+      <TagsProvider groupOptions={data.group_Info} tagsInfo={data.tagsInfo}>
+        <div className="px-2 md:px-4 max-w-7xl mx-auto min-h-dvh">
           <div className="pt-20 flex flex-col">
             <div className="mb-8 mt-4 flex items-center justify-between">
               <h1>Tags Infomation</h1>
@@ -50,30 +50,30 @@ async function layout({ children }: { children: ReactNode }) {
                       { items: { item: "Others", path: "others" } },
                     ],
                   },
-                  // {
-                  //   trigger: "Custom Tags",
-                  //   items: data.tagsInfo,
-                  //   // [
-                  //   //   {
-                  //   //     subItems: {
-                  //   //       trigger: "First",
-                  //   //       subItems: [{ item: "First sub", path: "firstsub" }],
-                  //   //     },
-                  //   //   },
-                  //   //   {
-                  //   //     subItems: {
-                  //   //       trigger: "Second",
-                  //   //       subItems: [{ item: "Second sub", path: "secondsub" }],
-                  //   //     },
-                  //   //   },
-                  //   //   {
-                  //   //     items: {
-                  //   //       item: "Third",
-                  //   //       path: "third",
-                  //   //     },
-                  //   //   },
-                  //   // ],
-                  // },
+                  {
+                    trigger: "Custom Tags",
+                    items: data.tagsInfo,
+                    // [
+                    //   {
+                    //     subItems: {
+                    //       trigger: "First",
+                    //       subItems: [{ item: "First sub", path: "firstsub" }],
+                    //     },
+                    //   },
+                    //   {
+                    //     subItems: {
+                    //       trigger: "Second",
+                    //       subItems: [{ item: "Second sub", path: "secondsub" }],
+                    //     },
+                    //   },
+                    //   {
+                    //     items: {
+                    //       item: "Third",
+                    //       path: "third",
+                    //     },
+                    //   },
+                    // ],
+                  },
                 ]}
               />
               <div className="flex border rounded-md">
