@@ -12,50 +12,58 @@ import {
 import { memo } from "react";
 
 interface ItemValue {
-  items?: {
-    item: string;
-    path: string;
-  };
-  subItems?: {
-    trigger: string;
-    subItems: {
-      item: string;
-      path: string;
-    }[];
-  };
+  name: string;
+  _id: string;
 }
 
 interface SubNavbarForTagsProps {
   menu: {
+    type: "auto" | "tag" | "group";
     trigger: string;
-    items: ItemValue[];
+    items?: ItemValue[];
+    SubItems?: {
+      name: string;
+      SubItem: ItemValue[];
+    }[];
   }[];
 }
 
 function SubNavbarForTags({ menu }: SubNavbarForTagsProps) {
   return (
     <Menubar>
-      {menu.map(({ items, trigger }) => (
-        <MenubarMenu key={trigger}>
-          <MenubarTrigger className="cursor-pointer">{trigger}</MenubarTrigger>
-          <MenubarContent>
-            {items.map(({ subItems, items }) =>
-              items ? (
-                <MenubarItem key={items.item}>{items.item}</MenubarItem>
-              ) : (
-                <MenubarSub key={subItems?.trigger}>
-                  <MenubarSubTrigger>{subItems?.trigger}</MenubarSubTrigger>
+      {menu.map(({ items, type, trigger, SubItems }) =>
+        type !== "group" ? (
+          <MenubarMenu key={trigger}>
+            <MenubarTrigger className="cursor-pointer">
+              {trigger}
+            </MenubarTrigger>
+            <MenubarContent>
+              {items?.map(
+                ({ name, _id }) =>
+                  name && _id && <MenubarItem key={_id}>{name}</MenubarItem>
+              )}
+            </MenubarContent>
+          </MenubarMenu>
+        ) : (
+          <MenubarMenu key={trigger}>
+            <MenubarTrigger className="cursor-pointer">
+              {trigger}
+            </MenubarTrigger>
+            <MenubarContent>
+              {SubItems?.map(({ SubItem, name }) => (
+                <MenubarSub key={name}>
+                  <MenubarSubTrigger>{name}</MenubarSubTrigger>
                   <MenubarSubContent>
-                    {subItems?.subItems.map(({ item, path }) => (
-                      <MenubarItem key={item}>{item}</MenubarItem>
+                    {SubItem?.map(({ name, _id }) => (
+                      <MenubarItem key={_id}>{name}</MenubarItem>
                     ))}
                   </MenubarSubContent>
                 </MenubarSub>
-              )
-            )}
-          </MenubarContent>
-        </MenubarMenu>
-      ))}
+              ))}
+            </MenubarContent>
+          </MenubarMenu>
+        )
+      )}
     </Menubar>
   );
 }

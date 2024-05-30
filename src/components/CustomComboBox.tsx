@@ -23,10 +23,8 @@ import { FormControl, FormField, FormItem, FormLabel } from "./ui/form";
 interface CustomComboBoxProps {
   options:
     | {
-        subItems: {
-          trigger: string;
-          _id: string;
-        };
+        _id: string;
+        name: string;
       }[]
     | [];
   placeholder: string;
@@ -64,9 +62,7 @@ function CustomComboBox({
                   className="w-[200px] justify-between"
                 >
                   {field.value
-                    ? options?.find(
-                        ({ subItems }) => subItems._id === field.value
-                      )?.subItems.trigger
+                    ? options?.find(({ _id }) => _id === field.value)?.name
                     : placeholder}
                   <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
@@ -78,24 +74,24 @@ function CustomComboBox({
                     <CommandEmpty>{placeholderForEmptyValue}</CommandEmpty>
                     <CommandGroup>
                       {options?.length &&
-                        options?.map(({ subItems }) => (
+                        options?.map(({ _id, name }) => (
                           <CommandItem
-                            key={subItems._id}
-                            value={subItems.trigger}
+                            key={_id}
+                            value={name}
                             onSelect={() => {
-                              field.onChange(subItems._id);
+                              field.onChange(_id);
                               setOpen(false);
                             }}
                           >
                             <Check
                               className={cn(
                                 "mr-2 h-4 w-4",
-                                field.value === subItems._id
+                                field.value === _id
                                   ? "opacity-100"
                                   : "opacity-0"
                               )}
                             />
-                            {subItems.trigger}
+                            {name}
                           </CommandItem>
                         ))}
                     </CommandGroup>

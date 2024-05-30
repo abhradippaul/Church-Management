@@ -26,7 +26,7 @@ function AccordionComponent({
       <AccordionItem value={itemKey}>
         <AccordionTrigger>{trigger}</AccordionTrigger>
         {content.map(({ item, path }) => (
-          <AccordionContent>
+          <AccordionContent key={path}>
             <Link href={`${path}`}>{item}</Link>
           </AccordionContent>
         ))}

@@ -11,17 +11,8 @@ import {
 } from "react";
 
 interface ItemValue {
-  items?: {
-    item: string;
-    path: string;
-  };
-  subItems?: {
-    trigger: string;
-    subItems: {
-      item: string;
-      path: string;
-    }[];
-  };
+  _id: string;
+  name: string;
 }
 
 interface TagsContextValue {
@@ -29,14 +20,12 @@ interface TagsContextValue {
   setDialogType: Dispatch<SetStateAction<"tags" | "groups">>;
   isFormError: boolean;
   setIsFormError: Dispatch<SetStateAction<boolean>>;
-  groupOptions:
-    | {
-        subItems: {
-          trigger: string;
-          _id: string;
-        };
-      }[]
-    | [];
+  groupOptions: {
+    SubItem: {
+      _id: string;
+      name: string;
+    }[];
+  }[];
   tagsInfo: ItemValue[];
 }
 
@@ -62,14 +51,12 @@ function TagsProvider({
 }: {
   children: ReactNode;
   tagsInfo: ItemValue[];
-  groupOptions:
-    | {
-        subItems: {
-          trigger: string;
-          _id: string;
-        };
-      }[]
-    | [];
+  groupOptions: {
+    SubItem: {
+      _id: string;
+      name: string;
+    }[];
+  }[];
 }) {
   const [isFormError, setIsFormError] = useState(false);
   const [dialogType, setDialogType] = useState<"tags" | "groups">("tags");

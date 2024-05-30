@@ -9,7 +9,7 @@ import { NextRequest, NextResponse } from "next/server";
 export async function POST(req: NextRequest) {
   dbConnect();
   try {
-    const { name } = await req.json();
+    const { name, group } = await req.json();
     const access_token = req.cookies.get("access_token")?.value;
     if (!access_token) {
       return NextResponse.json<ApiResponse>({
@@ -46,10 +46,19 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    const isTagCreated = await TagItemModel.create({
-      name,
-      church: verifiedData._id,
-    });
+    let isTagCreated;
+
+    if (group) {
+      isTagCreated = await TagItemModel.create({
+        name,
+        tag_group: group,
+      });
+    } else {
+      isTagCreated = await TagItemModel.create({
+        name,
+        church: verifiedData._id,
+      });
+    }
 
     if (!isTagCreated) {
       return NextResponse.json<ApiResponse>({

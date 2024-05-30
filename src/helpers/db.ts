@@ -23,26 +23,7 @@ export async function getTagsPage() {
       },
     });
     if (data.success) {
-      const tags_Info = data.data.Tags_Item.map((e: tags_Info) => ({
-        items: {
-          item: e.name,
-          path: e._id,
-        },
-      }));
-
-      const group_Info = data.data.Tag_Group.map((e: group_Info) => ({
-        subItems: {
-          trigger: e.name,
-          _id: e._id,
-          subItems:
-            e?.Tags_Item?.map(({ _id, name }) => ({
-              item: name,
-              path: _id,
-            })) || [],
-        },
-      }));
-      const tagsInfo = [...tags_Info, ...group_Info];
-      return { tagsInfo, group_Info };
+      return data.data;
     }
   } catch (err: any) {
     console.log(err);

@@ -29,13 +29,14 @@ const UserInfo: UserInfoValue = {
 
 async function layout({ children }: { children: ReactNode }) {
   const data = await (await import("@/helpers/db")).getTagsPage();
+  console.log(data.SubItems);
   if (!data) {
     return null;
   }
   return (
     <div>
       <Navbar userInfo={UserInfo} />
-      <TagsProvider groupOptions={data.group_Info} tagsInfo={data.tagsInfo}>
+      <TagsProvider groupOptions={data.SubItems} tagsInfo={data.items}>
         <div className="px-2 md:px-4 max-w-7xl mx-auto min-h-dvh">
           <div className="pt-20 flex flex-col">
             <div className="mb-8 mt-4 flex items-center justify-between">
@@ -43,36 +44,23 @@ async function layout({ children }: { children: ReactNode }) {
               <SubNavbarForTags
                 menu={[
                   {
+                    type: "auto",
                     trigger: "Auto Tags",
                     items: [
-                      { items: { item: "Male", path: "male" } },
-                      { items: { item: "Female", path: "female" } },
-                      { items: { item: "Others", path: "others" } },
+                      { name: "Male", _id: "male" },
+                      { name: "Female", _id: "female" },
+                      { name: "Others", _id: "others" },
                     ],
                   },
                   {
-                    trigger: "Custom Tags",
-                    items: data.tagsInfo,
-                    // [
-                    //   {
-                    //     subItems: {
-                    //       trigger: "First",
-                    //       subItems: [{ item: "First sub", path: "firstsub" }],
-                    //     },
-                    //   },
-                    //   {
-                    //     subItems: {
-                    //       trigger: "Second",
-                    //       subItems: [{ item: "Second sub", path: "secondsub" }],
-                    //     },
-                    //   },
-                    //   {
-                    //     items: {
-                    //       item: "Third",
-                    //       path: "third",
-                    //     },
-                    //   },
-                    // ],
+                    type: "tag",
+                    trigger: "Custome Tags",
+                    items: data.items,
+                  },
+                  {
+                    type: "group",
+                    trigger: "Custome Groups",
+                    SubItems: data.SubItems,
                   },
                 ]}
               />

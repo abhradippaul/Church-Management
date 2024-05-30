@@ -13,14 +13,14 @@ export async function getTagsInfoAggregate(ownerId: string) {
         from: "taggroups",
         localField: "_id",
         foreignField: "church",
-        as: "Tag_Group",
+        as: "SubItems",
         pipeline: [
           {
             $lookup: {
               from: "tagitems",
               localField: "_id",
               foreignField: "tag_group",
-              as: "Tags_Item",
+              as: "SubItem",
             },
           },
         ],
@@ -31,15 +31,17 @@ export async function getTagsInfoAggregate(ownerId: string) {
         from: "tagitems",
         localField: "_id",
         foreignField: "church",
-        as: "Tags_Item",
+        as: "items",
       },
     },
     {
       $project: {
         _id: 0,
-        "Tags_Item._id": 1,
-        "Tags_Item.name": 1,
-        Tag_Group: 1,
+        "items._id": 1,
+        "items.name": 1,
+        "SubItems.SubItem._id" : 1,
+        "SubItems.SubItem.name" : 1,
+        "SubItems.name" : 1,
       },
     },
   ]);
