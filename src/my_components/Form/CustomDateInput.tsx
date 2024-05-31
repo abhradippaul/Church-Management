@@ -10,7 +10,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { memo, useState } from "react";
+import { memo } from "react";
 import {
   FormControl,
   FormField,
@@ -63,9 +63,7 @@ function CustomDateInput({
                 selected={field.value}
                 onSelect={field.onChange}
                 required={required}
-                disabled={(date) =>
-                  date > new Date() || date < new Date("1900-01-01")
-                }
+                disabled={(date) => date < new Date()}
                 initialFocus
               />
             </PopoverContent>

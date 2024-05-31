@@ -27,6 +27,11 @@ interface TagsContextValue {
     }[];
   }[];
   tagsInfo: ItemValue[];
+  groupsInfo: {
+    _id: string;
+    name: string;
+    SubItem: ItemValue[];
+  }[];
 }
 
 const CreateTagsContext = createContext<TagsContextValue>({
@@ -36,6 +41,7 @@ const CreateTagsContext = createContext<TagsContextValue>({
   setIsFormError: () => {},
   groupOptions: [],
   tagsInfo: [],
+  groupsInfo: [],
 });
 
 const TagsContextProvider = CreateTagsContext.Provider;
@@ -48,6 +54,7 @@ function TagsProvider({
   children,
   groupOptions,
   tagsInfo,
+  groupsInfo,
 }: {
   children: ReactNode;
   tagsInfo: ItemValue[];
@@ -56,6 +63,11 @@ function TagsProvider({
       _id: string;
       name: string;
     }[];
+  }[];
+  groupsInfo: {
+    _id: string;
+    name: string;
+    SubItem: ItemValue[];
   }[];
 }) {
   const [isFormError, setIsFormError] = useState(false);
@@ -69,6 +81,7 @@ function TagsProvider({
         setIsFormError,
         groupOptions,
         tagsInfo,
+        groupsInfo,
       }}
     >
       {children}

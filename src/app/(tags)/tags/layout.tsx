@@ -29,14 +29,13 @@ const UserInfo: UserInfoValue = {
 
 async function layout({ children }: { children: ReactNode }) {
   const data = await (await import("@/helpers/db")).getTagsPage();
-  console.log(data.SubItems);
   if (!data) {
     return null;
   }
   return (
     <div>
       <Navbar userInfo={UserInfo} />
-      <TagsProvider groupOptions={data.SubItems} tagsInfo={data.items}>
+      <TagsProvider groupOptions={data.SubItems} groupsInfo={data.SubItems} tagsInfo={data.items}>
         <div className="px-2 md:px-4 max-w-7xl mx-auto min-h-dvh">
           <div className="pt-20 flex flex-col">
             <div className="mb-8 mt-4 flex items-center justify-between">

@@ -21,12 +21,11 @@ import { memo, useState } from "react";
 import { FormControl, FormField, FormItem, FormLabel } from "./ui/form";
 
 interface CustomComboBoxProps {
-  options:
-    | {
-        _id: string;
-        name: string;
-      }[]
-    | [];
+  options: {
+    _id: string;
+    name: string;
+  }[];
+
   placeholder: string;
   placeholderForEmptyValue: string;
   control: any;
@@ -44,7 +43,6 @@ function CustomComboBox({
   label,
 }: CustomComboBoxProps) {
   const [open, setOpen] = useState(false);
-
   return (
     <FormField
       control={control}

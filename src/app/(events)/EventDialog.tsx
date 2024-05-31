@@ -22,7 +22,7 @@ interface EventsDialogProps {
 
 function EventDialog({ trigger }: EventsDialogProps) {
   const [isMounted, setIsMounted] = useState(false);
-  const { dialogType, isFormError } = useTagsContext();
+  const { isFormError } = useTagsContext();
   useEffect(() => {
     setIsMounted(true);
   }, []);

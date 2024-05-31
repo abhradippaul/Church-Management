@@ -11,8 +11,8 @@ interface AccordionComponentProps {
   itemKey: string;
   trigger: string;
   content: {
-    item: string;
-    path: string;
+    _id: string;
+    name: string;
   }[];
 }
 
@@ -25,9 +25,9 @@ function AccordionComponent({
     <Accordion type="multiple">
       <AccordionItem value={itemKey}>
         <AccordionTrigger>{trigger}</AccordionTrigger>
-        {content.map(({ item, path }) => (
-          <AccordionContent key={path}>
-            <Link href={`${path}`}>{item}</Link>
+        {content.map(({ _id, name }) => (
+          <AccordionContent key={_id}>
+            <Link href={`${_id}`}>{name}</Link>
           </AccordionContent>
         ))}
       </AccordionItem>

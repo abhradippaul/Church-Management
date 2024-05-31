@@ -1,7 +1,7 @@
 import OwnerModel from "@/model/Owner";
 import mongoose from "mongoose";
 
-export async function getTagsInfoAggregate(ownerId: string) {
+export async function getTagsInfoFromEventsAggregate(ownerId: string) {
   return await OwnerModel.aggregate([
     {
       $match: {
@@ -10,39 +10,40 @@ export async function getTagsInfoAggregate(ownerId: string) {
     },
     {
       $lookup: {
+        from: "tagitems",
+        localField: "_id",
+        foreignField: "church",
+        as: "Tags_Item",
+      },
+    },
+    {
+      $lookup: {
         from: "taggroups",
         localField: "_id",
         foreignField: "church",
-        as: "SubItems",
+        as: "Tag_Group",
         pipeline: [
           {
             $lookup: {
               from: "tagitems",
               localField: "_id",
               foreignField: "tag_group",
-              as: "SubItem",
+              as: "Tag_Item",
             },
+          },
+          {
+            $unwind: "$Tag_Item",
           },
         ],
       },
     },
     {
-      $lookup: {
-        from: "tagitems",
-        localField: "_id",
-        foreignField: "church",
-        as: "items",
-      },
-    },
-    {
       $project: {
         _id: 0,
-        "items._id": 1,
-        "items.name": 1,
-        "SubItems.SubItem._id": 1,
-        "SubItems.SubItem.name": 1,
-        "SubItems.name": 1,
-        "SubItems._id": 1,
+        "Tags_Item._id": 1,
+        "Tags_Item.name": 1,
+        "Tag_Group.Tag_Item._id": 1,
+        "Tag_Group.Tag_Item.name": 1,
       },
     },
   ]);
