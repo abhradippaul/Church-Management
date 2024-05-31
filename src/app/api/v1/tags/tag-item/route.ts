@@ -1,9 +1,9 @@
+import { isChurchAndTagValid } from "@/aggregation/Tags";
 import dbConnect from "@/lib/DbConnect";
 import { verifyToken } from "@/lib/JsonWebToken";
 import OwnerModel from "@/model/Owner";
 import TagItemModel from "@/model/TagsItem";
 import { ApiResponse } from "@/types/ApiResponse";
-import mongoose from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
@@ -107,87 +107,16 @@ export async function DELETE(req: NextRequest) {
       });
     }
 
-    const isChurchAndTagValid = await OwnerModel.aggregate([
-      {
-        $match: {
-          _id: new mongoose.Types.ObjectId(verifiedData._id),
-        },
-      },
-      {
-        $lookup: {
-          from: "taggroups",
-          localField: "_id",
-          foreignField: "church",
-          as: "Tag_Group",
-          pipeline: [
-            {
-              $lookup: {
-                from: "tagitems",
-                localField: "_id",
-                foreignField: "tag_group",
-                as: "Tag_Item",
-              },
-            },
-          ],
-        },
-      },
-      {
-        $addFields: {
-          isInTag_Group: {
-            $cond: {
-              if: {
-                $in: [
-                  new mongoose.Types.ObjectId(tagItem),
-                  "$Tag_Group.Tag_Item._id",
-                ],
-              },
-              then: true,
-              else: false,
-            },
-          },
-        },
-      },
-      {
-        $lookup: {
-          from: "tagitems",
-          localField: "_id",
-          foreignField: "church",
-          as: "Tag_Item",
-        },
-      },
-      {
-        $addFields: {
-          isInTag_Item: {
-            $cond: {
-              if: {
-                $in: [new mongoose.Types.ObjectId(tagItem), "$Tag_Item._id"],
-              },
-              then: true,
-              else: false,
-            },
-          },
-        },
-      },
-      {
-        $project: {
-          _id: 0,
-          isInTag_Group: 1,
-          isInTag_Item: 1,
-        },
-      },
-    ]);
+    const isValid = await isChurchAndTagValid(verifiedData._id, tagItem);
 
-    if (!isChurchAndTagValid?.length) {
+    if (!isValid?.length) {
       return NextResponse.json<ApiResponse>({
         success: false,
         message: "Tag not found",
       });
     }
 
-    if (
-      !isChurchAndTagValid[0]?.isInTag_Group &&
-      !isChurchAndTagValid[0]?.isInTag_Item
-    ) {
+    if (!isValid[0]?.isInTag_Group && !isValid[0]?.isInTag_Item) {
       return NextResponse.json<ApiResponse>({
         success: false,
         message: "Problem with the tag",

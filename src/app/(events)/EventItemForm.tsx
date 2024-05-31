@@ -4,20 +4,27 @@ import { toast } from "@/components/ui/use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { memo, useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { string, z } from "zod";
+import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import CreateEventSchema from "@/schema/CreateEventSchema";
-import CustomDateInput from "@/my_components/Form/CustomDateInput";
-import CustomTextArea from "@/my_components/Form/CustomTextArea";
-import CustomSelectInput from "@/my_components/Form/CustomSelectInput";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const CustomFormInput = dynamic(
   () => import("@/my_components/Form/CustomFormInput")
 );
 const CustomComboBox = dynamic(() => import("@/components/CustomComboBox"));
+const CustomSelectInput = dynamic(
+  () => import("@/my_components/Form/CustomSelectInput")
+);
+const CustomTextArea = dynamic(
+  () => import("@/my_components/Form/CustomTextArea")
+);
+const CustomDateInput = dynamic(
+  () => import("@/my_components/Form/CustomDateInput")
+);
 
 interface TagsOptionValue {
   _id: string;
@@ -70,25 +77,28 @@ function EventItemForm() {
   const onSubmit = useCallback(
     async (values: z.infer<typeof CreateEventSchema>) => {
       console.log(values);
-      //   try {
-      //     const { data } = await axios.post(
-      //       `/api/v1/tags/${dialogType === "tags" ? "tag-item" : "tag-group"}`,
-      //       values
-      //     );
-      //     if (data.success) {
-      //       router.refresh();
-      //     } else {
-      //       toast({
-      //         title: "Error",
-      //         description: data.message,
-      //       });
-      //     }
-      //   } catch (err: any) {
-      //     toast({
-      //       title: "Error",
-      //       description: err?.response?.data?.message,
-      //     });
-      //   }
+      try {
+        const { data } = await axios.post(`/api/v1/events`, {
+          name: values.name,
+          tag: values.tags,
+          date: `${values.event_date.getDate()}/${values.event_date.getMonth()}/${values.event_date.getFullYear()}`,
+          time: `${values.event_hour}:${values.event_minutes} ${values.event_time}`,
+          description: values.event_description,
+        });
+        if (data.success) {
+          router.refresh();
+        } else {
+          toast({
+            title: "Error",
+            description: data.message,
+          });
+        }
+      } catch (err: any) {
+        toast({
+          title: "Error",
+          description: err?.response?.data?.message,
+        });
+      }
     },
     []
   );
@@ -129,86 +139,93 @@ function EventItemForm() {
   }, []);
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)}>
-        <CustomFormInput
-          control={form.control}
-          inputName="name"
-          label="Tag Name"
-          type="text"
-          placeholder="Enter a tag name"
-          disabled={form.formState.isSubmitting}
-        />
-        <div className="my-4"></div>
-
-        <CustomComboBox
-          control={form.control}
-          placeholder="Attach a tag"
-          placeholderForEmptyValue="Tag not found"
-          inputName="tags"
-          label="Tag"
-          disabled={form.formState.isSubmitting}
-          options={tagsOption}
-        />
-
-        <div className="my-4"></div>
-        <CustomDateInput
-          control={form.control}
-          inputName="event_date"
-          label="Event Date"
-        />
-
-        <div className="my-4"></div>
-        <div>
-          <h1>Event time</h1>
-          <CustomSelectInput
+      <ScrollArea>
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="max-h-[500px] px-4"
+        >
+          <CustomFormInput
             control={form.control}
-            inputName="event_hour"
-            label="Hour"
+            inputName="name"
+            label="Event Name"
+            type="text"
+            placeholder="Enter a event name"
             disabled={form.formState.isSubmitting}
-            items={hourArr}
           />
-          <CustomSelectInput
-            control={form.control}
-            inputName="event_minutes"
-            label="Minutes"
-            disabled={form.formState.isSubmitting}
-            items={minArr}
-          />
-          <CustomSelectInput
-            control={form.control}
-            inputName="event_time"
-            label="Time"
-            disabled={form.formState.isSubmitting}
-            items={[
-              {
-                value: "am",
-                label: "am",
-              },
-              {
-                value: "pm",
-                label: "pm",
-              },
-            ]}
-          />
-        </div>
+          <div className="my-4"></div>
 
-        <div className="my-4"></div>
-        <CustomTextArea
-          control={form.control}
-          inputName="event_description"
-          label="Event description"
-          placeholder="Short description for the event"
-          disabled={form.formState.isSubmitting}
-        />
+          <CustomComboBox
+            control={form.control}
+            placeholder="Attach a tag"
+            placeholderForEmptyValue="Tag not found"
+            inputName="tags"
+            label="Tag"
+            disabled={form.formState.isSubmitting}
+            options={tagsOption}
+          />
 
-        <Button variant="secondary" size="lg" className="text-lg mt-8">
-          {form.formState.isSubmitting ? (
-            <Loader2 className="size-6 animate-spin" />
-          ) : (
-            "Submit"
-          )}
-        </Button>
-      </form>
+          <div className="my-4"></div>
+          <CustomDateInput
+            control={form.control}
+            inputName="event_date"
+            label="Event Date"
+          />
+
+          <div className="my-4"></div>
+          <div className="my-4 flex items-center justify-between w-full">
+            <CustomSelectInput
+              control={form.control}
+              inputName="event_hour"
+              label="Hour"
+              disabled={form.formState.isSubmitting}
+              items={hourArr}
+              triggerClass="w-[90px]"
+            />
+            <CustomSelectInput
+              control={form.control}
+              inputName="event_minutes"
+              label="Minutes"
+              disabled={form.formState.isSubmitting}
+              items={minArr}
+              triggerClass="w-[90px]"
+            />
+            <CustomSelectInput
+              control={form.control}
+              inputName="event_time"
+              label="Time"
+              disabled={form.formState.isSubmitting}
+              triggerClass="w-[90px]"
+              items={[
+                {
+                  value: "am",
+                  label: "am",
+                },
+                {
+                  value: "pm",
+                  label: "pm",
+                },
+              ]}
+            />
+          </div>
+
+          <div className="my-4"></div>
+          <CustomTextArea
+            control={form.control}
+            inputName="event_description"
+            label="Event description"
+            placeholder="Short description for the event"
+            disabled={form.formState.isSubmitting}
+          />
+
+          <Button variant="secondary" size="lg" className="text-lg mt-8">
+            {form.formState.isSubmitting ? (
+              <Loader2 className="size-6 animate-spin" />
+            ) : (
+              "Submit"
+            )}
+          </Button>
+        </form>
+      </ScrollArea>
     </Form>
   );
 }

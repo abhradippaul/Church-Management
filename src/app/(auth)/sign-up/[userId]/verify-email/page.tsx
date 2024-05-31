@@ -13,15 +13,20 @@ import { Toaster } from "@/components/ui/toaster";
 import { toast } from "@/components/ui/use-toast";
 import axios from "axios";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { createVerifyCodeForEmail } from "@/helpers/db";
 
 const CustomFormInput = dynamic(
   () => import("@/my_components/Form/CustomFormInput")
 );
 
 function page() {
-  const { userId } = useParams();
+  const { userId }: { userId: string } = useParams();
   const router = useRouter();
-  const type = useSearchParams().get("type");
+  const type = useSearchParams().get("type") as
+    | "admin"
+    | "owner"
+    | "people"
+    | null;
 
   const form = useForm<z.infer<typeof VerifyEmailSchema>>({
     resolver: zodResolver(VerifyEmailSchema),
@@ -29,6 +34,18 @@ function page() {
       emailOtp: "",
     },
   });
+
+  const methodForUseEffect = useCallback(() => {
+    (async () => {
+      if (type && userId) {
+        const response = await createVerifyCodeForEmail(type, userId);
+        console.log(response);
+      }
+    })();
+  }, []);
+
+  useEffect(methodForUseEffect, []);
+
   const onSubmit = useCallback(
     async (values: z.infer<typeof VerifyEmailSchema>) => {
       try {

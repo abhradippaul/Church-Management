@@ -1,10 +1,7 @@
 import { getTagsInfoFromEventsAggregate } from "@/aggregation/Events";
-import { getTagsInfoAggregate } from "@/aggregation/Tags";
 import dbConnect from "@/lib/DbConnect";
 import { verifyToken } from "@/lib/JsonWebToken";
-import OwnerModel from "@/model/Owner";
 import { ApiResponse } from "@/types/ApiResponse";
-import mongoose from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {

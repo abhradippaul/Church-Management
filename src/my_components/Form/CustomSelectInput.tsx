@@ -24,6 +24,7 @@ interface CustomSelectInputProps extends InputProps {
     value: string;
     label: string;
   }[];
+  triggerClass: string;
 }
 
 function CustomSelectInput({
@@ -35,6 +36,7 @@ function CustomSelectInput({
   placeholder,
   formMessage,
   items,
+  triggerClass,
 }: CustomSelectInputProps) {
   return (
     <div>
@@ -52,11 +54,11 @@ function CustomSelectInput({
               required={required}
             >
               <FormControl>
-                <SelectTrigger className="w-[180px]">
+                <SelectTrigger className={triggerClass}>
                   <SelectValue placeholder={placeholder} />
                 </SelectTrigger>
               </FormControl>
-              <SelectContent>
+              <SelectContent className="max-h-[300px]">
                 {items.map(({ label, value }) => (
                   <SelectItem value={value} key={value}>
                     {label}

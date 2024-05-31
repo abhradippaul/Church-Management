@@ -6,16 +6,20 @@ import {
 } from "@/components/ui/card";
 import dynamic from "next/dynamic";
 
-const SigninForm = dynamic(() => import("@/my_components/Form/SigninForm"));
+const SignupFormPeople = dynamic(
+  () => import("@/my_components/Form/SignupFormPeople")
+);
 
 function page() {
   return (
     <Card className="w-[90%] max-w-[500px]">
       <CardHeader>
-        <CardTitle>Signin Form</CardTitle>
-        <CardDescription>Sign in here for church to go to the dashboard</CardDescription>
+        <CardTitle>Signup Form</CardTitle>
+        <CardDescription>
+          Sign up here for people to see their info about the church
+        </CardDescription>
       </CardHeader>
-      <SigninForm />
+      <SignupFormPeople />
     </Card>
   );
 }
