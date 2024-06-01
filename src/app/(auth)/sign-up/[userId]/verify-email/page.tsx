@@ -38,7 +38,7 @@ function page() {
   const methodForUseEffect = useCallback(() => {
     (async () => {
       if (type && userId) {
-        const response = await createVerifyCodeForEmail(type, userId);
+        const response = await createVerifyCodeForEmail({ _id: userId, type });
         console.log(response);
       }
     })();

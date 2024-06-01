@@ -4,21 +4,34 @@ import OwnerModel from "@/model/Owner";
 import { ApiResponse } from "@/types/ApiResponse";
 import { NextRequest, NextResponse } from "next/server";
 import { genSalt, hash } from "bcryptjs";
-import axios from "axios";
+import PeopleModel from "@/model/People";
 
 export async function POST(req: NextRequest) {
   dbConnect();
   try {
-    const { name, password, email, image } = await req.json();
+    const { name, password, email, image, emailOtp } = await req.json();
     const type = req.nextUrl.searchParams.get("type");
 
-    if (!name || !password || !email || !image || !type) {
-      return NextResponse.json(
-        {
-          message: "All fields are required",
-        },
-        { status: 400 }
-      );
+    console.log(type, email, emailOtp, password);
+
+    if (type !== "people") {
+      if (!name || !password || !email || !image || !type) {
+        return NextResponse.json(
+          {
+            message: "All fields are required",
+          },
+          { status: 400 }
+        );
+      }
+    } else {
+      if (!email || !password || !emailOtp) {
+        return NextResponse.json(
+          {
+            message: "All fields are required",
+          },
+          { status: 400 }
+        );
+      }
     }
 
     let isUserCreated;
@@ -73,6 +86,52 @@ export async function POST(req: NextRequest) {
       });
       isUserCreated = {
         _id: isUserCreated._id,
+        type: type,
+      };
+    } else if (type === "people") {
+      const salt = await genSalt(10);
+      const hashedPassword = await hash(password, salt);
+
+      const isExist = await PeopleModel.findOne(
+        { verify_code: emailOtp, email },
+        { _id: 1, verify_expiry: 1 }
+      );
+
+      if (!isExist) {
+        return NextResponse.json<ApiResponse>({
+          success: false,
+          message: "Invalid verification code or id",
+        });
+      }
+
+      if (isExist?.verify_expiry < Math.floor(Date.now() / 1000)) {
+        return NextResponse.json<ApiResponse>({
+          success: false,
+          message: "Verification code expired",
+        });
+      }
+      const updateUser = await PeopleModel.updateOne(
+        { email },
+        {
+          $set: {
+            is_verified: true,
+            password: hashedPassword,
+          },
+          $unset: {
+            verify_code: "",
+            verify_expiry: "",
+          },
+        }
+      );
+      if (!updateUser.modifiedCount) {
+        return NextResponse.json<ApiResponse>({
+          success: false,
+          message: "Updating people failed",
+        });
+      }
+
+      isUserCreated = {
+        _id: 1,
         type: type,
       };
     } else {

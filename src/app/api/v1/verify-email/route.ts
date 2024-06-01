@@ -1,6 +1,7 @@
 import dbConnect from "@/lib/DbConnect";
 import AdminModel from "@/model/Admin";
 import OwnerModel from "@/model/Owner";
+import PeopleModel from "@/model/People";
 import { ApiResponse } from "@/types/ApiResponse";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -38,9 +39,11 @@ export async function POST(req: NextRequest) {
         { _id },
         {
           $set: {
-            verify_code: undefined,
-            verify_expiry: undefined,
             is_verified: true,
+          },
+          $unset: {
+            verify_code: "",
+            verify_expiry: "",
           },
         }
       );
@@ -63,7 +66,7 @@ export async function POST(req: NextRequest) {
         });
       }
 
-      if (isExist?.verify_expiry > Math.floor(Date.now() / 1000)) {
+      if (isExist?.verify_expiry < Math.floor(Date.now() / 1000)) {
         return NextResponse.json<ApiResponse>({
           success: false,
           message: "Verification code expired",
@@ -73,16 +76,18 @@ export async function POST(req: NextRequest) {
         { _id },
         {
           $set: {
-            verify_code: undefined,
-            verify_expiry: undefined,
-            isVerified: true,
+            is_verified: true,
+          },
+          $unset: {
+            verify_code: "",
+            verify_expiry: "",
           },
         }
       );
       if (!updateOwner.modifiedCount) {
         return NextResponse.json<ApiResponse>({
           success: false,
-          message: "Updating the admin failed",
+          message: "Updating the church failed",
         });
       }
     } else {

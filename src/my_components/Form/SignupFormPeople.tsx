@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { CardContent, CardFooter } from "@/components/ui/card";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -11,9 +12,12 @@ import { toast } from "@/components/ui/use-toast";
 import { memo, useCallback, useEffect, useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import SignInSchema from "@/schema/SignInSchema";
-import CustomFormInput from "./CustomFormInput";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import { verifyPeople } from "@/helpers/db";
+import CreatePeopleSchema from "@/schema/CreatePeopleSchema";
+
+const CustomFormInput = dynamic(() => import("./CustomFormInput"));
 
 const SignUpFormValue = [
   {
@@ -30,39 +34,53 @@ const SignUpFormValue = [
     placeholder: "Create a password",
     autoComplete: "password",
   },
+  {
+    label: "Email Otp",
+    inputName: "emailOtp",
+    type: "number",
+    placeholder: "Otp has sent to your email address",
+    autoComplete: "email",
+  },
 ];
 
 function SignUpForm() {
-  const [isEmailVerified, setIsEmailVerified] = useState(false);
   const [isUserExist, setIsUserExist] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  let form = useForm<z.infer<typeof SignInSchema>>({
-    resolver: zodResolver(SignInSchema),
+  let form = useForm<z.infer<typeof CreatePeopleSchema>>({
+    resolver: zodResolver(CreatePeopleSchema),
     defaultValues: {
       email: "",
       password: "",
+      emailOtp: "",
     },
   });
 
-  const onSubmit = useCallback(async (values: z.infer<typeof SignInSchema>) => {
-    try {
-      const { data } = await axios.post("/api/v1/sign-in", values);
-      console.log(data);
-      if (data.success) {
-        router.push("/dashboard");
-      } else {
+  const onSubmit = useCallback(
+    async (values: z.infer<typeof CreatePeopleSchema>) => {
+      try {
+        const { data } = await axios.post(
+          `/api/v1/sign-up?type=people`,
+          values
+        );
+        console.log(data);
+        if (data.success) {
+          router.push("/sign-in");
+        } else {
+          toast({
+            title: "Error",
+            description: data.message,
+          });
+        }
+      } catch (err: any) {
         toast({
           title: "Error",
-          description: data.message,
+          description: err?.response?.data?.message,
         });
       }
-    } catch (err: any) {
-      toast({
-        title: "Error",
-        description: err?.response?.data?.message,
-      });
-    }
-  }, []);
+    },
+    []
+  );
 
   const methodForUseEffect = useCallback(() => {
     const error = form.formState.errors;
@@ -84,6 +102,27 @@ function SignUpForm() {
 
   useEffect(methodForUseEffect, [form.formState.errors]);
 
+  const methodForVerifyButton = useCallback(async () => {
+    const email = form.getValues("email");
+    if (email) {
+      setIsLoading(true);
+      const data = await verifyPeople({ email, type: "people" });
+      if (data.success) {
+        setIsUserExist(true);
+        toast({
+          title: "Success",
+          description: data.message,
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: data.message,
+        });
+      }
+      setIsLoading(false);
+    }
+  }, []);
+
   return (
     <>
       <CardContent>
@@ -97,12 +136,16 @@ function SignUpForm() {
                 label={e.label}
                 type={e.type}
                 placeholder={e.placeholder}
-                disabled={form.formState.isSubmitting || isUserExist}
+                disabled={
+                  isUserExist
+                    ? e.inputName === "email"
+                    : e.inputName !== "email"
+                }
                 autoComplete={e.autoComplete}
               />
             ))}
 
-            {isEmailVerified && isUserExist && (
+            {isUserExist && (
               <Button variant="secondary" size="lg" className="text-lg mt-8">
                 {form.formState.isSubmitting ? (
                   <Loader2 className="size-6 animate-spin" />
@@ -112,9 +155,14 @@ function SignUpForm() {
               </Button>
             )}
           </form>
-          {!isEmailVerified && (
-            <Button variant="secondary" size="lg" className="text-lg mt-8">
-              {form.formState.isSubmitting ? (
+          {!isUserExist && (
+            <Button
+              variant="secondary"
+              size="lg"
+              className="text-lg mt-8"
+              onClick={methodForVerifyButton}
+            >
+              {form.formState.isSubmitting || isLoading ? (
                 <Loader2 className="size-6 animate-spin" />
               ) : (
                 "Verify"

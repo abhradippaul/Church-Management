@@ -10,19 +10,29 @@ export async function PUT(req: NextRequest) {
   dbConnect();
   try {
     const type = req.nextUrl.searchParams.get("type");
-    const { _id } = await req.json();
+    const { _id, email } = await req.json();
+
     if (!type) {
       return NextResponse.json<ApiResponse>({
         success: false,
         message: "Type is required",
       });
     }
-    if (!_id) {
+
+    if (!_id && type !== "people") {
       return NextResponse.json<ApiResponse>({
         success: false,
         message: "Id is required",
       });
     }
+
+    if (!email && type === "people") {
+      return NextResponse.json<ApiResponse>({
+        success: false,
+        message: "Email is required",
+      });
+    }
+
     let isUserVerifyCodeUpdated;
 
     // Function for generating verification code and expriy time
@@ -57,7 +67,6 @@ export async function PUT(req: NextRequest) {
       if (expiry) {
         const currentTime = Math.floor(Date.now() / 1000);
         if (expiry > currentTime) {
-          console.log(expiry, currentTime);
           if (expiry - 60 * 59 > currentTime) {
             return true;
           }
@@ -80,7 +89,14 @@ export async function PUT(req: NextRequest) {
         });
       }
 
-      checkVerificationTime(isUserExist.verify_expiry);
+      const timeResponse = checkVerificationTime(isUserExist.verify_expiry);
+
+      if (timeResponse) {
+        return NextResponse.json<ApiResponse>({
+          success: false,
+          message: "Verification code is recent",
+        });
+      }
 
       await verficationEmail(isUserExist.email, isUserExist.name, verify_code);
 
@@ -114,7 +130,7 @@ export async function PUT(req: NextRequest) {
         });
       }
 
-      //   await verficationEmail(isUserExist.email, isUserExist.name, verify_code);
+      await verficationEmail(isUserExist.email, isUserExist.name, verify_code);
 
       isUserVerifyCodeUpdated = await OwnerModel.updateOne(
         { _id },
@@ -127,7 +143,7 @@ export async function PUT(req: NextRequest) {
       );
     } else if (type === "people") {
       const isUserExist = await PeopleModel.findOne(
-        { _id },
+        { email },
         { name: 1, email: 1, verify_expiry: 1 }
       );
       if (!isUserExist) {
@@ -136,11 +152,17 @@ export async function PUT(req: NextRequest) {
           message: "User not found",
         });
       }
-      //   checkVerificationTime(isUserExist.verify_expiry);
+      const timeResponse = checkVerificationTime(isUserExist.verify_expiry);
 
+      if (timeResponse) {
+        return NextResponse.json<ApiResponse>({
+          success: false,
+          message: "Verification code is recent",
+        });
+      }
       await verficationEmail(isUserExist.email, isUserExist.name, verify_code);
       isUserVerifyCodeUpdated = await PeopleModel.updateOne(
-        { _id },
+        { email },
         {
           $set: {
             verify_code,

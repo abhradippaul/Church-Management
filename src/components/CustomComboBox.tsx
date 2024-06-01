@@ -71,7 +71,7 @@ function CustomComboBox({
                   <CommandList>
                     <CommandEmpty>{placeholderForEmptyValue}</CommandEmpty>
                     <CommandGroup>
-                      {options?.length &&
+                      {options?.length ? (
                         options?.map(({ _id, name }) => (
                           <CommandItem
                             key={_id}
@@ -91,7 +91,10 @@ function CustomComboBox({
                             />
                             {name}
                           </CommandItem>
-                        ))}
+                        ))
+                      ) : (
+                        <></>
+                      )}
                     </CommandGroup>
                   </CommandList>
                 </Command>

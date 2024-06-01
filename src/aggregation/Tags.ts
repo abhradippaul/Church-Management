@@ -119,3 +119,46 @@ export async function isChurchAndTagValid(ownerId: string, tagId: string) {
     },
   ]);
 }
+
+export async function getTagInfoAggregate(ownerId: string, tagId: string) {
+  return await OwnerModel.aggregate([
+    {
+      $match: {
+        _id: new mongoose.Types.ObjectId(ownerId),
+      },
+    },
+    {
+      $lookup: {
+        from: "taggroups",
+        localField: "_id",
+        foreignField: "church",
+        as: "Tag_Group",
+        pipeline: [
+          {
+            $lookup: {
+              from: "tagitems",
+              localField: "_id",
+              foreignField: "tag_group",
+              as: "Tag_Item",
+            },
+          },
+        ],
+      },
+    },
+    {
+      $lookup: {
+        from: "tagitems",
+        localField: "_id",
+        foreignField: "church",
+        as: "Tag_Item",
+      },
+    },
+    // {
+    //   $project: {
+    //     _id: 0,
+    //     isInTag_Group: 1,
+    //     isInTag_Item: 1,
+    //   },
+    // },
+  ]);
+}

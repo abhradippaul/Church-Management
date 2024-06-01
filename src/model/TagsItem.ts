@@ -17,6 +17,7 @@ const TagItemSchema = new Schema<TagItemInterfaceValue>(
     church: {
       type: Schema.Types.ObjectId,
       ref: "Owner",
+      required: true,
     },
     tag_group: {
       type: Schema.Types.ObjectId,

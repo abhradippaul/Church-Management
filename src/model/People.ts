@@ -9,6 +9,11 @@ export interface PeopleInterfaceValue extends Document {
   church: Types.ObjectId;
   date_of_birth: string;
   image: string;
+  password: string;
+  refresh_token: string;
+  is_verified: boolean;
+  verify_code: string;
+  verify_expiry: number;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -45,10 +50,26 @@ const PeopleSchema = new Schema<PeopleInterfaceValue>(
       type: String,
       required: true,
     },
+    password: {
+      type: String,
+    },
     church: {
       type: Schema.Types.ObjectId,
       ref: "Owner",
       required: true,
+    },
+    refresh_token: {
+      type: String,
+    },
+    is_verified: {
+      type: Boolean,
+      default: false,
+    },
+    verify_code: {
+      type: String,
+    },
+    verify_expiry: {
+      type: Number,
     },
   },
   { timestamps: true }

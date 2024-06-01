@@ -1,10 +1,63 @@
-import { isChurchAndTagValid } from "@/aggregation/Tags";
+import { getTagInfoAggregate, isChurchAndTagValid } from "@/aggregation/Tags";
 import dbConnect from "@/lib/DbConnect";
 import { verifyToken } from "@/lib/JsonWebToken";
 import OwnerModel from "@/model/Owner";
 import TagItemModel from "@/model/TagsItem";
 import { ApiResponse } from "@/types/ApiResponse";
 import { NextRequest, NextResponse } from "next/server";
+
+export async function GET(req: NextRequest) {
+  dbConnect();
+  try {
+    const tagItem = req.nextUrl.searchParams.get("tagItem");
+    const access_token = req.cookies.get("access_token")?.value;
+    if (!access_token) {
+      return NextResponse.json<ApiResponse>({
+        success: false,
+        message: "You are not logged in",
+      });
+    }
+
+    const verifiedData = verifyToken(access_token);
+
+    if (!verifiedData?._id || !verifiedData?.role) {
+      return NextResponse.json<ApiResponse>({
+        success: false,
+        message: "You are not logged in",
+      });
+    }
+
+    if (!tagItem) {
+      return NextResponse.json<ApiResponse>({
+        success: false,
+        message: "Provide tagItem",
+      });
+    }
+
+    const isChurchAndTagValid = await getTagInfoAggregate(
+      verifiedData._id,
+      tagItem
+    );
+
+    if (!isChurchAndTagValid) {
+      return NextResponse.json<ApiResponse>({
+        success: false,
+        message: "You are not authorized to access this tag",
+      });
+    }
+
+    return NextResponse.json<ApiResponse>({
+      success: true,
+      message: "Tag found",
+      data: isChurchAndTagValid,
+    });
+  } catch (err) {
+    return NextResponse.json<ApiResponse>({
+      success: false,
+      message: "Something went wrong",
+    });
+  }
+}
 
 export async function POST(req: NextRequest) {
   dbConnect();
@@ -52,6 +105,7 @@ export async function POST(req: NextRequest) {
       isTagCreated = await TagItemModel.create({
         name,
         tag_group: group,
+        church: verifiedData._id,
       });
     } else {
       isTagCreated = await TagItemModel.create({
