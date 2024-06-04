@@ -1,10 +1,12 @@
-import TableComponent from "@/components/TableComponent";
+import dynamic from "next/dynamic";
 const tableHeading = ["Name", "Email", "Age", ""];
 
-function page() {
+const TableComponent = dynamic(() => import("@/components/TableComponent"));
+
+async function page() {
   return (
     <div>
-      {/* <TableComponent type="people" tableHeading={tableHeading} /> */}
+      <TableComponent type="tagpeople" tableHeading={tableHeading} />
     </div>
   );
 }

@@ -1,4 +1,7 @@
-import { getTagInfoAggregate, isChurchAndTagValid } from "@/aggregation/Tags";
+import {
+  getSpecificTagInfoAggregate,
+  isChurchAndTagValid,
+} from "@/aggregation/Tags";
 import dbConnect from "@/lib/DbConnect";
 import { verifyToken } from "@/lib/JsonWebToken";
 import OwnerModel from "@/model/Owner";
@@ -34,7 +37,7 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    const isChurchAndTagValid = await getTagInfoAggregate(
+    const isChurchAndTagValid = await getSpecificTagInfoAggregate(
       verifiedData._id,
       tagItem
     );
@@ -49,7 +52,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json<ApiResponse>({
       success: true,
       message: "Tag found",
-      data: isChurchAndTagValid,
+      data: isChurchAndTagValid[0],
     });
   } catch (err) {
     return NextResponse.json<ApiResponse>({

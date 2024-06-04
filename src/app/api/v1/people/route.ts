@@ -19,21 +19,17 @@ cloudinary.config({
 export async function GET(req: NextRequest) {
   dbConnect();
   try {
-    // const userId = req.nextUrl.searchParams.get("userId");
     const access_token = req.cookies.get("access_token")?.value;
+    const page = parseInt(req.nextUrl.searchParams.get("page") || "") - 1 || 0;
+    const limit = parseInt(req.nextUrl.searchParams.get("limit") || "") || 5;
+    const sort = req.nextUrl.searchParams.get("sort") || "recent";
+    const gender = req.nextUrl.searchParams.get("gender") || "";
     if (!access_token) {
       return NextResponse.json<ApiResponse>({
         success: false,
         message: "You are not logged in",
       });
     }
-
-    // if (!userId) {
-    //   return NextResponse.json<ApiResponse>({
-    //     success: false,
-    //     message: "User id not found",
-    //   });
-    // }
 
     const verifiedData = verifyToken(access_token);
 
@@ -79,7 +75,14 @@ export async function GET(req: NextRequest) {
     }
 
     // Getting the people info of that owner
-    data = await peopleDetailsAggregate(verifiedData._id);
+
+    data = await peopleDetailsAggregate(
+      verifiedData._id,
+      gender,
+      page,
+      limit,
+      sort
+    );
 
     if (!data?.length) {
       return NextResponse.json<ApiResponse>({

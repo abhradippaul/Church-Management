@@ -37,7 +37,19 @@ export async function isPeopleExistAggregate(userId: string, peopleId: string) {
   ]);
 }
 
-export async function peopleDetailsAggregate(userId: string) {
+export async function peopleDetailsAggregate(
+  userId: string,
+  gender: string,
+  page: number,
+  limit: number,
+  sort: string
+) {
+  let sortStage: any;
+  if (sort === "recent") {
+    sortStage = -1;
+  } else if (sort === "oldest") {
+    sortStage = 1;
+  }
   return await OwnerModel.aggregate([
     {
       $match: {
@@ -56,6 +68,30 @@ export async function peopleDetailsAggregate(userId: string) {
       $addFields: {
         PeopleCount: {
           $size: "$Peoples",
+        },
+      },
+    },
+    {
+      $addFields: {
+        Peoples: {
+          $filter: {
+            input: "$Peoples",
+            as: "people",
+            cond: gender ? { $eq: ["$$people.gender", gender] } : {},
+          },
+        },
+      },
+    },
+    {
+      $addFields: {
+        Peoples: {
+          $slice: [
+            {
+              $sortArray: { input: "$Peoples", sortBy: sortStage },
+            },
+            page * limit,
+            limit,
+          ],
         },
       },
     },

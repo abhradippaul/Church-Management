@@ -120,7 +120,10 @@ export async function isChurchAndTagValid(ownerId: string, tagId: string) {
   ]);
 }
 
-export async function getTagInfoAggregate(ownerId: string, tagId: string) {
+export async function getSpecificTagInfoAggregate(
+  ownerId: string,
+  tagId: string
+) {
   return await OwnerModel.aggregate([
     {
       $match: {
@@ -129,36 +132,64 @@ export async function getTagInfoAggregate(ownerId: string, tagId: string) {
     },
     {
       $lookup: {
-        from: "taggroups",
+        from: "tagitems",
         localField: "_id",
         foreignField: "church",
-        as: "Tag_Group",
+        as: "Tag_Info",
         pipeline: [
           {
             $lookup: {
-              from: "tagitems",
+              from: "tagjoineds",
               localField: "_id",
-              foreignField: "tag_group",
-              as: "Tag_Item",
+              foreignField: "tag_item",
+              as: "Tag_Joined",
+              pipeline: [
+                {
+                  $lookup: {
+                    from: "peoples",
+                    localField: "people",
+                    foreignField: "_id",
+                    as: "People_Info",
+                  },
+                },
+                {
+                  $addFields: {
+                    People_Info: {
+                      $first: "$People_Info",
+                    },
+                  },
+                },
+              ],
             },
           },
         ],
       },
     },
     {
-      $lookup: {
-        from: "tagitems",
-        localField: "_id",
-        foreignField: "church",
-        as: "Tag_Item",
+      $addFields: {
+        People_Info: {
+          $first: "$Tag_Info.Tag_Joined.People_Info",
+        },
       },
     },
-    // {
-    //   $project: {
-    //     _id: 0,
-    //     isInTag_Group: 1,
-    //     isInTag_Item: 1,
-    //   },
-    // },
+    {
+      $addFields: {
+        Tag_Info: {
+          $first: "$Tag_Info",
+        },
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        "Tag_Info._id": 1,
+        "Tag_Info.name": 1,
+        "People_Info._id": 1,
+        "People_Info.name": 1,
+        "People_Info.email": 1,
+        "People_Info.image": 1,
+        "People_Info.date_of_birth": 1,
+      },
+    },
   ]);
 }

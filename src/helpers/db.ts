@@ -93,3 +93,42 @@ export async function getPeopleSearchInfo(name: string) {
     console.log(err);
   }
 }
+
+export async function insertPeopleToTag(_id: { _id: string }[], tagId: string) {
+  try {
+    const { data } = await axios.post(
+      `http://${host}/api/v1/tags`,
+      { _id, tagId },
+      {
+        headers: {
+          Cookie: `${access_token?.name}=${access_token?.value}`,
+        },
+      }
+    );
+    return data;
+  } catch (err) {
+    console.log(err);
+  }
+}
+
+export async function getEventsInfo({
+  month,
+  year,
+}: {
+  month: number;
+  year: number;
+}) {
+  try {
+    const { data } = await axios.get(
+      `http://${host}/api/v1/events?month=${month}&year=${year}`,
+      {
+        headers: {
+          Cookie: `${access_token?.name}=${access_token?.value}`,
+        },
+      }
+    );
+    return data;
+  } catch (err) {
+    console.log(err);
+  }
+}

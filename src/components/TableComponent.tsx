@@ -8,7 +8,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Trash } from "lucide-react";
-import { memo, useCallback } from "react";
+import { memo, useCallback, useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { usePeopleContext } from "@/my_components/providers/PeopleProvider";
 import axios from "axios";
@@ -19,7 +19,7 @@ const TooltipComponent = dynamic(() => import("./TooltipComponent"));
 const AlertDialogComponent = dynamic(() => import("./AlertDialogComponent"));
 
 interface TableComponentProps {
-  type: "people";
+  type: "people" | "tagpeople";
   tableHeading: string[];
   // tableRow: {
   //   imageUrl: string;
@@ -37,24 +37,56 @@ interface PeopleInfoValue {
   image: string;
 }
 
-function TableComponent({ tableHeading }: TableComponentProps) {
-  const { peopleInfo } = usePeopleContext();
+function TableComponent({ tableHeading, type }: TableComponentProps) {
+  const { peopleInfo: info, tagInfo, filterOptions } = usePeopleContext();
+  const [peopleInfo, setPeopleInfo] = useState(info);
   const router = useRouter();
 
   const deletePeople = useCallback(async (id: string) => {
     try {
-      const { data } = await axios.delete(`/api/v1/people?peopleId=${id}`);
-      if (data.success) {
-        router.refresh();
-      } else {
-        console.log(data);
+      if (type == "people") {
+        const { data } = await axios.delete(`/api/v1/people?peopleId=${id}`);
+        if (data.success) {
+          router.refresh();
+        } else {
+          console.log(data);
+        }
+      } else if (type === "tagpeople") {
+        const { data } = await axios.delete(
+          `/api/v1/tags?peopleId=${id}&tagId=${tagInfo?._id}`
+        );
+        if (data.success) {
+          router.refresh();
+        } else {
+          console.log(data);
+        }
       }
     } catch (err: any) {
       console.log(err.message);
     }
   }, []);
 
+  const methodForFilterRequest = useCallback(async () => {
+    try {
+      if (filterOptions.gender || filterOptions.order) {
+        const { data } = await axios.get(
+          `/api/v1/people?page=${0}&gender=${filterOptions.gender}`
+        );
+        console.log(data);
+        if (data.success) {
+          setPeopleInfo(data.data.Peoples);
+        }
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  }, []);
+
   const imageUrl = process.env.NEXT_PUBLIC_IMAGE_URL;
+
+  useEffect(() => {
+    methodForFilterRequest();
+  }, [filterOptions]);
 
   return (
     <Table>
@@ -66,7 +98,7 @@ function TableComponent({ tableHeading }: TableComponentProps) {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {peopleInfo.Peoples.map(
+        {peopleInfo.map(
           ({ email, name, date_of_birth, _id, image }: PeopleInfoValue) => (
             <TableRow
               key={_id}
@@ -91,8 +123,16 @@ function TableComponent({ tableHeading }: TableComponentProps) {
               </TableCell>
               <TableCell>
                 <AlertDialogComponent
-                  description={`Data of ${name} will be permanently deleted.`}
-                  title={`Are you want to delete ${name} ?`}
+                  description={
+                    type === "people"
+                      ? `Data of ${name} will be permanently deleted.`
+                      : `Delete the people ${name} from the tag ${tagInfo?.name}.`
+                  }
+                  title={
+                    type === "tagpeople"
+                      ? `Are you want to delete the user from the ${tagInfo?.name}`
+                      : `Are you want to delete ${name} ?`
+                  }
                   _id={_id}
                   onActionClick={deletePeople}
                   trigger={
@@ -101,7 +141,10 @@ function TableComponent({ tableHeading }: TableComponentProps) {
                         <Trash className="size-4 text-red-700 hover:text-red-600 transition" />
                       }
                     >
-                      <h1>Delete People</h1>
+                      <div>
+                        {type === "people" && <h1>Delete People</h1>}
+                        {type === "tagpeople" && <h1>Delete From the tag</h1>}
+                      </div>
                     </TooltipComponent>
                   }
                 />

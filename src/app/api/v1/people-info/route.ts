@@ -23,6 +23,10 @@ export async function GET(req: NextRequest) {
           },
         },
       },
+
+      {
+        $limit: 5,
+      },
       {
         $project: {
           name: 1,
@@ -30,6 +34,8 @@ export async function GET(req: NextRequest) {
         },
       },
     ]);
+
+    console.log(userInfo);
 
     return NextResponse.json<ApiResponse>({
       success: true,
