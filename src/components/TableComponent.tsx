@@ -80,7 +80,7 @@ function TableComponent({ tableHeading, type }: TableComponentProps) {
     } catch (err) {
       console.log(err);
     }
-  }, []);
+  }, [filterOptions]);
 
   const imageUrl = process.env.NEXT_PUBLIC_IMAGE_URL;
 

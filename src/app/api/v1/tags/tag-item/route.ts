@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
 
     const verifiedData = verifyToken(access_token);
 
-    if (!verifiedData?._id || !verifiedData?.role) {
+    if (!verifiedData?.role) {
       return NextResponse.json<ApiResponse>({
         success: false,
         message: "You are not logged in",
@@ -38,7 +38,7 @@ export async function GET(req: NextRequest) {
     }
 
     const isChurchAndTagValid = await getSpecificTagInfoAggregate(
-      verifiedData._id,
+      verifiedData,
       tagItem
     );
 
@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
 
     const verifiedData = verifyToken(access_token);
 
-    if (!verifiedData?._id || !verifiedData?.role) {
+    if (verifiedData?.role !== "owner") {
       return NextResponse.json<ApiResponse>({
         success: false,
         message: "You are not logged in",
@@ -91,7 +91,7 @@ export async function POST(req: NextRequest) {
     }
 
     const isChurchExist = await OwnerModel.findOne(
-      { _id: verifiedData._id },
+      { _id: verifiedData.ownerId },
       { _id: 1 }
     );
 
@@ -108,12 +108,12 @@ export async function POST(req: NextRequest) {
       isTagCreated = await TagItemModel.create({
         name,
         tag_group: group,
-        church: verifiedData._id,
+        church: verifiedData.ownerId,
       });
     } else {
       isTagCreated = await TagItemModel.create({
         name,
-        church: verifiedData._id,
+        church: verifiedData.ownerId,
       });
     }
 
@@ -150,7 +150,7 @@ export async function DELETE(req: NextRequest) {
 
     const verifiedData = verifyToken(access_token);
 
-    if (!verifiedData?._id || !verifiedData?.role) {
+    if (verifiedData?.role !== "owner") {
       return NextResponse.json<ApiResponse>({
         success: false,
         message: "You are not logged in",
@@ -164,7 +164,7 @@ export async function DELETE(req: NextRequest) {
       });
     }
 
-    const isValid = await isChurchAndTagValid(verifiedData._id, tagItem);
+    const isValid = await isChurchAndTagValid(verifiedData.ownerId, tagItem);
 
     if (!isValid?.length) {
       return NextResponse.json<ApiResponse>({
@@ -173,7 +173,7 @@ export async function DELETE(req: NextRequest) {
       });
     }
 
-    if (!isValid[0]?.isInTag_Group && !isValid[0]?.isInTag_Item) {
+    if (!isValid[0]?.isTagExist) {
       return NextResponse.json<ApiResponse>({
         success: false,
         message: "Problem with the tag",

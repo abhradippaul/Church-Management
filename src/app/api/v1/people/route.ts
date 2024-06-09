@@ -9,6 +9,7 @@ import { ApiResponse } from "@/types/ApiResponse";
 import mongoose from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
 import { v2 as cloudinary } from "cloudinary";
+import AdminModel from "@/model/Admin";
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_NAME,
@@ -33,20 +34,20 @@ export async function GET(req: NextRequest) {
 
     const verifiedData = verifyToken(access_token);
 
-    if (!verifiedData?._id || !verifiedData?.role) {
+    if (!verifiedData?.role) {
       return NextResponse.json<ApiResponse>({
         success: false,
         message: "You are not logged in",
       });
     }
 
-    let data;
-    let newUserId;
+    let data = [];
+    let role;
 
-    if (verifiedData.role === "admin") {
+    if (verifiedData.role === "admin" && verifiedData.ownerId) {
       // Checking is the admin exist
-      const isAdmin = await PeopleModel.findOne(
-        { _id: verifiedData._id },
+      const isAdmin = await AdminModel.findOne(
+        { _id: verifiedData.adminId },
         { _id: 1 }
       );
 
@@ -57,16 +58,24 @@ export async function GET(req: NextRequest) {
         });
       }
 
-      if (String(isAdmin?._id) !== verifiedData._id) {
-        return NextResponse.json<ApiResponse>({
-          success: false,
-          message: "You are not logged in",
-        });
-      }
-
+      role = "admin";
+      data = await peopleDetailsAggregate(
+        verifiedData.ownerId,
+        gender,
+        page,
+        limit,
+        sort
+      );
       // newUserId = new mongoose.Types.ObjectId(userId);
     } else if (verifiedData.role === "owner") {
-      newUserId = new mongoose.Types.ObjectId(verifiedData._id);
+      role = "owner";
+      data = await peopleDetailsAggregate(
+        verifiedData.ownerId,
+        gender,
+        page,
+        limit,
+        sort
+      );
     } else {
       return NextResponse.json<ApiResponse>({
         success: false,
@@ -75,14 +84,6 @@ export async function GET(req: NextRequest) {
     }
 
     // Getting the people info of that owner
-
-    data = await peopleDetailsAggregate(
-      verifiedData._id,
-      gender,
-      page,
-      limit,
-      sort
-    );
 
     if (!data?.length) {
       return NextResponse.json<ApiResponse>({
@@ -94,7 +95,10 @@ export async function GET(req: NextRequest) {
     return NextResponse.json<ApiResponse>({
       success: true,
       message: "People found successfully",
-      data: data[0],
+      data: {
+        ...data[0],
+        role,
+      },
     });
   } catch (err: any) {
     return NextResponse.json({
@@ -117,7 +121,7 @@ export async function POST(req: NextRequest) {
       });
     }
     const verifiedData = verifyToken(access_token);
-    if (!verifiedData?._id || !verifiedData?.role) {
+    if (verifiedData?.role !== "owner") {
       return NextResponse.json<ApiResponse>({
         success: false,
         message: "You are not logged in",
@@ -159,7 +163,7 @@ export async function POST(req: NextRequest) {
       gender,
       address,
       phone_number,
-      church: verifiedData._id,
+      church: verifiedData.ownerId,
       email,
       image,
     });
@@ -201,7 +205,7 @@ export async function DELETE(req: NextRequest) {
 
     const verifiedData = verifyToken(access_token);
 
-    if (!verifiedData?._id || !verifiedData?.role) {
+    if (verifiedData?.role !== "owner") {
       return NextResponse.json<ApiResponse>({
         success: false,
         message: "You are not logged in",
@@ -210,7 +214,7 @@ export async function DELETE(req: NextRequest) {
 
     // Checking is the people under the owner or not
     const isPeopleExist = await isPeopleExistAggregate(
-      verifiedData._id,
+      verifiedData.ownerId,
       peopleId
     );
 

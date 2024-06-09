@@ -2,6 +2,7 @@ import dbConnect from "@/lib/DbConnect";
 import { createToken } from "@/lib/JsonWebToken";
 import AdminModel from "@/model/Admin";
 import OwnerModel from "@/model/Owner";
+import PeopleModel from "@/model/People";
 import { ApiResponse } from "@/types/ApiResponse";
 import { compare } from "bcryptjs";
 import { NextRequest, NextResponse } from "next/server";
@@ -17,6 +18,33 @@ export async function POST(req: NextRequest) {
         message: "Please enter email and password",
       });
     }
+    let isPeopleExist = await PeopleModel.findOne(
+      { email },
+      { church: 1, password: 1 }
+    );
+
+    if (isPeopleExist?.id) {
+      const isPasswordCorrect = await compare(password, isPeopleExist.password);
+      if (!isPasswordCorrect) {
+        return NextResponse.json<ApiResponse>({
+          success: false,
+          message: "Credentials are incorrect",
+        });
+      }
+      const { access_token, refresh_token } = createToken({
+        ownerId: isPeopleExist.church.toString(),
+        peopleId: isPeopleExist._id.toString(),
+        role: "people",
+      });
+      const response = NextResponse.json<ApiResponse>({
+        message: "Logged in successfully",
+        success: true,
+      });
+      response.cookies.set("access_token", access_token, cookieSettings);
+      response.cookies.set("refresh_token", refresh_token, cookieSettings);
+      return response;
+    }
+
     let isOwnerExist = await OwnerModel.findOne({ email }, { password: 1 });
     if (isOwnerExist?._id) {
       const isPasswordCorrect = await compare(password, isOwnerExist.password);
@@ -27,7 +55,7 @@ export async function POST(req: NextRequest) {
         });
       }
       const { access_token, refresh_token } = createToken({
-        _id: isOwnerExist._id.toString(),
+        ownerId: isOwnerExist._id.toString(),
         role: "owner",
       });
       const response = NextResponse.json<ApiResponse>({
@@ -39,7 +67,8 @@ export async function POST(req: NextRequest) {
       return response;
     }
     let isAdminExist = await AdminModel.findOne({ email }, { password: 1 });
-    if (!isAdminExist?._id) {
+    let ownerId = await OwnerModel.findOne();
+    if (!isAdminExist?._id || !ownerId?._id) {
       return NextResponse.json<ApiResponse>({
         success: false,
         message: "User does not exist",
@@ -55,7 +84,8 @@ export async function POST(req: NextRequest) {
     }
 
     const { access_token, refresh_token } = createToken({
-      _id: isAdminExist._id.toString(),
+      adminId: isAdminExist._id.toString(),
+      ownerId: ownerId._id.toString(),
       role: "admin",
     });
     const response = NextResponse.json<ApiResponse>({

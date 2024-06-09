@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/menubar";
 import { usePeopleContext } from "@/my_components/providers/PeopleProvider";
 import { Check } from "lucide-react";
+import { memo } from "react";
 
 const GenderOptions = [
   {
@@ -41,7 +42,7 @@ function PeopleFilterOptions() {
                 <MenubarItem
                   key={value}
                   onClick={() =>
-                    setFilterOptions((prev) => ({
+                    setFilterOptions((prev: any) => ({
                       ...prev,
                       gender: value,
                     }))
@@ -63,4 +64,4 @@ function PeopleFilterOptions() {
   );
 }
 
-export default PeopleFilterOptions;
+export default memo(PeopleFilterOptions);

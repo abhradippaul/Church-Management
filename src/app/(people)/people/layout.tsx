@@ -36,17 +36,27 @@ export default async function RootLayout({
     });
     if (data.success) {
       peopleInfo = data.data;
-      console.log(data);
     }
   } catch (err: any) {
     console.log(err);
   }
+
+  if (!peopleInfo) {
+    return null;
+  }
+
   return (
     <PeopleProvider
-      peopleInfo={peopleInfo.Peoples}
-      PeopleCount={peopleInfo.PeopleCount}
+      peopleInfo={peopleInfo?.Peoples}
+      PeopleCount={peopleInfo?.PeopleCount}
     >
-      <Navbar userInfo={UserInfo} />
+      <Navbar
+        userInfo={{
+          name: peopleInfo.name,
+          imageUrl: peopleInfo.image,
+          role: peopleInfo.role,
+        }}
+      />
       <div className="px-2 md:px-4 max-w-7xl mx-auto min-h-dvh">
         <div className="pt-24 flex flex-col">{children}</div>
       </div>

@@ -1,9 +1,10 @@
 import { sign, verify } from "jsonwebtoken";
 
 interface PayloadValue {
-  _id: string;
-  role: "admin" | "owner";
-  userId?: string;
+  role: "admin" | "owner" | "people";
+  adminId?: string;
+  ownerId: string;
+  peopleId?: string;
 }
 
 export function createToken(payload: PayloadValue) {

@@ -8,12 +8,21 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import { getPeopleSearchInfo } from "@/helpers/db";
 import { Search } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { memo, useEffect, useState } from "react";
+import { useDebouncedCallback } from "use-debounce";
+
+interface PeopleItemValue {
+  name: string;
+  _id: string;
+  image: string;
+}
 
 function CommandComponent() {
   const [open, setOpen] = useState(false);
+  const [people, setPeople] = useState<PeopleItemValue[]>([]);
   const pathname = usePathname();
 
   useEffect(() => {
@@ -26,6 +35,17 @@ function CommandComponent() {
     document.addEventListener("keydown", down);
     return () => document.removeEventListener("keydown", down);
   }, []);
+
+  const debounced = useDebouncedCallback(async (value) => {
+    if (pathname === "/people") {
+      const data = await getPeopleSearchInfo(value);
+      if (data.success) {
+        setPeople(data.data);
+      }
+    } else {
+    }
+  }, 500);
+
   return (
     <>
       <div
@@ -47,12 +67,19 @@ function CommandComponent() {
           placeholder={`Type to search ${
             pathname === "/dashboard" ? " Church" : " People"
           }`}
+          onValueChange={(e) => debounced(e)}
         />
         <CommandList>
           <CommandEmpty>No results found.</CommandEmpty>
-          <CommandGroup heading="Suggestions">
-            <CommandItem>Calendar</CommandItem>
-          </CommandGroup>
+          {people.length ? (
+            <CommandGroup heading="Suggestions">
+              {people.map(({ _id, name }) => (
+                <CommandItem key={_id}>{name}</CommandItem>
+              ))}
+            </CommandGroup>
+          ) : (
+            <></>
+          )}
         </CommandList>
       </CommandDialog>
     </>

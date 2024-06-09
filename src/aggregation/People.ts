@@ -98,6 +98,8 @@ export async function peopleDetailsAggregate(
     {
       $project: {
         _id: 0,
+        name: 1,
+        image: 1,
         "Peoples._id": 1,
         "Peoples.name": 1,
         "Peoples.date_of_birth": 1,

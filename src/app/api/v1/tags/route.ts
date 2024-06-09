@@ -1,10 +1,8 @@
 import { getTagsInfoAggregate, isChurchAndTagValid } from "@/aggregation/Tags";
 import dbConnect from "@/lib/DbConnect";
 import { verifyToken } from "@/lib/JsonWebToken";
-import OwnerModel from "@/model/Owner";
 import TagJoinedModel from "@/model/TagJoined";
 import { ApiResponse } from "@/types/ApiResponse";
-import mongoose from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
@@ -20,16 +18,16 @@ export async function GET(req: NextRequest) {
 
     const verifiedData = verifyToken(access_token);
 
-    if (!verifiedData?._id || !verifiedData?.role) {
+    if (!verifiedData?.role) {
       return NextResponse.json<ApiResponse>({
         success: false,
         message: "You are not logged in",
       });
     }
 
-    const tagsInfo = await getTagsInfoAggregate(verifiedData._id);
+    const tagsInfo = await getTagsInfoAggregate(verifiedData);
 
-    if (!tagsInfo.length) {
+    if (!tagsInfo?.length) {
       return NextResponse.json<ApiResponse>({
         success: false,
         message: "No data found",
@@ -38,7 +36,10 @@ export async function GET(req: NextRequest) {
     return NextResponse.json<ApiResponse>({
       success: true,
       message: "Tags found successfully",
-      data: tagsInfo[0],
+      data: {
+        ...tagsInfo[0],
+        role: verifiedData.role,
+      },
     });
   } catch (err: any) {
     return NextResponse.json<ApiResponse>({
@@ -62,7 +63,7 @@ export async function POST(req: NextRequest) {
 
     const verifiedData = verifyToken(access_token);
 
-    if (!verifiedData?._id || !verifiedData?.role) {
+    if (verifiedData?.role !== "owner") {
       return NextResponse.json<ApiResponse>({
         success: false,
         message: "You are not logged in",
@@ -76,12 +77,19 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    const isChurchTagValid = await isChurchAndTagValid(verifiedData._id, tagId);
+    const isChurchTagValid = await isChurchAndTagValid(
+      verifiedData.ownerId,
+      tagId
+    );
 
-    if (
-      !isChurchTagValid[0].isInTag_Group &&
-      !isChurchTagValid[0].isInTag_Item
-    ) {
+    if (!isChurchTagValid) {
+      return NextResponse.json<ApiResponse>({
+        success: false,
+        message: "Tag not found",
+      });
+    }
+
+    if (!isChurchTagValid[0]?.isTagExist) {
       return NextResponse.json<ApiResponse>({
         success: false,
         message: "Tag not found",
@@ -119,7 +127,7 @@ export async function DELETE(req: NextRequest) {
 
     const verifiedData = verifyToken(access_token);
 
-    if (!verifiedData?._id || !verifiedData?.role) {
+    if (verifiedData?.role !== "owner") {
       return NextResponse.json<ApiResponse>({
         success: false,
         message: "You are not logged in",
@@ -133,40 +141,7 @@ export async function DELETE(req: NextRequest) {
       });
     }
 
-    const isValid = await OwnerModel.aggregate([
-      {
-        $match: {
-          _id: new mongoose.Types.ObjectId(verifiedData._id),
-        },
-      },
-      {
-        $lookup: {
-          from: "tagitems",
-          localField: "_id",
-          foreignField: "church",
-          as: "Tag_Item",
-        },
-      },
-      {
-        $addFields: {
-          isTagExist: {
-            $cond: {
-              if: {
-                $in: [new mongoose.Types.ObjectId(tagId), "$Tag_Item._id"],
-              },
-              then: true,
-              else: false,
-            },
-          },
-        },
-      },
-      {
-        $project: {
-          _id: 0,
-          isTagExist: 1,
-        },
-      },
-    ]);
+    const isValid = await isChurchAndTagValid(verifiedData.ownerId, tagId);
 
     if (!isValid) {
       return NextResponse.json<ApiResponse>({

@@ -32,6 +32,8 @@ const Pages = [
   },
 ];
 
+const imageUrl = process.env.NEXT_PUBLIC_IMAGE_URL;
+
 function Navbar({ userInfo }: { userInfo: UserInfoValue }) {
   return (
     <div className="w-full flex items-center justify-between fixed top-0 left-0 right-0  bg-slate-900">
@@ -50,9 +52,9 @@ function Navbar({ userInfo }: { userInfo: UserInfoValue }) {
           <TooltipComponent
             hoverElement={
               <img
-                src={userInfo.imageUrl}
+                src={`${imageUrl}/${userInfo.imageUrl}`}
                 alt="image"
-                className="size-10 rounded-full ml-8"
+                className="size-10 rounded-full ml-4"
               />
             }
           >
