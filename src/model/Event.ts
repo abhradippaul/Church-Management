@@ -4,7 +4,9 @@ export interface EventInterfaceValue extends Document {
   name: string;
   tag: Types.ObjectId;
   owner: Types.ObjectId;
-  date: string;
+  date_day: number;
+  date_month: number;
+  date_year: number;
   time: string;
   description: string;
   createdAt: Date;
@@ -17,8 +19,16 @@ const EventSchema = new Schema<EventInterfaceValue>(
       type: String,
       required: true,
     },
-    date: {
-      type: String,
+    date_day: {
+      type: Number,
+      required: true,
+    },
+    date_month: {
+      type: Number,
+      required: true,
+    },
+    date_year: {
+      type: Number,
       required: true,
     },
     time: {

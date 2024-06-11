@@ -17,14 +17,14 @@ export async function GET(req: NextRequest) {
 
     const verifiedData = verifyToken(access_token);
 
-    if (!verifiedData?._id || !verifiedData?.role) {
+    if (verifiedData?.role !== "owner" || !verifiedData?.ownerId) {
       return NextResponse.json<ApiResponse>({
         success: false,
         message: "You are not logged in",
       });
     }
 
-    const tagsInfo = await getTagsInfoFromEventsAggregate(verifiedData._id);
+    const tagsInfo = await getTagsInfoFromEventsAggregate(verifiedData.ownerId);
 
     if (!tagsInfo.length) {
       return NextResponse.json<ApiResponse>({

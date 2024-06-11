@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
 
     const verifiedData = verifyToken(access_token);
 
-    if (!verifiedData?._id || !verifiedData?.role) {
+    if (verifiedData?.role !== "owner") {
       return NextResponse.json<ApiResponse>({
         success: false,
         message: "You are not logged in",
@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
     }
 
     const isChurchExist = await OwnerModel.findOne(
-      { _id: verifiedData._id },
+      { _id: verifiedData.ownerId },
       { _id: 1 }
     );
 
@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
 
     const isTagGroupCreated = await TagGroupModel.create({
       name,
-      church: verifiedData._id,
+      church: verifiedData.ownerId,
     });
 
     if (!isTagGroupCreated) {

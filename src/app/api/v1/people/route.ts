@@ -6,7 +6,6 @@ import dbConnect from "@/lib/DbConnect";
 import { verifyToken } from "@/lib/JsonWebToken";
 import PeopleModel from "@/model/People";
 import { ApiResponse } from "@/types/ApiResponse";
-import mongoose from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
 import { v2 as cloudinary } from "cloudinary";
 import AdminModel from "@/model/Admin";
@@ -42,7 +41,6 @@ export async function GET(req: NextRequest) {
     }
 
     let data = [];
-    let role;
 
     if (verifiedData.role === "admin" && verifiedData.ownerId) {
       // Checking is the admin exist
@@ -58,7 +56,6 @@ export async function GET(req: NextRequest) {
         });
       }
 
-      role = "admin";
       data = await peopleDetailsAggregate(
         verifiedData.ownerId,
         gender,
@@ -66,9 +63,7 @@ export async function GET(req: NextRequest) {
         limit,
         sort
       );
-      // newUserId = new mongoose.Types.ObjectId(userId);
     } else if (verifiedData.role === "owner") {
-      role = "owner";
       data = await peopleDetailsAggregate(
         verifiedData.ownerId,
         gender,
@@ -97,7 +92,7 @@ export async function GET(req: NextRequest) {
       message: "People found successfully",
       data: {
         ...data[0],
-        role,
+        role: verifiedData.role,
       },
     });
   } catch (err: any) {

@@ -1,3 +1,4 @@
+"use client";
 import {
   Dispatch,
   ReactNode,
@@ -12,14 +13,23 @@ interface EventMonthValue {
   year: string;
 }
 
+interface EventInfoValue {
+  name: string;
+  description: string;
+  date_day: number;
+  time: string;
+}
+
 interface CreateContextValue {
   eventMonth: EventMonthValue | null;
   setEventMonth: Dispatch<SetStateAction<EventMonthValue | null>>;
+  events: EventInfoValue[];
 }
 
 const CreateEventsContext = createContext<CreateContextValue>({
   eventMonth: null,
   setEventMonth: () => {},
+  events: [],
 });
 
 const CreateEventsContextProvider = CreateEventsContext.Provider;
@@ -28,10 +38,16 @@ export const useEventsContext = () => {
   return useContext(CreateEventsContext);
 };
 
-function EventsProvider({ children }: { children: ReactNode }) {
+function EventsProvider({
+  children,
+  events,
+}: {
+  children: ReactNode;
+  events: EventInfoValue[];
+}) {
   const [eventMonth, setEventMonth] = useState<EventMonthValue | null>(null);
   return (
-    <CreateEventsContextProvider value={{ eventMonth, setEventMonth }}>
+    <CreateEventsContextProvider value={{ eventMonth, setEventMonth, events }}>
       {children}
     </CreateEventsContextProvider>
   );

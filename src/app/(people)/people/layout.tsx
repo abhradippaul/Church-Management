@@ -8,17 +8,6 @@ export const metadata = {
   description: "People",
 };
 
-interface UserInfoValue {
-  name: string;
-  imageUrl: string;
-  role: string;
-}
-const UserInfo: UserInfoValue = {
-  name: "Abhradip Paul",
-  imageUrl: "",
-  role: "Admin",
-};
-
 export default async function RootLayout({
   children,
 }: {

@@ -76,15 +76,17 @@ function EventItemForm() {
 
   const onSubmit = useCallback(
     async (values: z.infer<typeof CreateEventSchema>) => {
-      console.log(values);
       try {
         const { data } = await axios.post(`/api/v1/events`, {
           name: values.name,
           tag: values.tags,
-          date: `${values.event_date.getDate()}/${values.event_date.getMonth()}/${values.event_date.getFullYear()}`,
+          date_day: values.event_date.getDate(),
+          date_month: values.event_date.getMonth(),
+          date_year: values.event_date.getFullYear(),
           time: `${values.event_hour}:${values.event_minutes} ${values.event_time}`,
           description: values.event_description,
         });
+        console.log(data);
         if (data.success) {
           router.refresh();
         } else {

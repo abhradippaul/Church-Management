@@ -19,7 +19,7 @@ export async function GET(
       });
     }
     const verifiedData = verifyToken(access_token);
-    if (!verifiedData?._id || !verifiedData?.role) {
+    if (!verifiedData?.role) {
       return NextResponse.json<ApiResponse>({
         success: false,
         message: "You are not logged in",
@@ -27,7 +27,7 @@ export async function GET(
     }
 
     // Getting data of the specific people
-    const peopleInfo = await getPeopleInfoAggregate(verifiedData._id, peopleId);
+    const peopleInfo = await getPeopleInfoAggregate(verifiedData, peopleId);
 
     if (!peopleInfo?.length) {
       return NextResponse.json<ApiResponse>({
@@ -39,7 +39,7 @@ export async function GET(
     return NextResponse.json<ApiResponse>({
       success: true,
       message: "Successfully fetched users information",
-      data: peopleInfo[0]
+      data: peopleInfo[0],
     });
   } catch (err: any) {
     return NextResponse.json<ApiResponse>({

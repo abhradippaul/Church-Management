@@ -1,7 +1,9 @@
+"use client";
 import NavigationMenuComponent from "@/components/NavigationMenuComponent";
 import { LogOut } from "lucide-react";
 import { memo } from "react";
 import dynamic from "next/dynamic";
+import { usePathname } from "next/navigation";
 
 const CommandComponent = dynamic(() => import("@/components/CommandComponent"));
 const TooltipComponent = dynamic(() => import("@/components/TooltipComponent"));
@@ -13,7 +15,7 @@ interface UserInfoValue {
   role: string;
 }
 
-const Pages = [
+const AdminPages = [
   {
     title: "Dashboard",
     path: "/dashboard",
@@ -32,23 +34,52 @@ const Pages = [
   },
 ];
 
+const Pages = [
+  {
+    title: "Dashboard",
+    path: "/dashboard",
+  },
+  {
+    title: "Profile",
+    path: "/people",
+  },
+  {
+    title: "Tags",
+    path: "/tags",
+  },
+  {
+    title: "Events",
+    path: "/events",
+  },
+];
+
 const imageUrl = process.env.NEXT_PUBLIC_IMAGE_URL;
 
 function Navbar({ userInfo }: { userInfo: UserInfoValue }) {
+  const pathname = usePathname();
   return (
     <div className="w-full flex items-center justify-between fixed top-0 left-0 right-0  bg-slate-900">
       <div className="max-w-7xl w-full mx-auto flex items-center justify-between py-4 px-2 gap-x-4 md:px-4">
         <div className="flex md:hidden">
-          <SheetComponent userInfo={userInfo} Pages={Pages} />
+          <SheetComponent userInfo={userInfo} Pages={AdminPages} />
         </div>
         <h1 className="text-slate-300 font-bold text-lg sm:text-xl tracking-wider sm:tracking-widest">
           XYZ
         </h1>
         <div className="hidden md:block">
-          <NavigationMenuComponent Pages={Pages} />
+          <NavigationMenuComponent
+            Pages={userInfo.role !== "people" ? AdminPages : Pages}
+          />
         </div>
-        <div className="max-w-[300px] w-[90%] flex items-center justify-between">
-          <CommandComponent />
+        <div
+          className={`flex items-center ${
+            (pathname === "/people" || pathname === "/dashboard") &&
+            userInfo.role !== "people" &&
+            "max-w-[300px] w-[90%]"
+          }`}
+        >
+          {(pathname === "/people" || pathname === "/dashboard") &&
+            userInfo.role !== "people" && <CommandComponent />}
           <TooltipComponent
             hoverElement={
               <img
