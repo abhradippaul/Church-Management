@@ -2,6 +2,7 @@ import dynamic from "next/dynamic";
 import Navbar from "@/my_components/Navbar/Navbar";
 import { cookies, headers } from "next/headers";
 import axios from "axios";
+import DashboardProvider from "@/my_components/providers/DashboardProvider";
 
 const RightSideNavbar = dynamic(
   () => import("@/my_components/Navbar/RightSideNavbar")
@@ -39,7 +40,10 @@ export default async function RootLayout({
   }
 
   return (
-    <div>
+    <DashboardProvider
+      recentJoined={dashboardInfo.PeopleCount}
+      Events={dashboardInfo.Events}
+    >
       {dashboardInfo.role === "admin" && <RightSideNavbar />}
       <Navbar
         userInfo={{
@@ -49,6 +53,6 @@ export default async function RootLayout({
         }}
       />
       <div className="px-2 md:px-4 max-w-7xl mx-auto min-h-dvh">{children}</div>
-    </div>
+    </DashboardProvider>
   );
 }

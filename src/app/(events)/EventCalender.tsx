@@ -1,33 +1,73 @@
 "use client";
+
+import TooltipComponent from "@/components/TooltipComponent";
+import { Button } from "@/components/ui/button";
 import { useEventsContext } from "@/my_components/providers/EventsProvider";
 import clsx from "clsx";
 import {
+  add,
   eachDayOfInterval,
   endOfMonth,
   format,
   getDay,
   isToday,
+  parse,
   startOfMonth,
 } from "date-fns";
-import { memo } from "react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
+import { memo, useState } from "react";
 
 const WeekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 function EventCalender() {
   const currentDate = new Date();
-  const firstDayOfMonth = startOfMonth(currentDate);
-  const lastDayOfMonth = endOfMonth(currentDate);
+  const [currentMonth, setCurrentMonth] = useState(
+    format(currentDate, "MMM-yyyy")
+  );
+  const firstDayCurrentMonth = parse(currentMonth, "MMM-yyyy", new Date());
   const daysInMonth = eachDayOfInterval({
-    start: firstDayOfMonth,
-    end: lastDayOfMonth,
+    start: firstDayCurrentMonth,
+    end: endOfMonth(firstDayCurrentMonth),
   });
-  const startingDayIndex = getDay(firstDayOfMonth);
+  const startingDayIndex = getDay(firstDayCurrentMonth);
   const { events } = useEventsContext();
+
+  const previousMonth = () => {
+    const firstDayNextMonth = add(firstDayCurrentMonth, { months: -1 });
+    setCurrentMonth(format(firstDayNextMonth, "MMM-yyyy"));
+  };
+
+  const nextMonth = () => {
+    const firstDayNextMonth = add(firstDayCurrentMonth, { months: 1 });
+    setCurrentMonth(format(firstDayNextMonth, "MMM-yyyy"));
+  };
+
   console.log(events);
+
   return (
     <div className="mt-4">
-      <div className="text-center text-2xl font-semibold text-zinc-300">
-        {format(currentDate, "MMMM yyyy")}
+      <div className="flex items-center justify-between">
+        <TooltipComponent
+          hoverElement={
+            <Button variant="outline" onClick={previousMonth}>
+              <ArrowLeft className="size-6" />
+            </Button>
+          }
+        >
+          <p>Previous month</p>
+        </TooltipComponent>
+        <h1 className="text-2xl font-semibold text-zinc-300">
+          {format(currentMonth, "MMMM yyyy")}
+        </h1>
+        <TooltipComponent
+          hoverElement={
+            <Button variant="outline" onClick={nextMonth}>
+              <ArrowRight className="size-6" />
+            </Button>
+          }
+        >
+          <p>Next month</p>
+        </TooltipComponent>
       </div>
       <div className="grid grid-cols-7 gap-2 mt-8">
         {WeekDays.map((day, i) => (
@@ -52,8 +92,9 @@ function EventCalender() {
             {format(day, "d")}
             {events.length ? (
               events.map(
-                ({ name, description, date_day, time }) =>
-                  date_day === Number(format(day, "d")) && (
+                ({ name, description, date_day, date_month, time }) =>
+                  date_day === Number(format(day, "d")) &&
+                  new Date(currentMonth).getMonth() === date_month && (
                     <div
                       key={description}
                       className="my-2 w-full flex flex-wrap text-xs items-center justify-center gap-x-4 bg-blue-800 rounded-md"

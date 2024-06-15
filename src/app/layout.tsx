@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Roboto } from "next/font/google";
 import "@/app/globals.css";
 import { ThemeProvider } from "@/my_components/providers/ThemeProvider";
+import Script from "next/script";
 
 const inter = Roboto({
   weight: "400",
@@ -27,6 +28,7 @@ export default function RootLayout({
           {children}
         </ThemeProvider>
       </body>
+      <Script defer src="https://checkout.razorpay.com/v1/checkout.js"></Script>
     </html>
   );
 }

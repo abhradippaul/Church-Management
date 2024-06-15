@@ -17,6 +17,8 @@ interface EventInfoValue {
   name: string;
   description: string;
   date_day: number;
+  date_month: number;
+  date_year: number;
   time: string;
 }
 
