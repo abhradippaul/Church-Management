@@ -43,6 +43,11 @@ export default async function RootLayout({
     <DashboardProvider
       recentJoined={dashboardInfo.PeopleCount}
       Events={dashboardInfo.Events}
+      UserInfo={{
+        name: dashboardInfo.name,
+        imageUrl: dashboardInfo.image,
+        role: dashboardInfo.role,
+      }}
     >
       {dashboardInfo.role === "admin" && <RightSideNavbar />}
       <Navbar

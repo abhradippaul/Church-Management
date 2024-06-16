@@ -1,3 +1,7 @@
+import {
+  GetDashboardInfoForOwner,
+  GetDashboardInfoForUser,
+} from "@/aggregation/Dashboard";
 import dbConnect from "@/lib/DbConnect";
 import { verifyToken } from "@/lib/JsonWebToken";
 import AdminModel from "@/model/Admin";
@@ -18,7 +22,7 @@ export async function GET(req: NextRequest) {
       });
     }
     const verifiedData = verifyToken(access_token);
-    if (!verifiedData?.role) {
+    if (!verifiedData?.role || !verifiedData.ownerId) {
       return NextResponse.json<ApiResponse>({
         success: false,
         message: "You are not logged in",
@@ -43,102 +47,13 @@ export async function GET(req: NextRequest) {
           },
         },
       ]);
-    } else if (verifiedData.role === "owner" && verifiedData.ownerId) {
-      data = await OwnerModel.aggregate([
-        {
-          $match: {
-            _id: new mongoose.Types.ObjectId(verifiedData.ownerId),
-          },
-        },
-        {
-          $lookup: {
-            from: "events",
-            localField: "_id",
-            foreignField: "owner",
-            as: "Events",
-            pipeline: [
-              {
-                $redact: {
-                  $cond: {
-                    if: {
-                      $and: [
-                        {
-                          $gte: ["$date_day", new Date().getDate()],
-                        },
-                        {
-                          $gte: ["$date_month", new Date().getMonth()],
-                        },
-                        {
-                          $gte: ["$date_year", new Date().getFullYear()],
-                        },
-                      ],
-                    },
-                    then: "$$KEEP",
-                    else: "$$PRUNE",
-                  },
-                },
-              },
-            ],
-          },
-        },
-        {
-          $lookup: {
-            from: "peoples",
-            localField: "_id",
-            foreignField: "church",
-            as: "Peoples",
-            pipeline: [
-              {
-                $redact: {
-                  $cond: {
-                    if: {
-                      $gte: [
-                        "$createdAt",
-                        new Date(new Date().setDate(new Date().getDate() - 7)),
-                      ],
-                    },
-                    then: "$$KEEP",
-                    else: "$$PRUNE",
-                  },
-                },
-              },
-            ],
-          },
-        },
-        {
-          $addFields: {
-            PeopleCount: {
-              $size: "$Peoples",
-            },
-          },
-        },
-        {
-          $project: {
-            name: 1,
-            image: 1,
-            PeopleCount: 1,
-            "Events.name": 1,
-            "Events.date_day": 1,
-            "Events.date_month": 1,
-            "Events.date_year": 1,
-            "Events.time": 1,
-          },
-        },
-      ]);
+    } else if (verifiedData.role === "owner") {
+      data = await GetDashboardInfoForOwner(verifiedData.ownerId);
     } else if (verifiedData.role === "people" && verifiedData.peopleId) {
-      data = await PeopleModel.aggregate([
-        {
-          $match: {
-            _id: new mongoose.Types.ObjectId(verifiedData.peopleId),
-          },
-        },
-        {
-          $project: {
-            name: 1,
-            image: 1,
-          },
-        },
-      ]);
+      data = await GetDashboardInfoForUser(
+        verifiedData.ownerId,
+        verifiedData.peopleId
+      );
     } else {
       return NextResponse.json<ApiResponse>({
         success: false,

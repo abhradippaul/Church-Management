@@ -124,12 +124,7 @@ function EventItemForm() {
       try {
         const { data } = await axios.get(`/api/v1/events/tags`);
         if (data.success) {
-          let arr: any[] = data.data.Tag_Group.map((tag: any) => ({
-            _id: tag.Tag_Item._id,
-            name: tag.Tag_Item.name,
-          }));
-          arr = [...arr, ...data.data.Tags_Item];
-          setTagsIOption(arr);
+          setTagsIOption(data.data.Tags_Item);
         }
       } catch (err: any) {
         toast({

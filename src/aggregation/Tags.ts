@@ -46,6 +46,19 @@ export async function getTagsInfoAggregate({
           localField: "_id",
           foreignField: "church",
           as: "items",
+          pipeline: [
+            {
+              $redact: {
+                $cond: {
+                  if: {
+                    $gt: ["$tag_group", null],
+                  },
+                  then: "$$PRUNE",
+                  else: "$$KEEP",
+                },
+              },
+            },
+          ],
         },
       },
       {
@@ -134,6 +147,11 @@ export async function getSpecificTagInfoAggregate(
           foreignField: "church",
           as: "Tag_Info",
           pipeline: [
+            {
+              $match: {
+                _id: new mongoose.Types.ObjectId(tagId),
+              },
+            },
             {
               $lookup: {
                 from: "tagjoineds",

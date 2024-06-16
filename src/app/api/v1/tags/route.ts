@@ -82,7 +82,7 @@ export async function POST(req: NextRequest) {
       tagId
     );
 
-    if (!isChurchTagValid) {
+    if (!isChurchTagValid.length) {
       return NextResponse.json<ApiResponse>({
         success: false,
         message: "Tag not found",

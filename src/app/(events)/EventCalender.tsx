@@ -3,6 +3,7 @@
 import TooltipComponent from "@/components/TooltipComponent";
 import { Button } from "@/components/ui/button";
 import { useEventsContext } from "@/my_components/providers/EventsProvider";
+import axios from "axios";
 import clsx from "clsx";
 import {
   add,
@@ -12,10 +13,9 @@ import {
   getDay,
   isToday,
   parse,
-  startOfMonth,
 } from "date-fns";
 import { ArrowLeft, ArrowRight } from "lucide-react";
-import { memo, useState } from "react";
+import { memo, useCallback, useEffect, useState } from "react";
 
 const WeekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
@@ -24,25 +24,36 @@ function EventCalender() {
   const [currentMonth, setCurrentMonth] = useState(
     format(currentDate, "MMM-yyyy")
   );
+  const [month, setMonth] = useState(new Date().getMonth());
   const firstDayCurrentMonth = parse(currentMonth, "MMM-yyyy", new Date());
   const daysInMonth = eachDayOfInterval({
     start: firstDayCurrentMonth,
     end: endOfMonth(firstDayCurrentMonth),
   });
   const startingDayIndex = getDay(firstDayCurrentMonth);
-  const { events } = useEventsContext();
+  const { eventsInfo: events, setEventsInfo } = useEventsContext();
 
-  const previousMonth = () => {
+  const previousMonth = useCallback(async () => {
     const firstDayNextMonth = add(firstDayCurrentMonth, { months: -1 });
     setCurrentMonth(format(firstDayNextMonth, "MMM-yyyy"));
-  };
+    setMonth((prev) => prev - 1);
+    const { data } = await axios.get(`/api/v1/events?month=${month - 1}`);
+    if (data.success) {
+      setEventsInfo(data.data.Events);
+    }
+  }, [month]);
 
-  const nextMonth = () => {
+  const nextMonth = useCallback(async () => {
     const firstDayNextMonth = add(firstDayCurrentMonth, { months: 1 });
     setCurrentMonth(format(firstDayNextMonth, "MMM-yyyy"));
-  };
+    setMonth((prev) => prev + 1);
+    const { data } = await axios.get(`/api/v1/events?month=${month + 1}`);
+    if (data.success) {
+      setEventsInfo(data.data.Events);
+    }
+  }, [month]);
 
-  console.log(events);
+  useEffect(() => {}, [currentMonth]);
 
   return (
     <div className="mt-4">
@@ -82,7 +93,7 @@ function EventCalender() {
           <div
             key={i}
             className={clsx(
-              "border rounded-md px-2 text-center overflow-hidden text-zinc-200 max-h-24 hover:overflow-y-auto scroll-smooth",
+              "border rounded-md px-2 text-center overflow-hidden text-zinc-200 h-20 hover:overflow-y-auto scroll-smooth",
               {
                 "bg-gray-900": isToday(day),
                 "text-white": isToday(day),

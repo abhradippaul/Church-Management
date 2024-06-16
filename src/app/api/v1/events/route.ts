@@ -95,6 +95,7 @@ export async function GET(req: NextRequest) {
   dbConnect();
   try {
     const access_token = req.cookies.get("access_token")?.value;
+    const month = Number(req.nextUrl.searchParams.get("month"));
     if (!access_token) {
       return NextResponse.json<ApiResponse>({
         success: false,
@@ -109,6 +110,8 @@ export async function GET(req: NextRequest) {
       });
     }
 
+    console.log(month);
+
     const data = await OwnerModel.aggregate([
       {
         $match: {
@@ -122,6 +125,20 @@ export async function GET(req: NextRequest) {
           foreignField: "owner",
           as: "Events",
           pipeline: [
+            {
+              $redact: {
+                $cond: {
+                  if: {
+                    $and: [
+                      { $eq: ["$date_month", month] },
+                      { $eq: ["$date_year", new Date().getFullYear()] },
+                    ],
+                  },
+                  then: "$$KEEP",
+                  else: "$$PRUNE",
+                },
+              },
+            },
             {
               $lookup: {
                 from: "tagitems",

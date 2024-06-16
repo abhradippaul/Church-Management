@@ -4,6 +4,7 @@ import {
   ReactNode,
   SetStateAction,
   createContext,
+  memo,
   useContext,
   useState,
 } from "react";
@@ -25,13 +26,15 @@ interface EventInfoValue {
 interface CreateContextValue {
   eventMonth: EventMonthValue | null;
   setEventMonth: Dispatch<SetStateAction<EventMonthValue | null>>;
-  events: EventInfoValue[];
+  eventsInfo: EventInfoValue[];
+  setEventsInfo: Dispatch<SetStateAction<EventInfoValue[]>>;
 }
 
 const CreateEventsContext = createContext<CreateContextValue>({
   eventMonth: null,
   setEventMonth: () => {},
-  events: [],
+  eventsInfo: [],
+  setEventsInfo: () => {},
 });
 
 const CreateEventsContextProvider = CreateEventsContext.Provider;
@@ -48,11 +51,14 @@ function EventsProvider({
   events: EventInfoValue[];
 }) {
   const [eventMonth, setEventMonth] = useState<EventMonthValue | null>(null);
+  const [eventsInfo, setEventsInfo] = useState<EventInfoValue[]>(events);
   return (
-    <CreateEventsContextProvider value={{ eventMonth, setEventMonth, events }}>
+    <CreateEventsContextProvider
+      value={{ eventMonth, setEventMonth, eventsInfo, setEventsInfo }}
+    >
       {children}
     </CreateEventsContextProvider>
   );
 }
 
-export default EventsProvider;
+export default memo(EventsProvider);

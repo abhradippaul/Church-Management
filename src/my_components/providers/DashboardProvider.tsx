@@ -9,14 +9,23 @@ interface EventsValue {
   date_year: number;
   time: string;
 }
+
+interface UserInfoValue {
+  name: string;
+  imageUrl: string;
+  role: string;
+}
+
 interface DashboardContextValue {
   recentJoined: number;
   Events: EventsValue[];
+  UserInfo: UserInfoValue | null;
 }
 
 const CreateDashboardContext = createContext<DashboardContextValue>({
   recentJoined: 0,
   Events: [],
+  UserInfo: null,
 });
 
 const CreateDashboardProvider = CreateDashboardContext.Provider;
@@ -29,13 +38,15 @@ function DashboardProvider({
   children,
   recentJoined,
   Events,
+  UserInfo,
 }: {
   children: ReactNode;
   recentJoined: number;
   Events: EventsValue[];
+  UserInfo: UserInfoValue;
 }) {
   return (
-    <CreateDashboardProvider value={{ recentJoined, Events }}>
+    <CreateDashboardProvider value={{ recentJoined, Events, UserInfo }}>
       {children}
     </CreateDashboardProvider>
   );

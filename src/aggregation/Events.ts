@@ -17,33 +17,10 @@ export async function getTagsInfoFromEventsAggregate(ownerId: string) {
       },
     },
     {
-      $lookup: {
-        from: "taggroups",
-        localField: "_id",
-        foreignField: "church",
-        as: "Tag_Group",
-        pipeline: [
-          {
-            $lookup: {
-              from: "tagitems",
-              localField: "_id",
-              foreignField: "tag_group",
-              as: "Tag_Item",
-            },
-          },
-          {
-            $unwind: "$Tag_Item",
-          },
-        ],
-      },
-    },
-    {
       $project: {
         _id: 0,
         "Tags_Item._id": 1,
         "Tags_Item.name": 1,
-        "Tag_Group.Tag_Item._id": 1,
-        "Tag_Group.Tag_Item.name": 1,
       },
     },
   ]);

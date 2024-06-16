@@ -18,17 +18,22 @@ async function layout({ children }: { children: ReactNode }) {
     const host = headers().get("host");
     const cookieStore = cookies();
     const access_token = cookieStore.get("access_token");
-    const { data } = await axios.get(`http://${host}/api/v1/events`, {
-      headers: {
-        Cookie: `${access_token?.name}=${access_token?.value}`,
-      },
-    });
+    const { data } = await axios.get(
+      `http://${host}/api/v1/events?month=${new Date().getMonth()}`,
+      {
+        headers: {
+          Cookie: `${access_token?.name}=${access_token?.value}`,
+        },
+      }
+    );
     if (data.success) {
       eventsInfo = data.data;
     }
   } catch (err: any) {
     console.log(err);
   }
+
+  console.log(eventsInfo);
 
   if (!eventsInfo) {
     return null;
