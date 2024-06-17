@@ -3,6 +3,7 @@
 import { ReactNode, createContext, memo, useContext } from "react";
 
 interface EventsValue {
+  Tag_Name: string;
   name: string;
   date_day: number;
   date_month: number;

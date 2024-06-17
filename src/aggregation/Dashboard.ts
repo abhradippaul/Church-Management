@@ -36,6 +36,26 @@ export async function GetDashboardInfoForOwner(ownerId: string) {
               },
             },
           },
+          {
+            $lookup: {
+              from: "tagitems",
+              localField: "tag",
+              foreignField: "_id",
+              as: "Tag_Info",
+            },
+          },
+          {
+            $addFields: {
+              Tag_Info: {
+                $first: "$Tag_Info",
+              },
+            },
+          },
+          {
+            $addFields: {
+              Tag_Name: "$Tag_Info.name",
+            },
+          },
         ],
       },
     },
@@ -80,6 +100,7 @@ export async function GetDashboardInfoForOwner(ownerId: string) {
         "Events.date_month": 1,
         "Events.date_year": 1,
         "Events.time": 1,
+        "Events.Tag_Name": 1,
       },
     },
   ]);
@@ -120,30 +141,33 @@ export async function GetDashboardInfoForUser(
                     localField: "tag_item",
                     foreignField: "tag",
                     as: "Events",
+                    pipeline: [
+                      {
+                        $lookup: {
+                          from: "tagitems",
+                          localField: "tag",
+                          foreignField: "_id",
+                          as: "Tag_Info",
+                        },
+                      },
+                      {
+                        $addFields: {
+                          Tag_Info: {
+                            $first: "$Tag_Info",
+                          },
+                        },
+                      },
+                    ],
                   },
                 },
                 {
                   $unwind: "$Events",
                 },
-
-                // {
-                //   $lookup: {
-                //     from: "tagitems",
-                //     localField: "tag_item",
-                //     foreignField: "_id",
-                //     as: "Tag_Info",
-                //     pipeline: [
-                //       {
-                //         $lookup: {
-                //           from: "events",
-                //           localField: "_id",
-                //           foreignField: "tag",
-                //           as: "Events",
-                //         },
-                //       },
-                //     ],
-                //   },
-                // },
+                {
+                  $addFields: {
+                    "Events.Tag_Name": "$Events.Tag_Info.name",
+                  },
+                },
               ],
             },
           },
@@ -171,39 +195,8 @@ export async function GetDashboardInfoForUser(
         "Events.date_month": 1,
         "Events.date_year": 1,
         "Events.time": 1,
+        "Events.Tag_Name": 1,
       },
     },
   ]);
 }
-
-// {
-//     $lookup: {
-//       from: "events",
-//       localField: "_id",
-//       foreignField: "owner",
-//       as: "Events",
-//       pipeline: [
-//         {
-//           $redact: {
-//             $cond: {
-//               if: {
-//                 $and: [
-//                   {
-//                     $gte: ["$date_day", new Date().getDate()],
-//                   },
-//                   {
-//                     $gte: ["$date_month", new Date().getMonth()],
-//                   },
-//                   {
-//                     $gte: ["$date_year", new Date().getFullYear()],
-//                   },
-//                 ],
-//               },
-//               then: "$$KEEP",
-//               else: "$$PRUNE",
-//             },
-//           },
-//         },
-//       ],
-//     },
-//   },

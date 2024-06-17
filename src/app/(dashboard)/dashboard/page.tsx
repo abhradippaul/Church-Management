@@ -22,20 +22,23 @@ function DashboardPage() {
           }`}
         >
           <h1 className="text-xl my-4">Upcoming Events</h1>
-          {Events.map(({ name, time, date_day, date_month, date_year }) => (
-            <div
-              className="w-full bg-gray-900 my-2 p-2 flex items-center justify-between"
-              key={name}
-            >
-              <h1>{name}</h1>
-              <p>
-                {new Date(
-                  `${date_month}-${date_day}-${date_year}`
-                ).toDateString()}
-              </p>
-              <p>{time}</p>
-            </div>
-          ))}
+          {Events.map(
+            ({ name, time, date_day, date_month, date_year, Tag_Name }) => (
+              <div
+                className="w-full bg-gray-900 my-2 p-2 flex items-center justify-between"
+                key={name}
+              >
+                <h1>{name}</h1>
+                <p>({Tag_Name})</p>
+                <p>
+                  {new Date(
+                    `${date_month}-${date_day}-${date_year}`
+                  ).toDateString()}
+                </p>
+                <p>{time}</p>
+              </div>
+            )
+          )}
         </div>
       </div>
     </div>

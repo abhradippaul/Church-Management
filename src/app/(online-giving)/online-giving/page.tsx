@@ -1,9 +1,10 @@
 "use client";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useOnlineGivingContext } from "@/my_components/providers/OnlineGivingProvider";
 import axios from "axios";
-// import Razorpay from "razorpay";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 interface ResponseValue {
   razorpay_order_id: String;
@@ -11,44 +12,53 @@ interface ResponseValue {
   razorpay_signature: String;
 }
 
+const imageUrl = process.env.NEXT_PUBLIC_IMAGE_URL;
+
 function page() {
-  const [amount, setAmount] = useState<Number>();
-  console.log(process.env.NEXT_PUBLIC_RAZORPAY_API_KEY);
-  const paymentHandler = async (e: any) => {
-    const { data } = await axios.post("/api/v1/payment", {
-      amount,
-    });
-    console.log(data);
-    const options = {
-      key: process.env.NEXT_PUBLIC_RAZORPAY_API_KEY!,
-      amount: data.data.amount,
-      currency: "INR",
-      name: "Church website",
-      description: "Test Transaction",
-      image: "https://example.com/your_logo",
-      order_id: data.data.id,
-      handler: async function (response: ResponseValue) {
-        const { data } = await axios.post("/api/v1/payment-verification", {
-          ...response,
-        });
-        console.log(data);
-      },
-      prefill: {
-        name: "Gaurav Kumar",
-        email: "gaurav.kumar@example.com",
-        contact: "9000090000",
-      },
-      notes: {
-        address: "Razorpay Corporate Office",
-      },
-      theme: {
-        color: "#3399cc",
-      },
-    };
-    const razor = new window.Razorpay(options);
-    razor.open();
-    e.preventDefault();
-  };
+  const [amount, setAmount] = useState<Number>(0);
+  const { ChurchInfo, UserInfo } = useOnlineGivingContext();
+  const paymentHandler = useCallback(
+    async (e: any) => {
+      const { data } = await axios.post("/api/v1/payment", {
+        amount,
+      });
+      if (data.success) {
+        const options = {
+          key: process.env.NEXT_PUBLIC_RAZORPAY_API_KEY!,
+          amount: data.data.amount,
+          currency: "INR",
+          name: ChurchInfo?.name,
+          description: "Test Transaction",
+          image: `${imageUrl}/${ChurchInfo?.imageUrl}`,
+          order_id: data.data.id,
+          handler: async function (response: ResponseValue) {
+            const { data } = await axios.post("/api/v1/payment-verification", {
+              ...response,
+              amount,
+            });
+            if (data.success) {
+              setAmount(0);
+            }
+          },
+          prefill: {
+            name: UserInfo?.name,
+            email: UserInfo?.email,
+            contact: UserInfo?.phone_number,
+          },
+          notes: {
+            address: "Razorpay Corporate Office",
+          },
+          theme: {
+            color: "#3399cc",
+          },
+        };
+        const razor = new window.Razorpay(options);
+        razor.open();
+        e.preventDefault();
+      }
+    },
+    [amount]
+  );
   return (
     <div>
       <h1>Thank You!</h1>
@@ -60,6 +70,7 @@ function page() {
       <Input
         placeholder="Amount"
         type="number"
+        value={amount.toString()}
         onChange={(e) => setAmount(Number(e.target.value))}
       />
       <Button size="lg" className="text-xl my-4" onClick={paymentHandler}>

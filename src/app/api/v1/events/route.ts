@@ -154,6 +154,11 @@ export async function GET(req: NextRequest) {
                 },
               },
             },
+            {
+              $addFields: {
+                Tag_Name: "$Tag_Info.name",
+              },
+            },
           ],
         },
       },
@@ -167,7 +172,7 @@ export async function GET(req: NextRequest) {
           "Events.date_year": 1,
           "Events.description": 1,
           "Events.time": 1,
-          "Events.Tag_Info.name": 1,
+          "Events.Tag_Name": 1,
         },
       },
     ]);

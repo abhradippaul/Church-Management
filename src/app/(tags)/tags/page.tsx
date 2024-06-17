@@ -12,7 +12,7 @@ import { memo, useCallback } from "react";
 import SubNavbarForTags from "./SubNavbarForTags";
 
 function page() {
-  const { tagsInfo, groupsInfo } = useTagsContext();
+  const { tagsInfo, groupsInfo, UserInfo } = useTagsContext();
   const router = useRouter();
   const deletePeople = useCallback(async (id: string) => {
     try {
@@ -30,18 +30,24 @@ function page() {
   }, []);
   return (
     <div>
-      <SubNavbarForTags />
-      <div className="h-full flex flex-col sm:flex-row justify-center gap-x-12">
-        <div className="flex flex-col w-full gap-y-4">
-          {groupsInfo.map(({ _id, name, SubItem }) => (
-            <AccordionComponent
-              content={SubItem}
-              key={_id}
-              itemKey={_id}
-              trigger={name}
-            />
-          ))}
-        </div>
+      {UserInfo?.role !== "people" && <SubNavbarForTags />}
+      <div
+        className={`h-full flex justify-center gap-x-12 gap-y-6 ${
+          UserInfo?.role !== "people" ? "flex-col sm:flex-row" : ""
+        }`}
+      >
+        {UserInfo?.role !== "people" && (
+          <div className="flex flex-col w-full gap-y-4">
+            {groupsInfo?.map(({ _id, name, SubItem }) => (
+              <AccordionComponent
+                content={SubItem}
+                key={_id}
+                itemKey={_id}
+                trigger={name}
+              />
+            ))}
+          </div>
+        )}
         <div className="flex flex-col w-full gap-y-4">
           {tagsInfo.map(({ _id, name }) => (
             <div
@@ -51,21 +57,23 @@ function page() {
               <Link href={`/tags/${_id}`} className="flex-grow">
                 {name}
               </Link>
-              <AlertDialogComponent
-                description={`Only the tag ${name} will be deleted not the people data.`}
-                title={`Are you want to delete ${name} the tag ?`}
-                _id={_id}
-                onActionClick={deletePeople}
-                trigger={
-                  <TooltipComponent
-                    hoverElement={
-                      <Trash className="size-4 mr-4 text-red-700 hover:text-red-600 transition" />
-                    }
-                  >
-                    <h1>Delete Tag</h1>
-                  </TooltipComponent>
-                }
-              />
+              {UserInfo?.role !== "people" && (
+                <AlertDialogComponent
+                  description={`Only the tag ${name} will be deleted not the people data.`}
+                  title={`Are you want to delete ${name} the tag ?`}
+                  _id={_id}
+                  onActionClick={deletePeople}
+                  trigger={
+                    <TooltipComponent
+                      hoverElement={
+                        <Trash className="size-4 mr-4 text-red-700 hover:text-red-600 transition" />
+                      }
+                    >
+                      <h1>Delete Tag</h1>
+                    </TooltipComponent>
+                  }
+                />
+              )}
             </div>
           ))}
         </div>

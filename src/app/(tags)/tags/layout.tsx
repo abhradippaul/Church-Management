@@ -25,6 +25,11 @@ async function layout({ children }: { children: ReactNode }) {
         groupOptions={data.SubItems}
         groupsInfo={data.SubItems}
         tagsInfo={data.items}
+        UserInfo={{
+          name: data.name,
+          imageUrl: data.image,
+          role: data.role,
+        }}
       >
         <div className="px-2 md:px-4 max-w-7xl mx-auto min-h-dvh">
           <div className="pt-20 flex flex-col">{children}</div>

@@ -16,12 +16,11 @@ export async function POST(req: NextRequest) {
       currency: "INR",
       receipt: "order_rcptid_11",
     };
-    const order = await instance.orders.create(options);
+    await instance.orders.create(options);
     return NextResponse.json<ApiResponse>(
       {
         success: true,
         message: "Razorpay order created successfully",
-        data: order,
       },
       { status: 200 }
     );

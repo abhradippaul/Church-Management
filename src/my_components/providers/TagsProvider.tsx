@@ -15,6 +15,12 @@ interface ItemValue {
   name: string;
 }
 
+interface UserInfoValue {
+  name: string;
+  imageUrl: string;
+  role: string;
+}
+
 interface TagsContextValue {
   dialogType: "tags" | "groups";
   setDialogType: Dispatch<SetStateAction<"tags" | "groups">>;
@@ -32,6 +38,7 @@ interface TagsContextValue {
     name: string;
     SubItem: ItemValue[];
   }[];
+  UserInfo: UserInfoValue | null;
 }
 
 const CreateTagsContext = createContext<TagsContextValue>({
@@ -42,6 +49,7 @@ const CreateTagsContext = createContext<TagsContextValue>({
   groupOptions: [],
   tagsInfo: [],
   groupsInfo: [],
+  UserInfo: null,
 });
 
 const TagsContextProvider = CreateTagsContext.Provider;
@@ -55,6 +63,7 @@ function TagsProvider({
   groupOptions,
   tagsInfo,
   groupsInfo,
+  UserInfo,
 }: {
   children: ReactNode;
   tagsInfo: ItemValue[];
@@ -69,6 +78,7 @@ function TagsProvider({
     name: string;
     SubItem: ItemValue[];
   }[];
+  UserInfo: UserInfoValue;
 }) {
   const [isFormError, setIsFormError] = useState(false);
   const [dialogType, setDialogType] = useState<"tags" | "groups">("tags");
@@ -82,6 +92,7 @@ function TagsProvider({
         groupOptions,
         tagsInfo,
         groupsInfo,
+        UserInfo,
       }}
     >
       {children}

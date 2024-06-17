@@ -1,5 +1,6 @@
 import AdminModel from "@/model/Admin";
 import OwnerModel from "@/model/Owner";
+import PeopleModel from "@/model/People";
 import mongoose from "mongoose";
 
 interface VerifiedDataValue {
@@ -76,17 +77,61 @@ export async function getTagsInfoAggregate({
       },
     ]);
   }
-  if (role === "admin") {
-    if (!adminId || !ownerId) return [];
-
+  if (role === "admin" && adminId) {
     const isAdminExist = await AdminModel.findOne({ _id: adminId }, { _id: 1 });
     if (!isAdminExist) return [];
     return await modelAggregate();
   } else if (role === "owner") {
-    if (!ownerId) return [];
-
     return await modelAggregate();
-  } else if (role === "people") {
+  } else if (role === "people" && peopleId) {
+    const isOwnerExist = await OwnerModel.findOne({ _id: ownerId }, { _id: 1 });
+    if (!isOwnerExist) return [];
+    return await PeopleModel.aggregate([
+      {
+        $match: {
+          _id: new mongoose.Types.ObjectId(peopleId),
+        },
+      },
+      {
+        $lookup: {
+          from: "tagjoineds",
+          localField: "_id",
+          foreignField: "people",
+          as: "Tags",
+          pipeline: [
+            {
+              $lookup: {
+                from: "tagitems",
+                localField: "tag_item",
+                foreignField: "_id",
+                as: "Tags_Info",
+              },
+            },
+            {
+              $addFields: {
+                Tags_Info: {
+                  $first: "$Tags_Info",
+                },
+              },
+            },
+          ],
+        },
+      },
+      {
+        $addFields: {
+          items: "$Tags.Tags_Info",
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          name: 1,
+          image: 1,
+          "items.name": 1,
+          "items._id": 1,
+        },
+      },
+    ]);
   } else {
     return [];
   }

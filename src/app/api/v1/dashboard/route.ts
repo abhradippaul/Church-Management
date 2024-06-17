@@ -6,7 +6,6 @@ import dbConnect from "@/lib/DbConnect";
 import { verifyToken } from "@/lib/JsonWebToken";
 import AdminModel from "@/model/Admin";
 import OwnerModel from "@/model/Owner";
-import PeopleModel from "@/model/People";
 import { ApiResponse } from "@/types/ApiResponse";
 import mongoose from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
@@ -15,31 +14,38 @@ export async function GET(req: NextRequest) {
   dbConnect();
   try {
     const access_token = req.cookies.get("access_token")?.value;
+
     if (!access_token) {
       return NextResponse.json<ApiResponse>({
         success: false,
         message: "You are not logged in",
       });
     }
+
     const verifiedData = verifyToken(access_token);
+
     if (!verifiedData?.role || !verifiedData.ownerId) {
       return NextResponse.json<ApiResponse>({
         success: false,
         message: "You are not logged in",
       });
     }
+
     let data: any = [];
+
     if (verifiedData.role === "admin" && verifiedData.adminId) {
       const isAdminExist = await AdminModel.findOne(
         { _id: verifiedData.adminId },
         { name: 1, image: 1 }
       );
+
       if (!isAdminExist) {
         return NextResponse.json<ApiResponse>({
           success: false,
           message: "You are not logged in",
         });
       }
+
       data = await OwnerModel.aggregate([
         {
           $match: {

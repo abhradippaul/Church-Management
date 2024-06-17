@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
 
     const verifiedData = verifyToken(access_token);
 
-    if (!verifiedData?.role) {
+    if (!verifiedData?.role || !verifiedData.ownerId) {
       return NextResponse.json<ApiResponse>({
         success: false,
         message: "You are not logged in",
