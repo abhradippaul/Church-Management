@@ -48,6 +48,7 @@ export default async function RootLayout({
         imageUrl: dashboardInfo.image,
         role: dashboardInfo.role,
       }}
+      PaymentAmount={dashboardInfo.Payment}
     >
       {dashboardInfo.role === "admin" && <RightSideNavbar />}
       <Navbar

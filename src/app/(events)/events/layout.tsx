@@ -33,13 +33,18 @@ async function layout({ children }: { children: ReactNode }) {
     console.log(err);
   }
 
-  console.log(eventsInfo);
-
   if (!eventsInfo) {
     return null;
   }
   return (
-    <EventsProvider events={eventsInfo.Events}>
+    <EventsProvider
+      events={eventsInfo.Events}
+      UserInfo={{
+        name: eventsInfo.name,
+        imageUrl: eventsInfo.image,
+        role: eventsInfo.role,
+      }}
+    >
       <Navbar
         userInfo={{
           name: eventsInfo.name,
@@ -51,6 +56,7 @@ async function layout({ children }: { children: ReactNode }) {
         <div className="flex items-center justify-between">
           <h1>Event page </h1>
           <EventDialog
+            type="create"
             trigger={
               <Button
                 variant="outline"

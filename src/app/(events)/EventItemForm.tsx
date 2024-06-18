@@ -2,7 +2,7 @@ import dynamic from "next/dynamic";
 import { Form } from "@/components/ui/form";
 import { toast } from "@/components/ui/use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { memo, useCallback, useEffect, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,7 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import CreateEventSchema from "@/schema/CreateEventSchema";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useEventsContext } from "@/my_components/providers/EventsProvider";
 
 const CustomFormInput = dynamic(
   () => import("@/my_components/Form/CustomFormInput")
@@ -60,40 +61,68 @@ for (let i = 0; i < 60; i += 10) {
 
 function EventItemForm() {
   const [tagsOption, setTagsIOption] = useState<TagsOptionValue[]>([]);
+  const { eventsInfo, eventIdForUpdate } = useEventsContext();
   const router = useRouter();
+  const event = useMemo(
+    () => eventsInfo?.find((e) => e._id === eventIdForUpdate),
+    [eventIdForUpdate]
+  );
+
   let form = useForm<z.infer<typeof CreateEventSchema>>({
     resolver: zodResolver(CreateEventSchema),
     defaultValues: {
-      name: "",
-      tags: "",
+      name: event?.name || "",
+      tags: event?.Tag_Id || "",
       event_date: new Date(),
-      event_hour: "00",
-      event_minutes: "00",
-      event_time: "am",
-      event_description: "",
+      event_hour: event?.time.split(":")[0] || "00",
+      event_minutes: event?.time.split(" ")[0].split(":")[1] || "00",
+      event_time: (event?.time.split(" ")[1] as "am" | "pm") || "am",
+      event_description: event?.description || "",
     },
   });
 
   const onSubmit = useCallback(
     async (values: z.infer<typeof CreateEventSchema>) => {
       try {
-        const { data } = await axios.post(`/api/v1/events`, {
-          name: values.name,
-          tag: values.tags,
-          date_day: values.event_date.getDate(),
-          date_month: values.event_date.getMonth(),
-          date_year: values.event_date.getFullYear(),
-          time: `${values.event_hour}:${values.event_minutes} ${values.event_time}`,
-          description: values.event_description,
-        });
-        console.log(data);
-        if (data.success) {
-          router.refresh();
+        if (eventIdForUpdate && event) {
+          const { data } = await axios.post(
+            `/api/v1/events?eventId=${event?._id}`,
+            {
+              name: values.name,
+              tag: values.tags,
+              date_day: values.event_date.getDate(),
+              date_month: values.event_date.getMonth(),
+              date_year: values.event_date.getFullYear(),
+              time: `${values.event_hour}:${values.event_minutes} ${values.event_time}`,
+              description: values.event_description,
+            }
+          );
+          if (data.success) {
+            router.refresh();
+          } else {
+            toast({
+              title: "Error",
+              description: data.message,
+            });
+          }
         } else {
-          toast({
-            title: "Error",
-            description: data.message,
+          const { data } = await axios.post(`/api/v1/events`, {
+            name: values.name,
+            tag: values.tags,
+            date_day: values.event_date.getDate(),
+            date_month: values.event_date.getMonth(),
+            date_year: values.event_date.getFullYear(),
+            time: `${values.event_hour}:${values.event_minutes} ${values.event_time}`,
+            description: values.event_description,
           });
+          if (data.success) {
+            router.refresh();
+          } else {
+            toast({
+              title: "Error",
+              description: data.message,
+            });
+          }
         }
       } catch (err: any) {
         toast({
@@ -217,6 +246,8 @@ function EventItemForm() {
           <Button variant="secondary" size="lg" className="text-lg mt-8">
             {form.formState.isSubmitting ? (
               <Loader2 className="size-6 animate-spin" />
+            ) : event?._id ? (
+              "Update"
             ) : (
               "Submit"
             )}

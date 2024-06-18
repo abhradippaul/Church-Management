@@ -1,10 +1,13 @@
+import {
+  GetEventsInfoForOwnerAggregate,
+  GetEventsInfoForPeopleAggregate,
+} from "@/aggregation/Events";
 import { isChurchAndTagValid } from "@/aggregation/Tags";
 import dbConnect from "@/lib/DbConnect";
 import { verifyToken } from "@/lib/JsonWebToken";
+import AdminModel from "@/model/Admin";
 import EventModel from "@/model/Event";
-import OwnerModel from "@/model/Owner";
 import { ApiResponse } from "@/types/ApiResponse";
-import mongoose from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
@@ -103,79 +106,43 @@ export async function GET(req: NextRequest) {
       });
     }
     const verifiedData = verifyToken(access_token);
-    if (!verifiedData?.role) {
+    if (!verifiedData?.role || !verifiedData.ownerId) {
       return NextResponse.json<ApiResponse>({
         success: false,
         message: "You are not logged in",
       });
     }
 
-    console.log(month);
+    let data: any = [];
 
-    const data = await OwnerModel.aggregate([
-      {
-        $match: {
-          _id: new mongoose.Types.ObjectId(verifiedData.ownerId),
-        },
-      },
-      {
-        $lookup: {
-          from: "events",
-          localField: "_id",
-          foreignField: "owner",
-          as: "Events",
-          pipeline: [
-            {
-              $redact: {
-                $cond: {
-                  if: {
-                    $and: [
-                      { $eq: ["$date_month", month] },
-                      { $eq: ["$date_year", new Date().getFullYear()] },
-                    ],
-                  },
-                  then: "$$KEEP",
-                  else: "$$PRUNE",
-                },
-              },
-            },
-            {
-              $lookup: {
-                from: "tagitems",
-                localField: "tag",
-                foreignField: "_id",
-                as: "Tag_Info",
-              },
-            },
-            {
-              $addFields: {
-                Tag_Info: {
-                  $first: "$Tag_Info",
-                },
-              },
-            },
-            {
-              $addFields: {
-                Tag_Name: "$Tag_Info.name",
-              },
-            },
-          ],
-        },
-      },
-      {
-        $project: {
-          name: 1,
-          image: 1,
-          "Events.name": 1,
-          "Events.date_day": 1,
-          "Events.date_month": 1,
-          "Events.date_year": 1,
-          "Events.description": 1,
-          "Events.time": 1,
-          "Events.Tag_Name": 1,
-        },
-      },
-    ]);
+    if (verifiedData.role === "admin" && verifiedData.adminId) {
+      const isAdminExist = await AdminModel.findOne(
+        { _id: verifiedData.adminId },
+        { name: 1, image: 1 }
+      );
+
+      if (!isAdminExist) {
+        return NextResponse.json<ApiResponse>({
+          success: false,
+          message: "You are not logged in",
+        });
+      }
+
+      data = await GetEventsInfoForOwnerAggregate(verifiedData.ownerId, month);
+    } else if (verifiedData.role === "owner") {
+      data = await GetEventsInfoForOwnerAggregate(verifiedData.ownerId, month);
+    } else if (verifiedData.role === "people" && verifiedData.peopleId) {
+      data = await GetEventsInfoForPeopleAggregate(
+        verifiedData.ownerId,
+        verifiedData.peopleId,
+        month
+      );
+    } else {
+      return NextResponse.json<ApiResponse>({
+        success: false,
+        message: "Some thing went wrong in role",
+      });
+    }
 
     if (!data?.length) {
       return NextResponse.json<ApiResponse>({
@@ -191,6 +158,135 @@ export async function GET(req: NextRequest) {
         ...data[0],
         role: verifiedData.role,
       },
+    });
+  } catch (err: any) {
+    return NextResponse.json<ApiResponse>({
+      success: false,
+      message: err.message,
+    });
+  }
+}
+
+export async function PUT(req: NextRequest) {
+  dbConnect();
+  try {
+    const eventId = req.nextUrl.searchParams.get("eventId");
+    const access_token = req.cookies.get("access_token")?.value;
+    const values = await req.json();
+
+    if (!access_token) {
+      return NextResponse.json<ApiResponse>({
+        success: false,
+        message: "You are not logged in",
+      });
+    }
+
+    const verifiedData = verifyToken(access_token);
+
+    if (verifiedData?.role !== "owner" || !verifiedData.ownerId) {
+      return NextResponse.json<ApiResponse>({
+        success: false,
+        message: "You are not logged in",
+      });
+    }
+
+    if (!eventId) {
+      return NextResponse.json<ApiResponse>({
+        success: false,
+        message: "Event id not found",
+      });
+    }
+
+    const isEventExist = await EventModel.findOne(
+      {
+        _id: eventId,
+        owner: verifiedData.ownerId,
+      },
+      { _id: 1 }
+    );
+
+    if (!isEventExist) {
+      return NextResponse.json<ApiResponse>({
+        success: false,
+        message: "Event does not exist",
+      });
+    }
+
+    const isEventUpdated = await EventModel.updateOne(
+      {
+        _id: eventId,
+        owner: verifiedData.ownerId,
+      },
+      {
+        $set: {
+          ...values,
+        },
+      }
+    );
+
+    if (!isEventUpdated.modifiedCount) {
+      return NextResponse.json<ApiResponse>({
+        success: false,
+        message: "Event is not updated",
+      });
+    }
+
+    return NextResponse.json<ApiResponse>({
+      success: true,
+      message: "Event deleted successfully",
+    });
+  } catch (err: any) {
+    return NextResponse.json<ApiResponse>({
+      success: false,
+      message: err.message,
+    });
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  dbConnect();
+  try {
+    const eventId = req.nextUrl.searchParams.get("eventId");
+    const access_token = req.cookies.get("access_token")?.value;
+
+    if (!access_token) {
+      return NextResponse.json<ApiResponse>({
+        success: false,
+        message: "You are not logged in",
+      });
+    }
+
+    const verifiedData = verifyToken(access_token);
+
+    if (verifiedData?.role !== "owner" || !verifiedData.ownerId) {
+      return NextResponse.json<ApiResponse>({
+        success: false,
+        message: "You are not logged in",
+      });
+    }
+
+    if (!eventId) {
+      return NextResponse.json<ApiResponse>({
+        success: false,
+        message: "Event id not found",
+      });
+    }
+
+    const isEventDeleted = await EventModel.deleteOne({
+      _id: eventId,
+      owner: verifiedData.ownerId,
+    });
+
+    if (!isEventDeleted.deletedCount) {
+      return NextResponse.json<ApiResponse>({
+        success: false,
+        message: "Event not deleted",
+      });
+    }
+
+    return NextResponse.json<ApiResponse>({
+      success: true,
+      message: "Event deleted successfully",
     });
   } catch (err: any) {
     return NextResponse.json<ApiResponse>({

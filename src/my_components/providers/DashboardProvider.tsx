@@ -1,14 +1,24 @@
 "use client";
 
-import { ReactNode, createContext, memo, useContext } from "react";
+import {
+  Dispatch,
+  ReactNode,
+  SetStateAction,
+  createContext,
+  memo,
+  useContext,
+  useState,
+} from "react";
 
-interface EventsValue {
-  Tag_Name: string;
+interface EventInfoValue {
   name: string;
+  description: string;
   date_day: number;
   date_month: number;
   date_year: number;
   time: string;
+  Tag_Name: string;
+  _id: string;
 }
 
 interface UserInfoValue {
@@ -19,14 +29,16 @@ interface UserInfoValue {
 
 interface DashboardContextValue {
   recentJoined: number;
-  Events: EventsValue[];
+  Events: EventInfoValue[];
   UserInfo: UserInfoValue | null;
+  PaymentAmount: number;
 }
 
 const CreateDashboardContext = createContext<DashboardContextValue>({
   recentJoined: 0,
   Events: [],
   UserInfo: null,
+  PaymentAmount: 0,
 });
 
 const CreateDashboardProvider = CreateDashboardContext.Provider;
@@ -40,14 +52,23 @@ function DashboardProvider({
   recentJoined,
   Events,
   UserInfo,
+  PaymentAmount,
 }: {
   children: ReactNode;
   recentJoined: number;
-  Events: EventsValue[];
+  Events: EventInfoValue[];
   UserInfo: UserInfoValue;
+  PaymentAmount: number;
 }) {
   return (
-    <CreateDashboardProvider value={{ recentJoined, Events, UserInfo }}>
+    <CreateDashboardProvider
+      value={{
+        recentJoined,
+        Events,
+        UserInfo,
+        PaymentAmount,
+      }}
+    >
       {children}
     </CreateDashboardProvider>
   );

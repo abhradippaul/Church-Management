@@ -10,6 +10,46 @@ export async function GetDashboardInfoForOwner(ownerId: string) {
     },
     {
       $lookup: {
+        from: "payments",
+        localField: "_id",
+        foreignField: "church",
+        as: "Payment",
+        pipeline: [
+          {
+            $redact: {
+              $cond: {
+                if: {
+                  $gte: [
+                    "$createdAt",
+                    new Date(new Date().setDate(new Date().getDate() - 7)),
+                  ],
+                },
+
+                then: "$$KEEP",
+                else: "$$PRUNE",
+              },
+            },
+          },
+          {
+            $group: {
+              _id: null,
+              amount: {
+                $sum: "$amount",
+              },
+            },
+          },
+        ],
+      },
+    },
+    {
+      $addFields: {
+        Payment: {
+          $first: "$Payment.amount",
+        },
+      },
+    },
+    {
+      $lookup: {
         from: "events",
         localField: "_id",
         foreignField: "owner",
@@ -100,7 +140,10 @@ export async function GetDashboardInfoForOwner(ownerId: string) {
         "Events.date_month": 1,
         "Events.date_year": 1,
         "Events.time": 1,
+        "Events._id": 1,
+        "Events.description": 1,
         "Events.Tag_Name": 1,
+        Payment: 1,
       },
     },
   ]);
@@ -195,6 +238,8 @@ export async function GetDashboardInfoForUser(
         "Events.date_month": 1,
         "Events.date_year": 1,
         "Events.time": 1,
+        "Events.description": 1,
+        "Events._id": 1,
         "Events.Tag_Name": 1,
       },
     },

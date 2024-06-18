@@ -10,6 +10,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Toaster } from "@/components/ui/toaster";
+import { useDashboardContext } from "@/my_components/providers/DashboardProvider";
+import { useEventsContext } from "@/my_components/providers/EventsProvider";
 import { useTagsContext } from "@/my_components/providers/TagsProvider";
 import dynamic from "next/dynamic";
 import { ReactNode, memo, useEffect, useState } from "react";
@@ -18,11 +20,13 @@ const EventItemForm = dynamic(() => import("./EventItemForm"));
 
 interface EventsDialogProps {
   trigger: ReactNode;
+  type: "create" | "update";
 }
 
-function EventDialog({ trigger }: EventsDialogProps) {
+function EventDialog({ trigger, type }: EventsDialogProps) {
   const [isMounted, setIsMounted] = useState(false);
   const { isFormError } = useTagsContext();
+  const { setEventIdForUpdate } = useEventsContext();
   useEffect(() => {
     setIsMounted(true);
   }, []);
@@ -31,7 +35,7 @@ function EventDialog({ trigger }: EventsDialogProps) {
     return null;
   }
   return (
-    <Dialog>
+    <Dialog onOpenChange={() => type === "create" && setEventIdForUpdate("")}>
       <DialogTrigger>{trigger}</DialogTrigger>
       <DialogContent>
         <DialogHeader>

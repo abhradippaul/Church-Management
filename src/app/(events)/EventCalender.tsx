@@ -1,5 +1,3 @@
-"use client";
-
 import TooltipComponent from "@/components/TooltipComponent";
 import { Button } from "@/components/ui/button";
 import { useEventsContext } from "@/my_components/providers/EventsProvider";
