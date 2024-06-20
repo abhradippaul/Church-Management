@@ -7,21 +7,16 @@ import {
 import dynamic from "next/dynamic";
 const SignupForm = dynamic(() => import("@/my_components/Form/SignupForm"));
 
-function page() {
+function Page() {
   return (
     <Card className="w-[90%] max-w-[500px]">
       <CardHeader>
         <CardTitle>Signup Form</CardTitle>
         <CardDescription>Create an account</CardDescription>
       </CardHeader>
-      <SignupForm
-        email="Church Email"
-        image="Upload Image"
-        name="Church Name"
-        password="Password"
-      />
+      <SignupForm />
     </Card>
   );
 }
 
-export default page;
+export default Page;

@@ -18,11 +18,13 @@ const TagItemForm = dynamic(() => import("@/my_components/Form/TagItemForm"));
 interface TagsDialogProps {
   trigger: ReactNode;
   descriptions: string;
+  type: "create" | "update";
+  title?: string;
 }
 
-function TagsDialog({ trigger, descriptions }: TagsDialogProps) {
+function TagsDialog({ trigger, descriptions, type, title }: TagsDialogProps) {
   const [isMounted, setIsMounted] = useState(false);
-  const { dialogType, isFormError } = useTagsContext();
+  const { dialogType, isFormError, setTagIdForUpdate } = useTagsContext();
   useEffect(() => {
     setIsMounted(true);
   }, []);
@@ -32,12 +34,12 @@ function TagsDialog({ trigger, descriptions }: TagsDialogProps) {
   }
 
   return (
-    <Dialog>
+    <Dialog onOpenChange={() => type === "create" && setTagIdForUpdate("")}>
       <DialogTrigger>{trigger}</DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
-            {dialogType === "groups" && "Create group to insert tags."}
+            {dialogType === "groups" && title}
             {dialogType === "tags" && "Create tags for user."}
           </DialogTitle>
         </DialogHeader>

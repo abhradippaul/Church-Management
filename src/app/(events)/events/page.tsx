@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import EventCalender from "../EventCalender";
 import TableComponentForEvents from "@/components/TableComponentForEvents";
 import { useEventsContext } from "@/my_components/providers/EventsProvider";
-function page() {
+function Page() {
   const [isMounted, setIsMounted] = useState(false);
   const { eventsInfo } = useEventsContext();
 
@@ -21,4 +21,4 @@ function page() {
   );
 }
 
-export default page;
+export default Page;

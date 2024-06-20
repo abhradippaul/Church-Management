@@ -3,7 +3,7 @@ const tableHeading = ["Name", "Email", "Age", ""];
 
 const TableComponent = dynamic(() => import("@/components/TableComponent"));
 
-async function page() {
+async function Page() {
   return (
     <div>
       <TableComponent type="tagpeople" tableHeading={tableHeading} />
@@ -11,4 +11,4 @@ async function page() {
   );
 }
 
-export default page;
+export default Page;

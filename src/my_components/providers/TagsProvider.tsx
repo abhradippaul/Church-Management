@@ -39,6 +39,10 @@ interface TagsContextValue {
     SubItem: ItemValue[];
   }[];
   UserInfo: UserInfoValue | null;
+  tagIdForUpdate: string;
+  setTagIdForUpdate: Dispatch<SetStateAction<string>>;
+  groupIdForUpdate: string;
+  setGroupIdForUpdate: Dispatch<SetStateAction<string>>;
 }
 
 const CreateTagsContext = createContext<TagsContextValue>({
@@ -50,6 +54,10 @@ const CreateTagsContext = createContext<TagsContextValue>({
   tagsInfo: [],
   groupsInfo: [],
   UserInfo: null,
+  tagIdForUpdate: "",
+  setTagIdForUpdate: () => {},
+  groupIdForUpdate: "",
+  setGroupIdForUpdate: () => {},
 });
 
 const TagsContextProvider = CreateTagsContext.Provider;
@@ -82,6 +90,8 @@ function TagsProvider({
 }) {
   const [isFormError, setIsFormError] = useState(false);
   const [dialogType, setDialogType] = useState<"tags" | "groups">("tags");
+  const [tagIdForUpdate, setTagIdForUpdate] = useState<string>("");
+  const [groupIdForUpdate, setGroupIdForUpdate] = useState<string>("");
   return (
     <TagsContextProvider
       value={{
@@ -93,6 +103,10 @@ function TagsProvider({
         tagsInfo,
         groupsInfo,
         UserInfo,
+        tagIdForUpdate,
+        setTagIdForUpdate,
+        groupIdForUpdate,
+        setGroupIdForUpdate,
       }}
     >
       {children}

@@ -7,19 +7,19 @@ import VerifyEmailSchema from "@/schema/VerifyEmailSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import { memo, useCallback, useEffect } from "react";
-import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Toaster } from "@/components/ui/toaster";
 import { toast } from "@/components/ui/use-toast";
 import axios from "axios";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { createVerifyCodeForEmail } from "@/helpers/db";
+import { useForm } from "react-hook-form";
 
 const CustomFormInput = dynamic(
   () => import("@/my_components/Form/CustomFormInput")
 );
 
-function page() {
+function Page() {
   const { userId }: { userId: string } = useParams();
   const router = useRouter();
   const type = useSearchParams().get("type") as
@@ -114,4 +114,4 @@ function page() {
   );
 }
 
-export default memo(page);
+export default memo(Page);

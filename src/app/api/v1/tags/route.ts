@@ -2,6 +2,7 @@ import { getTagsInfoAggregate, isChurchAndTagValid } from "@/aggregation/Tags";
 import dbConnect from "@/lib/DbConnect";
 import { verifyToken } from "@/lib/JsonWebToken";
 import TagJoinedModel from "@/model/TagJoined";
+import TagItemModel from "@/model/TagsItem";
 import { ApiResponse } from "@/types/ApiResponse";
 import { NextRequest, NextResponse } from "next/server";
 

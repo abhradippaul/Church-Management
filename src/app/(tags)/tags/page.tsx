@@ -5,16 +5,18 @@ import AlertDialogComponent from "@/components/AlertDialogComponent";
 import TooltipComponent from "@/components/TooltipComponent";
 import { useTagsContext } from "@/my_components/providers/TagsProvider";
 import axios from "axios";
-import { Trash } from "lucide-react";
+import { Pencil, Trash } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { memo, useCallback } from "react";
 import SubNavbarForTags from "./SubNavbarForTags";
+import TagsDialog from "../TagsDialog";
 
-function page() {
-  const { tagsInfo, groupsInfo, UserInfo } = useTagsContext();
+function Page() {
+  const { tagsInfo, groupsInfo, UserInfo, setTagIdForUpdate, setDialogType } =
+    useTagsContext();
   const router = useRouter();
-  const deletePeople = useCallback(async (id: string) => {
+  const deleteTags = useCallback(async (id: string) => {
     try {
       const { data } = await axios.delete(
         `/api/v1/tags/tag-item?tagItem=${id}`
@@ -28,6 +30,7 @@ function page() {
       console.log(err.message);
     }
   }, []);
+
   return (
     <div>
       {UserInfo?.role !== "people" && <SubNavbarForTags />}
@@ -39,12 +42,50 @@ function page() {
         {UserInfo?.role !== "people" && (
           <div className="flex flex-col w-full gap-y-4">
             {groupsInfo?.map(({ _id, name, SubItem }) => (
-              <AccordionComponent
-                content={SubItem}
-                key={_id}
-                itemKey={_id}
-                trigger={name}
-              />
+              <div className="flex w-full group" key={_id}>
+                <AccordionComponent
+                  content={SubItem}
+                  itemKey={_id}
+                  trigger={name}
+                />
+                <div className="flex items-center justify-between">
+                  <TagsDialog
+                    title="Update group"
+                    type="update"
+                    descriptions={`Update the group ${name}`}
+                    trigger={
+                      <TooltipComponent
+                        hoverElement={
+                          <Pencil
+                            onClick={() => {
+                              setTagIdForUpdate(_id);
+                              setDialogType("groups");
+                            }}
+                            className="size-4 mr-4 text-zinc-300 hover:text-white transition invisible group-hover:visible"
+                          />
+                        }
+                      >
+                        <h1>Update Group</h1>
+                      </TooltipComponent>
+                    }
+                  ></TagsDialog>
+                  <AlertDialogComponent
+                    description={`Only the tag ${name} will be deleted not the people data.`}
+                    title={`Are you want to delete ${name} the tag ?`}
+                    _id={_id}
+                    onActionClick={deleteTags}
+                    trigger={
+                      <TooltipComponent
+                        hoverElement={
+                          <Trash className="size-4 mr-4 text-red-700 hover:text-red-600 transition invisible group-hover:visible" />
+                        }
+                      >
+                        <h1>Delete Group</h1>
+                      </TooltipComponent>
+                    }
+                  />
+                </div>
+              </div>
             ))}
           </div>
         )}
@@ -52,21 +93,39 @@ function page() {
           {tagsInfo.map(({ _id, name }) => (
             <div
               key={_id}
-              className="flex items-center justify-between border-b py-4 text-white hover:cursor-pointer hover:underline "
+              className="flex items-center justify-between border-b py-4 text-white hover:cursor-pointer hover:underline group"
             >
               <Link href={`/tags/${_id}`} className="flex-grow">
                 {name}
               </Link>
               {UserInfo?.role !== "people" && (
+                <TagsDialog
+                  type="update"
+                  descriptions={`Update the tag ${name}`}
+                  trigger={
+                    <TooltipComponent
+                      hoverElement={
+                        <Pencil
+                          onClick={() => setTagIdForUpdate(_id)}
+                          className="size-4 mr-4 text-zinc-300 hover:text-white transition invisible group-hover:visible"
+                        />
+                      }
+                    >
+                      <h1>Update Tag</h1>
+                    </TooltipComponent>
+                  }
+                ></TagsDialog>
+              )}
+              {UserInfo?.role !== "people" && (
                 <AlertDialogComponent
                   description={`Only the tag ${name} will be deleted not the people data.`}
                   title={`Are you want to delete ${name} the tag ?`}
                   _id={_id}
-                  onActionClick={deletePeople}
+                  onActionClick={deleteTags}
                   trigger={
                     <TooltipComponent
                       hoverElement={
-                        <Trash className="size-4 mr-4 text-red-700 hover:text-red-600 transition" />
+                        <Trash className="size-4 mr-4 text-red-700 hover:text-red-600 transition invisible group-hover:visible" />
                       }
                     >
                       <h1>Delete Tag</h1>
@@ -82,4 +141,4 @@ function page() {
   );
 }
 
-export default memo(page);
+export default memo(Page);

@@ -6,7 +6,7 @@ const PeopleNavbar = dynamic(() => import("../PeopleNavbar"));
 
 const tableHeading = ["Name", "Email", "Age", ""];
 
-function page() {
+function Page() {
   return (
     <>
       <PeopleNavbar type="create" />
@@ -15,4 +15,4 @@ function page() {
   );
 }
 
-export default page;
+export default Page;

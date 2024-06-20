@@ -5,7 +5,7 @@ import { Loader2, Mail, MapPin, Phone, UserRound } from "lucide-react";
 
 const imageUrl = process.env.NEXT_PUBLIC_IMAGE_URL;
 
-function page() {
+function Page() {
   const { peopleInfo } = usePeopleContext();
 
   const info = [
@@ -59,4 +59,4 @@ function page() {
   );
 }
 
-export default page;
+export default Page;

@@ -136,6 +136,93 @@ export async function POST(req: NextRequest) {
   }
 }
 
+export async function PUT(req: NextRequest) {
+  dbConnect();
+  try {
+    const access_token = req.cookies.get("access_token")?.value;
+    const tagItem = req.nextUrl.searchParams.get("tagItem");
+    const value = await req.json();
+    if (!access_token) {
+      return NextResponse.json<ApiResponse>({
+        success: false,
+        message: "You are not logged in",
+      });
+    }
+
+    const verifiedData = verifyToken(access_token);
+
+    if (verifiedData?.role !== "owner") {
+      return NextResponse.json<ApiResponse>({
+        success: false,
+        message: "You are not logged in",
+      });
+    }
+
+    if (!tagItem) {
+      return NextResponse.json<ApiResponse>({
+        success: false,
+        message: "Provide tagItem",
+      });
+    }
+
+    const isValid = await isChurchAndTagValid(verifiedData.ownerId, tagItem);
+
+    if (!isValid?.length) {
+      return NextResponse.json<ApiResponse>({
+        success: false,
+        message: "Tag not found",
+      });
+    }
+
+    if (!isValid[0]?.isTagExist) {
+      return NextResponse.json<ApiResponse>({
+        success: false,
+        message: "Problem with the tag",
+      });
+    }
+
+    let isUpdated: any;
+
+    if (value.group) {
+      isUpdated = await TagItemModel.updateOne(
+        { _id: tagItem },
+        {
+          $set: {
+            name: value.name,
+            tag_group: value.group,
+          },
+        }
+      );
+    } else {
+      isUpdated = await TagItemModel.updateOne(
+        { _id: tagItem },
+        {
+          $set: {
+            name: value.name,
+          },
+        }
+      );
+    }
+
+    if (!isUpdated.modifiedCount) {
+      return NextResponse.json<ApiResponse>({
+        success: false,
+        message: "Tag not updated",
+      });
+    }
+
+    return NextResponse.json<ApiResponse>({
+      success: true,
+      message: "Insert people successfully",
+    });
+  } catch (err: any) {
+    return NextResponse.json<ApiResponse>({
+      success: false,
+      message: err.message,
+    });
+  }
+}
+
 export async function DELETE(req: NextRequest) {
   dbConnect();
   try {

@@ -3,7 +3,7 @@ import { Form } from "@/components/ui/form";
 import { toast } from "@/components/ui/use-toast";
 import CreateTagItemSchema from "@/schema/CreateTagItemSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { memo, useCallback, useEffect } from "react";
+import { memo, useCallback, useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
@@ -17,11 +17,25 @@ const CustomComboBox = dynamic(() => import("@/components/CustomComboBox"));
 
 function TagItemForm() {
   const router = useRouter();
-  const { dialogType, groupOptions } = useTagsContext();
+  const { dialogType, groupOptions, tagIdForUpdate, tagsInfo } =
+    useTagsContext();
+  const tagInfo = useMemo(
+    () => tagsInfo.find(({ _id }) => _id === tagIdForUpdate),
+    [tagIdForUpdate, dialogType]
+  );
+  // ||
+  // useMemo(
+  //   () =>
+  //     groupOptions.find(({ SubItem }) =>
+  //       SubItem.find(({ _id }) => _id === tagIdForUpdate)
+  //     ),
+  //   [tagIdForUpdate]
+  // );
+
   let form = useForm<z.infer<typeof CreateTagItemSchema>>({
     resolver: zodResolver(CreateTagItemSchema),
     defaultValues: {
-      name: "",
+      name: tagInfo?.name || "",
       group: "",
     },
   });
@@ -29,17 +43,32 @@ function TagItemForm() {
   const onSubmit = useCallback(
     async (values: z.infer<typeof CreateTagItemSchema>) => {
       try {
-        const { data } = await axios.post(
-          `/api/v1/tags/${dialogType === "tags" ? "tag-item" : "tag-group"}`,
-          values
-        );
-        if (data.success) {
-          router.refresh();
+        if (tagIdForUpdate) {
+          const { data } = await axios.put(
+            `/api/v1/tags/tag-item?tagItem=${tagIdForUpdate}`,
+            values
+          );
+          if (data.success) {
+            router.refresh();
+          } else {
+            toast({
+              title: "Error",
+              description: data.message,
+            });
+          }
         } else {
-          toast({
-            title: "Error",
-            description: data.message,
-          });
+          const { data } = await axios.post(
+            `/api/v1/tags/${dialogType === "tags" ? "tag-item" : "tag-group"}`,
+            values
+          );
+          if (data.success) {
+            router.refresh();
+          } else {
+            toast({
+              title: "Error",
+              description: data.message,
+            });
+          }
         }
       } catch (err: any) {
         toast({
@@ -48,7 +77,7 @@ function TagItemForm() {
         });
       }
     },
-    []
+    [tagIdForUpdate, dialogType]
   );
 
   const methodForUseEffect = useCallback(() => {
@@ -93,6 +122,8 @@ function TagItemForm() {
         <Button variant="secondary" size="lg" className="text-lg mt-8">
           {form.formState.isSubmitting ? (
             <Loader2 className="size-6 animate-spin" />
+          ) : tagIdForUpdate ? (
+            "Update"
           ) : (
             "Submit"
           )}

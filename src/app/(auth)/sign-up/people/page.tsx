@@ -10,7 +10,7 @@ const SignupFormPeople = dynamic(
   () => import("@/my_components/Form/SignupFormPeople")
 );
 
-function page() {
+function Page() {
   return (
     <Card className="w-[90%] max-w-[500px]">
       <CardHeader>
@@ -24,4 +24,4 @@ function page() {
   );
 }
 
-export default page;
+export default Page;

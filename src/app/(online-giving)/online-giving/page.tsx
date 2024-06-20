@@ -14,7 +14,7 @@ interface ResponseValue {
 
 const imageUrl = process.env.NEXT_PUBLIC_IMAGE_URL;
 
-function page() {
+function Page() {
   const [amount, setAmount] = useState<Number>(0);
   const { ChurchInfo, UserInfo } = useOnlineGivingContext();
   const paymentHandler = useCallback(
@@ -80,4 +80,4 @@ function page() {
   );
 }
 
-export default page;
+export default Page;
