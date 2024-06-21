@@ -136,7 +136,7 @@ export async function POST(req: NextRequest) {
   }
 }
 
-export async function PUT(req: NextRequest) {
+export async function PATCH(req: NextRequest) {
   dbConnect();
   try {
     const access_token = req.cookies.get("access_token")?.value;
@@ -183,7 +183,7 @@ export async function PUT(req: NextRequest) {
 
     let isUpdated: any;
 
-    if (value.group) {
+    if (value?.group) {
       isUpdated = await TagItemModel.updateOne(
         { _id: tagItem },
         {

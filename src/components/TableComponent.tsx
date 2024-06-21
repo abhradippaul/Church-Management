@@ -38,7 +38,12 @@ interface PeopleInfoValue {
 }
 
 function TableComponent({ tableHeading, type }: TableComponentProps) {
-  const { peopleInfo: info, tagInfo, filterOptions } = usePeopleContext();
+  const {
+    peopleInfo: info,
+    tagInfo,
+    filterOptions,
+    setPeopleCount,
+  } = usePeopleContext();
   const [peopleInfo, setPeopleInfo] = useState(info);
   const router = useRouter();
 
@@ -72,9 +77,9 @@ function TableComponent({ tableHeading, type }: TableComponentProps) {
         const { data } = await axios.get(
           `/api/v1/people?page=${0}&gender=${filterOptions.gender}`
         );
-        console.log(data);
         if (data.success) {
           setPeopleInfo(data.data.Peoples);
+          setPeopleCount(data.data?.PeopleCount);
         }
       }
     } catch (err) {

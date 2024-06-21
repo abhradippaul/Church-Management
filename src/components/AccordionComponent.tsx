@@ -28,7 +28,8 @@ function AccordionComponent({
   itemKey,
   trigger,
 }: AccordionComponentProps) {
-  const { setTagIdForUpdate, setDialogType } = useTagsContext();
+  const { setTagIdForUpdate, setDialogType, setGroupIdForUpdate } =
+    useTagsContext();
   const router = useRouter();
   const deletePeople = useCallback(async (id: string) => {
     try {
@@ -62,7 +63,11 @@ function AccordionComponent({
                   <TooltipComponent
                     hoverElement={
                       <Pencil
-                        onClick={() => setTagIdForUpdate(_id)}
+                        onClick={() => {
+                          setTagIdForUpdate(_id);
+                          setDialogType("tags");
+                          setGroupIdForUpdate(itemKey);
+                        }}
                         className="size-4 mr-4 text-zinc-300 hover:text-white transition"
                       />
                     }

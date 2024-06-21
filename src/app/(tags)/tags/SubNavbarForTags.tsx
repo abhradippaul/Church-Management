@@ -37,7 +37,7 @@ function SubNavbarTags() {
       />
       <div className="flex border rounded-md">
         <TagsDialog
-        type="create"
+          type="create"
           descriptions="You can create tags to attach multiple and optionally you can add the tags to any group."
           trigger={
             <Button

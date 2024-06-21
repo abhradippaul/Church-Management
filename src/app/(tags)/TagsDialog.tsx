@@ -12,7 +12,7 @@ import {
 import { Toaster } from "@/components/ui/toaster";
 import { useTagsContext } from "@/my_components/providers/TagsProvider";
 import dynamic from "next/dynamic";
-import { ReactNode, memo, useEffect, useState } from "react";
+import { ReactNode, memo, useCallback, useEffect, useState } from "react";
 const TagItemForm = dynamic(() => import("@/my_components/Form/TagItemForm"));
 
 interface TagsDialogProps {
@@ -24,9 +24,22 @@ interface TagsDialogProps {
 
 function TagsDialog({ trigger, descriptions, type, title }: TagsDialogProps) {
   const [isMounted, setIsMounted] = useState(false);
-  const { dialogType, isFormError, setTagIdForUpdate } = useTagsContext();
+  const {
+    dialogType,
+    isFormError,
+    setTagIdForUpdate,
+    setGroupIdForUpdate,
+  } = useTagsContext();
+
   useEffect(() => {
     setIsMounted(true);
+  }, []);
+
+  const onOpenChange = useCallback(() => {
+    if (type === "create") {
+      setTagIdForUpdate("");
+      setGroupIdForUpdate("");
+    }
   }, []);
 
   if (!isMounted) {
@@ -34,7 +47,7 @@ function TagsDialog({ trigger, descriptions, type, title }: TagsDialogProps) {
   }
 
   return (
-    <Dialog onOpenChange={() => type === "create" && setTagIdForUpdate("")}>
+    <Dialog onOpenChange={onOpenChange}>
       <DialogTrigger>{trigger}</DialogTrigger>
       <DialogContent>
         <DialogHeader>

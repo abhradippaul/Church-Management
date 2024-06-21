@@ -21,10 +21,12 @@ import { memo, useState } from "react";
 import { FormControl, FormField, FormItem, FormLabel } from "./ui/form";
 
 interface CustomComboBoxProps {
-  options: {
-    _id: string;
-    name: string;
-  }[];
+  options:
+    | {
+        _id: string;
+        name: string;
+      }[]
+    | undefined;
 
   placeholder: string;
   placeholderForEmptyValue: string;

@@ -52,7 +52,7 @@ function Page() {
             color: "#3399cc",
           },
         };
-        const razor = new window.Razorpay(options);
+        const razor = new (window as any).Razorpay(options);
         razor.open();
         e.preventDefault();
       }

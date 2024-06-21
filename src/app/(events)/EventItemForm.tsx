@@ -73,7 +73,11 @@ function EventItemForm() {
     defaultValues: {
       name: event?.name || "",
       tags: event?.Tag_Id || "",
-      event_date: new Date(),
+      event_date: event?._id
+        ? new Date(
+            `${event?.date_month}-${event?.date_day}-${event?.date_year}`
+          )
+        : new Date(),
       event_hour: event?.time.split(":")[0] || "00",
       event_minutes: event?.time.split(" ")[0].split(":")[1] || "00",
       event_time: (event?.time.split(" ")[1] as "am" | "pm") || "am",
@@ -84,8 +88,8 @@ function EventItemForm() {
   const onSubmit = useCallback(
     async (values: z.infer<typeof CreateEventSchema>) => {
       try {
-        if (eventIdForUpdate && event) {
-          const { data } = await axios.post(
+        if (event?._id) {
+          const { data } = await axios.put(
             `/api/v1/events?eventId=${event?._id}`,
             {
               name: values.name,

@@ -24,7 +24,7 @@ interface CustomSelectInputProps extends InputProps {
     value: string;
     label: string;
   }[];
-  triggerClass: string;
+  triggerClass?: string;
 }
 
 function CustomSelectInput({

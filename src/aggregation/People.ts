@@ -31,7 +31,8 @@ export async function isPeopleExistAggregate(userId: string, peopleId: string) {
     {
       $project: {
         _id: 0,
-        Peoples: 1,
+        "Peoples._id": 1,
+        "Peoples.image": 1,
       },
     },
   ]);
@@ -66,13 +67,6 @@ export async function peopleDetailsAggregate(
     },
     {
       $addFields: {
-        PeopleCount: {
-          $size: "$Peoples",
-        },
-      },
-    },
-    {
-      $addFields: {
         Peoples: {
           $filter: {
             input: "$Peoples",
@@ -92,6 +86,13 @@ export async function peopleDetailsAggregate(
             page * limit,
             limit,
           ],
+        },
+      },
+    },
+    {
+      $addFields: {
+        PeopleCount: {
+          $size: "$Peoples",
         },
       },
     },

@@ -27,10 +27,8 @@ interface TagsContextValue {
   isFormError: boolean;
   setIsFormError: Dispatch<SetStateAction<boolean>>;
   groupOptions: {
-    SubItem: {
-      _id: string;
-      name: string;
-    }[];
+    _id: string;
+    name: string;
   }[];
   tagsInfo: ItemValue[];
   groupsInfo: {
@@ -76,10 +74,8 @@ function TagsProvider({
   children: ReactNode;
   tagsInfo: ItemValue[];
   groupOptions: {
-    SubItem: {
-      _id: string;
-      name: string;
-    }[];
+    _id: string;
+    name: string;
   }[];
   groupsInfo: {
     _id: string;

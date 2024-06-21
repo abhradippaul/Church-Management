@@ -23,9 +23,10 @@ interface CreatePeopleContextValue {
     _id: string;
     name: string;
   };
-  PeopleCount?: number;
   filterOptions: FilterOptionsValue;
   setFilterOptions: Dispatch<SetStateAction<FilterOptionsValue>>;
+  peopleCount: number | undefined;
+  setPeopleCount: Dispatch<SetStateAction<number | undefined>>;
 }
 
 const CreatePeopleContext = createContext<CreatePeopleContextValue>({
@@ -33,9 +34,10 @@ const CreatePeopleContext = createContext<CreatePeopleContextValue>({
   isFormError: false,
   setIsFormError: () => {},
   tagInfo: undefined,
-  PeopleCount: 0,
   filterOptions: {},
   setFilterOptions: () => {},
+  peopleCount: 0,
+  setPeopleCount: () => {},
 });
 
 const PeopleContextProvider = CreatePeopleContext.Provider;
@@ -80,6 +82,9 @@ function PeopleProvider({
 }) {
   const [isFormError, setIsFormError] = useState(false);
   const [filterOptions, setFilterOptions] = useState<FilterOptionsValue>({});
+  const [peopleCount, setPeopleCount] = useState<number | undefined>(
+    PeopleCount
+  );
   return (
     <PeopleContextProvider
       value={{
@@ -87,7 +92,8 @@ function PeopleProvider({
         isFormError,
         setIsFormError,
         tagInfo,
-        PeopleCount,
+        peopleCount,
+        setPeopleCount,
         filterOptions,
         setFilterOptions,
       }}

@@ -184,6 +184,77 @@ export async function POST(req: NextRequest) {
   }
 }
 
+export async function PATCH(req: NextRequest) {
+  dbConnect();
+  try {
+    const peopleId = req.nextUrl.searchParams.get("peopleId");
+    const access_token = req.cookies.get("access_token")?.value;
+    const value = await req.json();
+
+    if (!access_token || !peopleId) {
+      return NextResponse.json<ApiResponse>({
+        success: false,
+        message: "You are not logged in or does not provide people id",
+      });
+    }
+
+    const verifiedData = verifyToken(access_token);
+
+    if (verifiedData?.role !== "owner") {
+      return NextResponse.json<ApiResponse>({
+        success: false,
+        message: "You are not logged in",
+      });
+    }
+
+    // Checking is the people under the owner or not
+    const isPeopleExist = await isPeopleExistAggregate(
+      verifiedData.ownerId,
+      peopleId
+    );
+
+    if (!isPeopleExist?.length) {
+      return NextResponse.json<ApiResponse>({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    if (!isPeopleExist[0]?.Peoples) {
+      return NextResponse.json<ApiResponse>({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    // If everything is verified then deleting the person
+    const isPeopleUpdated = await PeopleModel.updateOne(
+      {
+        _id: peopleId,
+      },
+      { $set: value }
+    );
+
+    if (!isPeopleUpdated?.modifiedCount) {
+      return NextResponse.json<ApiResponse>({
+        success: false,
+        message: "Failed to delete user",
+      });
+    }
+
+    return NextResponse.json<ApiResponse>({
+      success: true,
+      message: "User deleted successfully",
+      data: isPeopleExist,
+    });
+  } catch (err: any) {
+    return NextResponse.json<ApiResponse>({
+      success: false,
+      message: err.message,
+    });
+  }
+}
+
 export async function DELETE(req: NextRequest) {
   dbConnect();
   try {

@@ -17,40 +17,54 @@ const CustomComboBox = dynamic(() => import("@/components/CustomComboBox"));
 
 function TagItemForm() {
   const router = useRouter();
-  const { dialogType, groupOptions, tagIdForUpdate, tagsInfo } =
-    useTagsContext();
+  const {
+    dialogType,
+    groupOptions,
+    tagIdForUpdate,
+    tagsInfo,
+    groupsInfo,
+    groupIdForUpdate,
+  } = useTagsContext();
   const tagInfo = useMemo(
-    () => tagsInfo.find(({ _id }) => _id === tagIdForUpdate),
-    [tagIdForUpdate, dialogType]
+    () =>
+      (dialogType === "tags" &&
+        tagsInfo.find(({ _id }) => _id === tagIdForUpdate)) ||
+      groupsInfo
+        .find(({ _id }) => _id === groupIdForUpdate)
+        ?.SubItem.find(({ _id }) => _id === tagIdForUpdate),
+    [tagIdForUpdate, dialogType, groupIdForUpdate]
   );
-  // ||
-  // useMemo(
-  //   () =>
-  //     groupOptions.find(({ SubItem }) =>
-  //       SubItem.find(({ _id }) => _id === tagIdForUpdate)
-  //     ),
-  //   [tagIdForUpdate]
-  // );
+
+  const groupInfo = useMemo(
+    () => groupsInfo.find(({ _id }) => _id === groupIdForUpdate),
+    [groupIdForUpdate, dialogType]
+  );
 
   let form = useForm<z.infer<typeof CreateTagItemSchema>>({
     resolver: zodResolver(CreateTagItemSchema),
     defaultValues: {
-      name: tagInfo?.name || "",
-      group: "",
+      name: (dialogType === "tags" ? tagInfo?.name : groupInfo?.name) || "",
+      group: (dialogType === "tags" ? groupInfo?._id : "") || "",
     },
   });
 
   const onSubmit = useCallback(
     async (values: z.infer<typeof CreateTagItemSchema>) => {
+      console.log(dialogType);
       try {
-        if (tagIdForUpdate) {
-          const { data } = await axios.put(
-            `/api/v1/tags/tag-item?tagItem=${tagIdForUpdate}`,
+        if (tagIdForUpdate || groupIdForUpdate) {
+          const { data } = await axios.patch(
+            `/api/v1/tags/${
+              dialogType === "tags"
+                ? `tag-item?tagItem=${tagIdForUpdate}`
+                : `tag-group?tagItem=${groupIdForUpdate}`
+            }`,
             values
           );
           if (data.success) {
             router.refresh();
           } else {
+            console.log(data);
             toast({
               title: "Error",
               description: data.message,
@@ -77,7 +91,7 @@ function TagItemForm() {
         });
       }
     },
-    [tagIdForUpdate, dialogType]
+    [tagIdForUpdate, dialogType, groupIdForUpdate]
   );
 
   const methodForUseEffect = useCallback(() => {
@@ -101,9 +115,11 @@ function TagItemForm() {
         <CustomFormInput
           control={form.control}
           inputName="name"
-          label="Tag Name"
+          label={dialogType === "tags" ? "Tag Name" : "Group Name"}
           type="text"
-          placeholder="Enter a tag name"
+          placeholder={
+            dialogType === "tags" ? "Enter a tag name" : "Enter a group name"
+          }
           disabled={form.formState.isSubmitting}
         />
         <div className="my-4"></div>
@@ -122,7 +138,7 @@ function TagItemForm() {
         <Button variant="secondary" size="lg" className="text-lg mt-8">
           {form.formState.isSubmitting ? (
             <Loader2 className="size-6 animate-spin" />
-          ) : tagIdForUpdate ? (
+          ) : tagIdForUpdate || groupIdForUpdate ? (
             "Update"
           ) : (
             "Submit"

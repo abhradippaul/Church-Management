@@ -13,13 +13,34 @@ import SubNavbarForTags from "./SubNavbarForTags";
 import TagsDialog from "../TagsDialog";
 
 function Page() {
-  const { tagsInfo, groupsInfo, UserInfo, setTagIdForUpdate, setDialogType } =
-    useTagsContext();
+  const {
+    tagsInfo,
+    groupsInfo,
+    UserInfo,
+    setTagIdForUpdate,
+    setDialogType,
+    setGroupIdForUpdate,
+  } = useTagsContext();
   const router = useRouter();
   const deleteTags = useCallback(async (id: string) => {
     try {
       const { data } = await axios.delete(
         `/api/v1/tags/tag-item?tagItem=${id}`
+      );
+      if (data.success) {
+        router.refresh();
+      } else {
+        console.log(data);
+      }
+    } catch (err: any) {
+      console.log(err.message);
+    }
+  }, []);
+
+  const deleteGroup = useCallback(async (id: string) => {
+    try {
+      const { data } = await axios.delete(
+        `/api/v1/tags/tag-group?tagItem=${id}`
       );
       if (data.success) {
         router.refresh();
@@ -58,7 +79,7 @@ function Page() {
                         hoverElement={
                           <Pencil
                             onClick={() => {
-                              setTagIdForUpdate(_id);
+                              setGroupIdForUpdate(_id);
                               setDialogType("groups");
                             }}
                             className="size-4 mr-4 text-zinc-300 hover:text-white transition invisible group-hover:visible"
@@ -73,7 +94,7 @@ function Page() {
                     description={`Only the tag ${name} will be deleted not the people data.`}
                     title={`Are you want to delete ${name} the tag ?`}
                     _id={_id}
-                    onActionClick={deleteTags}
+                    onActionClick={deleteGroup}
                     trigger={
                       <TooltipComponent
                         hoverElement={
@@ -106,7 +127,11 @@ function Page() {
                     <TooltipComponent
                       hoverElement={
                         <Pencil
-                          onClick={() => setTagIdForUpdate(_id)}
+                          onClick={() => {
+                            setTagIdForUpdate(_id);
+                            setDialogType("tags");
+                            setGroupIdForUpdate("");
+                          }}
                           className="size-4 mr-4 text-zinc-300 hover:text-white transition invisible group-hover:visible"
                         />
                       }

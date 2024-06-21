@@ -97,16 +97,33 @@ function UserCreateForm() {
   const onSubmit = useCallback(
     async (values: z.infer<typeof CreateUserSchema>) => {
       values.image = isUploadedImage;
+      console.log(peopleInfo);
       try {
-        const { data } = await axios.post("/api/v1/people", values);
-        if (data.success) {
-          router.refresh();
+        if (peopleInfo._id) {
+          const { data } = await axios.patch(
+            `/api/v1/people?peopleId=${peopleInfo._id}`,
+            values
+          );
+          if (data.success) {
+            router.refresh();
+          } else {
+            setIsFormError(true);
+            toast({
+              title: "Error",
+              description: data.message,
+            });
+          }
         } else {
-          setIsFormError(true);
-          toast({
-            title: "Error",
-            description: data.message,
-          });
+          const { data } = await axios.post("/api/v1/people", values);
+          if (data.success) {
+            router.refresh();
+          } else {
+            setIsFormError(true);
+            toast({
+              title: "Error",
+              description: data.message,
+            });
+          }
         }
       } catch (err: any) {
         setIsFormError(true);
