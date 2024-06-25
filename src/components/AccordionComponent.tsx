@@ -54,43 +54,50 @@ function AccordionComponent({
             key={_id}
             className="flex items-center justify-between"
           >
-            <Link href={`/tags/${_id}`}>{name}</Link>
-            <div>
-              <TagsDialog
-                type="update"
-                descriptions={`Update the tag ${name}`}
-                trigger={
-                  <TooltipComponent
-                    hoverElement={
-                      <Pencil
-                        onClick={() => {
-                          setTagIdForUpdate(_id);
-                          setDialogType("tags");
-                          setGroupIdForUpdate(itemKey);
-                        }}
-                        className="size-4 mr-4 text-zinc-300 hover:text-white transition"
-                      />
-                    }
-                  >
-                    <h1>Update Tag</h1>
-                  </TooltipComponent>
-                }
-              ></TagsDialog>
-              <AlertDialogComponent
-                description={`Only the tag ${name} will be deleted not the people data.`}
-                title={`Are you want to delete ${name} the tag ?`}
-                _id={_id}
-                onActionClick={deletePeople}
-                trigger={
-                  <TooltipComponent
-                    hoverElement={
-                      <Trash className="size-4 mr-4 text-red-700 hover:text-red-600 transition" />
-                    }
-                  >
-                    <h1>Delete Tag</h1>
-                  </TooltipComponent>
-                }
-              />
+            <div
+              key={_id}
+              className="group w-full flex items-center justify-between"
+            >
+              <Link href={`/tags/${_id}`} className="flex-1">
+                {name}
+              </Link>
+              <div>
+                <TagsDialog
+                  type="update"
+                  descriptions={`Update the tag ${name}`}
+                  trigger={
+                    <TooltipComponent
+                      hoverElement={
+                        <Pencil
+                          onClick={() => {
+                            setTagIdForUpdate(_id);
+                            setDialogType("tags");
+                            setGroupIdForUpdate(itemKey);
+                          }}
+                          className="size-4 mr-4 invisible group-hover:visible text-zinc-300"
+                        />
+                      }
+                    >
+                      <h1>Update Tag</h1>
+                    </TooltipComponent>
+                  }
+                ></TagsDialog>
+                <AlertDialogComponent
+                  description={`Only the tag ${name} will be deleted not the people data.`}
+                  title={`Are you want to delete ${name} the tag ?`}
+                  _id={_id}
+                  onActionClick={deletePeople}
+                  trigger={
+                    <TooltipComponent
+                      hoverElement={
+                        <Trash className="size-4 mr-4 invisible group-hover:visible text-red-500" />
+                      }
+                    >
+                      <h1>Delete Tag</h1>
+                    </TooltipComponent>
+                  }
+                />
+              </div>
             </div>
           </AccordionContent>
         ))}

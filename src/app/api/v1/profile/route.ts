@@ -1,75 +1,75 @@
-import {
-  GetDashboardInfoForOwner,
-  GetDashboardInfoForUser,
-} from "@/aggregation/Dashboard";
+import { getPeopleInfoAggregate } from "@/aggregation/PeopleInfo";
 import dbConnect from "@/lib/DbConnect";
 import { verifyToken } from "@/lib/JsonWebToken";
-import AdminModel from "@/model/Admin";
 import OwnerModel from "@/model/Owner";
+import PeopleModel from "@/model/People";
 import { ApiResponse } from "@/types/ApiResponse";
 import mongoose from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
-
-export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
   dbConnect();
   try {
     const access_token = req.cookies.get("access_token")?.value;
-
     if (!access_token) {
       return NextResponse.json<ApiResponse>({
         success: false,
-        message: "You are not logged in",
+        message: "You are not logged in or does not provide people id",
       });
     }
-
     const verifiedData = verifyToken(access_token);
-
-    if (!verifiedData?.role || !verifiedData.ownerId) {
+    if (!verifiedData?.role) {
       return NextResponse.json<ApiResponse>({
         success: false,
         message: "You are not logged in",
       });
     }
 
-    let data: any = [];
+    let info = [];
 
     if (verifiedData.role === "admin" && verifiedData.adminId) {
-      const isAdminExist = await AdminModel.findOne(
-        { _id: verifiedData.adminId },
-        { name: 1, image: 1 }
-      );
-
-      if (!isAdminExist) {
-        return NextResponse.json<ApiResponse>({
-          success: false,
-          message: "You are not logged in",
-        });
-      }
-
-      data = await OwnerModel.aggregate([
+    } else if (verifiedData.role === "owner" && verifiedData.ownerId) {
+      info = await OwnerModel.aggregate([
         {
           $match: {
             _id: new mongoose.Types.ObjectId(verifiedData.ownerId),
           },
         },
+        {
+          $project: {
+            name: 1,
+            image: 1,
+            email: 1,
+          },
+        },
       ]);
-    } else if (verifiedData.role === "owner") {
-      data = await GetDashboardInfoForOwner(verifiedData.ownerId);
     } else if (verifiedData.role === "people" && verifiedData.peopleId) {
-      data = await GetDashboardInfoForUser(
-        verifiedData.ownerId,
-        verifiedData.peopleId
-      );
+      info = await PeopleModel.aggregate([
+        {
+          $match: {
+            _id: new mongoose.Types.ObjectId(verifiedData.peopleId),
+          },
+        },
+        {
+          $project: {
+            name: 1,
+            image: 1,
+            email: 1,
+            phone_number: 1,
+            gender: 1,
+            date_of_birth: 1,
+            address: 1,
+          },
+        },
+      ]);
     } else {
       return NextResponse.json<ApiResponse>({
         success: false,
-        message: "Some thing went wrong in role",
+        message: "You are not logged in",
       });
     }
 
-    if (!data.length) {
+    if (!info.length) {
       return NextResponse.json<ApiResponse>({
         success: false,
         message: "No data found",
@@ -78,10 +78,10 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json<ApiResponse>({
       success: true,
-      message: "Data found successfully",
+      message: "Successfully fetched users information",
       data: {
-        ...data[0],
         role: verifiedData.role,
+        ...info[0],
       },
     });
   } catch (err: any) {

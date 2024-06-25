@@ -78,6 +78,13 @@ export async function peopleDetailsAggregate(
     },
     {
       $addFields: {
+        PeopleCount: {
+          $size: "$Peoples",
+        },
+      },
+    },
+    {
+      $addFields: {
         Peoples: {
           $slice: [
             {
@@ -86,13 +93,6 @@ export async function peopleDetailsAggregate(
             page * limit,
             limit,
           ],
-        },
-      },
-    },
-    {
-      $addFields: {
-        PeopleCount: {
-          $size: "$Peoples",
         },
       },
     },

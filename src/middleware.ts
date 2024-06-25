@@ -31,5 +31,7 @@ export const config = {
     "/tags",
     "/tags/:tagId*",
     "/events",
+    "/giving",
+    "/online-giving",
   ],
 };

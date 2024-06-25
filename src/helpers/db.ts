@@ -132,3 +132,23 @@ export async function getEventsInfo({
     console.log(err);
   }
 }
+
+export async function createCashPayment(value: {
+  userId: string;
+  amount: number;
+}) {
+  try {
+    const { data } = await axios.post(
+      `http://${host}/api/v1/payment/cash`,
+      value,
+      {
+        headers: {
+          Cookie: `${access_token?.name}=${access_token?.value}`,
+        },
+      }
+    );
+    return data;
+  } catch (err) {
+    console.log(err);
+  }
+}
