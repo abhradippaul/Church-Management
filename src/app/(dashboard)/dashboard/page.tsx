@@ -1,15 +1,57 @@
 "use client";
 
 import TableComponentForEvents from "@/components/TableComponentForEvents";
+import { Button } from "@/components/ui/button";
 import { useDashboardContext } from "@/my_components/providers/DashboardProvider";
-import { memo } from "react";
+import axios from "axios";
+import { MessageSquare } from "lucide-react";
+import { memo, useCallback } from "react";
 
 function DashboardPage() {
-  const { recentJoined, Events, UserInfo, PaymentAmount } =
-    useDashboardContext();
+  const {
+    recentJoined,
+    Events,
+    UserInfo,
+    PaymentAmount,
+    setIsChatSheetOpen,
+    setChatInfo,
+  } = useDashboardContext();
+  const onMsgButtonClick = useCallback(async () => {
+    try {
+      setIsChatSheetOpen(true);
+      setChatInfo({
+        // imageUrl: image,
+        // name,
+        isChatLoading: true,
+      });
+      const { data } = await axios.get(`/api/v1/chat`);
+      if (data.success) {
+        setChatInfo((prev: any) => ({
+          ...prev,
+          chatDetails: data.data,
+          isChatLoading: false,
+        }));
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  }, []);
   return (
     <div className="pt-24">
-      <h1 className="mb-8">This is our dashboard page</h1>
+      <div className="flex items-center justify-between mb-8">
+        <h1>This is our dashboard page</h1>
+        {UserInfo?.role === "people" && (
+          <MessageSquare
+            className="size-4 cursor-pointer text-zinc-300 hover:text-white"
+            onClick={onMsgButtonClick}
+          />
+        )}
+        {UserInfo?.role === "admin" && (
+          <Button variant="outline" size="sm">
+            Change Church
+          </Button>
+        )}
+      </div>
       <div className="flex items-center justify-between gap-y-4 flex-col">
         {UserInfo?.role !== "people" && (
           <div className="flex gap-4 items-center justify-between w-full">

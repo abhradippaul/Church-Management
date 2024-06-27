@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
         });
       }
 
-      if (isExist?.verify_expiry > Math.floor(Date.now() / 1000)) {
+      if (isExist?.verify_expiry < Math.floor(Date.now() / 1000)) {
         return NextResponse.json<ApiResponse>({
           success: false,
           message: "Verification code expired",

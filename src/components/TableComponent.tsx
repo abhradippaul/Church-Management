@@ -7,7 +7,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Loader2, Trash } from "lucide-react";
+import { Loader2, MessageSquare, Trash } from "lucide-react";
 import { memo, useCallback, useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { usePeopleContext } from "@/my_components/providers/PeopleProvider";
@@ -22,12 +22,6 @@ const AlertDialogComponent = dynamic(() => import("./AlertDialogComponent"));
 interface TableComponentProps {
   type: "people" | "tagpeople";
   tableHeading: string[];
-  // tableRow: {
-  //   imageUrl: string;
-  //   name: string;
-  //   email: string;
-  //   age: string;
-  // }[];
 }
 
 interface PeopleInfoValue {
@@ -38,6 +32,8 @@ interface PeopleInfoValue {
   image: string;
 }
 
+const imageUrl = process.env.NEXT_PUBLIC_IMAGE_URL;
+
 function TableComponent({ tableHeading, type }: TableComponentProps) {
   const {
     peopleInfo: info,
@@ -45,6 +41,8 @@ function TableComponent({ tableHeading, type }: TableComponentProps) {
     filterOptions,
     setPeopleCount,
     peopleCount,
+    setIsChatSheetOpen,
+    setChatInfo,
   } = usePeopleContext();
   const [peopleInfo, setPeopleInfo] = useState(info);
   const [page, setPage] = useState<number>(0);
@@ -75,6 +73,32 @@ function TableComponent({ tableHeading, type }: TableComponentProps) {
     }
   }, []);
 
+  const onMsgButtonClick = useCallback(
+    async (e: any, _id: string, name: string, image: string) => {
+      try {
+        setIsChatSheetOpen(true);
+        e.stopPropagation();
+        setChatInfo({
+          _id,
+          imageUrl: image,
+          name,
+          isChatLoading: true,
+        });
+        const { data } = await axios.get(`/api/v1/chat?peopleId=${_id}`);
+        if (data.success) {
+          setChatInfo((prev: any) => ({
+            ...prev,
+            chatDetails: data.data,
+            isChatLoading: false,
+          }));
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    },
+    []
+  );
+
   const methodForFilterRequest = useCallback(async () => {
     try {
       if (filterOptions.gender || filterOptions.order || page) {
@@ -96,8 +120,6 @@ function TableComponent({ tableHeading, type }: TableComponentProps) {
       setIsLoading(false);
     }
   }, [filterOptions, page]);
-
-  const imageUrl = process.env.NEXT_PUBLIC_IMAGE_URL;
 
   useEffect(() => {
     methodForFilterRequest();
@@ -136,6 +158,12 @@ function TableComponent({ tableHeading, type }: TableComponentProps) {
                 <TableCell>
                   {new Date().getFullYear() -
                     new Date(date_of_birth).getFullYear()}
+                </TableCell>
+                <TableCell>
+                  <MessageSquare
+                    className="size-4"
+                    onClick={(e) => onMsgButtonClick(e, _id, name, image)}
+                  />
                 </TableCell>
                 <TableCell>
                   <AlertDialogComponent

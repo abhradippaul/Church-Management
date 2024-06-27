@@ -37,6 +37,10 @@ const AdminPages = [
     title: "Giving",
     path: "/giving",
   },
+  {
+    title: "Check In",
+    path: "/check-in",
+  },
 ];
 
 const Pages = [

@@ -15,6 +15,19 @@ interface FilterOptionsValue {
   order?: "recent" | "oldest" | null;
 }
 
+interface PeopleInfoForMessage {
+  _id: string;
+  name: string;
+  imageUrl: string;
+  isChatLoading: boolean;
+  chatDetails?: {
+    _id: string;
+    message: string;
+    createdAt: string;
+    receiver: string;
+  }[];
+}
+
 interface CreatePeopleContextValue {
   peopleInfo: any;
   isFormError: boolean;
@@ -27,6 +40,10 @@ interface CreatePeopleContextValue {
   setFilterOptions: Dispatch<SetStateAction<FilterOptionsValue>>;
   peopleCount: number | undefined;
   setPeopleCount: Dispatch<SetStateAction<number | undefined>>;
+  isChatSheetOpen: boolean;
+  setIsChatSheetOpen: Dispatch<SetStateAction<boolean>>;
+  chatInfo: PeopleInfoForMessage | null;
+  setChatInfo: Dispatch<SetStateAction<PeopleInfoForMessage | null>>;
 }
 
 const CreatePeopleContext = createContext<CreatePeopleContextValue>({
@@ -38,6 +55,10 @@ const CreatePeopleContext = createContext<CreatePeopleContextValue>({
   setFilterOptions: () => {},
   peopleCount: 0,
   setPeopleCount: () => {},
+  isChatSheetOpen: false,
+  setIsChatSheetOpen: () => {},
+  chatInfo: null,
+  setChatInfo: () => {},
 });
 
 const PeopleContextProvider = CreatePeopleContext.Provider;
@@ -85,6 +106,8 @@ function PeopleProvider({
   const [peopleCount, setPeopleCount] = useState<number | undefined>(
     PeopleCount
   );
+  const [isChatSheetOpen, setIsChatSheetOpen] = useState<boolean>(false);
+  const [chatInfo, setChatInfo] = useState<PeopleInfoForMessage | null>(null);
   return (
     <PeopleContextProvider
       value={{
@@ -96,6 +119,10 @@ function PeopleProvider({
         setPeopleCount,
         filterOptions,
         setFilterOptions,
+        isChatSheetOpen,
+        setIsChatSheetOpen,
+        chatInfo,
+        setChatInfo,
       }}
     >
       {children}

@@ -51,13 +51,13 @@ function TableComponentForEvents({ Events }: { Events: EventInfoValue[] }) {
       <TableCaption>Events Infomation</TableCaption>
       <TableHeader>
         <TableRow>
-          {heading.map((row) => (
+          {heading?.map((row) => (
             <TableHead key={row}>{row}</TableHead>
           ))}
         </TableRow>
       </TableHeader>
       <TableBody>
-        {Events.map(
+        {Events?.map(
           ({
             Tag_Name,
             date_day,

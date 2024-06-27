@@ -67,8 +67,8 @@ export async function POST(req: NextRequest) {
       return response;
     }
     let isAdminExist = await AdminModel.findOne({ email }, { password: 1 });
-    let ownerId = await OwnerModel.findOne();
-    if (!isAdminExist?._id || !ownerId?._id) {
+    // let ownerId = await OwnerModel.findOne();
+    if (!isAdminExist?._id) {
       return NextResponse.json<ApiResponse>({
         success: false,
         message: "User does not exist",
@@ -85,7 +85,7 @@ export async function POST(req: NextRequest) {
 
     const { access_token, refresh_token } = createToken({
       adminId: isAdminExist._id.toString(),
-      ownerId: ownerId._id.toString(),
+      // ownerId: ownerId._id.toString(),
       role: "admin",
     });
     const response = NextResponse.json<ApiResponse>({

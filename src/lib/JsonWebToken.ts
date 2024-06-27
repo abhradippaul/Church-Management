@@ -3,7 +3,7 @@ import { sign, verify } from "jsonwebtoken";
 interface PayloadValue {
   role: "admin" | "owner" | "people";
   adminId?: string;
-  ownerId: string;
+  ownerId?: string;
   peopleId?: string;
 }
 

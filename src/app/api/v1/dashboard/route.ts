@@ -1,13 +1,13 @@
 import {
+  GetDashboardInfoForAdmin,
   GetDashboardInfoForOwner,
   GetDashboardInfoForUser,
 } from "@/aggregation/Dashboard";
 import dbConnect from "@/lib/DbConnect";
-import { verifyToken } from "@/lib/JsonWebToken";
+import { createToken, verifyToken } from "@/lib/JsonWebToken";
 import AdminModel from "@/model/Admin";
 import OwnerModel from "@/model/Owner";
 import { ApiResponse } from "@/types/ApiResponse";
-import mongoose from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
 
     const verifiedData = verifyToken(access_token);
 
-    if (!verifiedData?.role || !verifiedData.ownerId) {
+    if (!verifiedData?.role) {
       return NextResponse.json<ApiResponse>({
         success: false,
         message: "You are not logged in",
@@ -36,9 +36,11 @@ export async function GET(req: NextRequest) {
     let data: any = [];
 
     if (verifiedData.role === "admin" && verifiedData.adminId) {
-      const isAdminExist = await AdminModel.findOne(
-        { _id: verifiedData.adminId },
-        { name: 1, image: 1 }
+      const isAdminExist = await AdminModel.find(
+        {
+          _id: verifiedData.adminId,
+        },
+        { _id: 1 }
       );
 
       if (!isAdminExist) {
@@ -48,18 +50,31 @@ export async function GET(req: NextRequest) {
         });
       }
 
-      data = await OwnerModel.aggregate([
-        {
-          $match: {
-            _id: new mongoose.Types.ObjectId(verifiedData.ownerId),
+      if (verifiedData.ownerId) {
+        data = await GetDashboardInfoForAdmin(verifiedData.ownerId);
+      } else {
+        const churchInfo = await OwnerModel.aggregate([
+          {
+            $project: {
+              name: 1,
+              image: 1,
+            },
           },
-        },
-      ]);
-    } else if (verifiedData.role === "owner") {
-      data = await GetDashboardInfoForOwner(verifiedData.ownerId);
+        ]);
+        return NextResponse.json<ApiResponse>({
+          success: true,
+          message: "Data found successfully",
+          data: {
+            ChurchInfo: churchInfo,
+            role: verifiedData.role,
+          },
+        });
+      }
+    } else if (verifiedData.role === "owner" && verifiedData?.ownerId) {
+      data = await GetDashboardInfoForOwner(verifiedData?.ownerId);
     } else if (verifiedData.role === "people" && verifiedData.peopleId) {
       data = await GetDashboardInfoForUser(
-        verifiedData.ownerId,
+        verifiedData?.ownerId || "",
         verifiedData.peopleId
       );
     } else {
@@ -84,6 +99,54 @@ export async function GET(req: NextRequest) {
         role: verifiedData.role,
       },
     });
+  } catch (err: any) {
+    return NextResponse.json<ApiResponse>({
+      success: false,
+      message: err.message,
+    });
+  }
+}
+
+export async function POST(req: NextRequest) {
+  const cookieSettings = { httpOnly: true, secure: true };
+  dbConnect();
+  try {
+    const { _id } = await req.json();
+    const token = req.cookies.get("access_token")?.value;
+
+    if (!token) {
+      return NextResponse.json<ApiResponse>({
+        success: false,
+        message: "You are not logged in",
+      });
+    }
+
+    const verifiedData = verifyToken(token);
+
+    if (verifiedData?.role !== "admin" || !verifiedData.adminId) {
+      return NextResponse.json<ApiResponse>({
+        success: false,
+        message: "You are not logged in",
+      });
+    }
+    if (!_id) {
+      return NextResponse.json<ApiResponse>({
+        success: false,
+        message: "Id is required",
+      });
+    }
+    const { access_token, refresh_token } = createToken({
+      adminId: verifiedData.adminId,
+      ownerId: _id,
+      role: "admin",
+    });
+    const response = NextResponse.json<ApiResponse>({
+      message: "Logged in successfully",
+      success: true,
+    });
+    response.cookies.set("access_token", access_token, cookieSettings);
+    response.cookies.set("refresh_token", refresh_token, cookieSettings);
+    return response;
   } catch (err: any) {
     return NextResponse.json<ApiResponse>({
       success: false,
