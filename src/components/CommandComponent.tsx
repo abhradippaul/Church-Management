@@ -9,8 +9,8 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { getPeopleSearchInfo } from "@/helpers/db";
+import axios from "axios";
 import { Search } from "lucide-react";
-import { usePathname } from "next/navigation";
 import { memo, useEffect, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 
@@ -20,10 +20,13 @@ interface PeopleItemValue {
   image: string;
 }
 
-function CommandComponent() {
+interface Props {
+  pathName: string;
+}
+
+function CommandComponent({ pathName }: Props) {
   const [open, setOpen] = useState(false);
   const [people, setPeople] = useState<PeopleItemValue[]>([]);
-  const pathname = usePathname();
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -37,12 +40,22 @@ function CommandComponent() {
   }, []);
 
   const debounced = useDebouncedCallback(async (value) => {
-    if (pathname === "/people") {
-      const data = await getPeopleSearchInfo(value);
-      if (data.success) {
-        setPeople(data.data);
+    try {
+      if (pathName === "/people") {
+        const data = await getPeopleSearchInfo(value);
+        if (data.success) {
+          setPeople(data.data);
+        }
+      } else if (pathName === "/dashboard") {
+        const { data } = await axios.get(
+          `/api/v1/search-church?churchName=${value}`
+        );
+        if (data.success) {
+          setPeople(data.data);
+        }
       }
-    } else {
+    } catch (err) {
+      console.log(err);
     }
   }, 500);
 
@@ -55,7 +68,7 @@ function CommandComponent() {
         <div className="flex items-center justify-center gap-x-2">
           <Search className="size-4 text-zinc-500 dark:text-zinc-300" />
           <h1 className="font-semibold max-w-max text-sm text-zinc-500 dark:text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300 transition">
-            Search {pathname === "/dashboard" ? " Church" : " People"}
+            Search {pathName === "/dashboard" ? " Church" : " People"}
           </h1>
         </div>
         <kbd className="text-muted-foreground font-mono font-medium bg-muted border rounded px-2 flex items-center justify-center">
@@ -65,7 +78,7 @@ function CommandComponent() {
       <CommandDialog open={open} onOpenChange={setOpen}>
         <CommandInput
           placeholder={`Type to search ${
-            pathname === "/dashboard" ? " Church" : " People"
+            pathName === "/dashboard" ? " Church" : " People"
           }`}
           onValueChange={(e) => debounced(e)}
         />

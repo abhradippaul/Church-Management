@@ -36,6 +36,7 @@ export default async function RootLayout({
 
   return (
     <PeopleProvider
+      role={peopleInfo.role}
       peopleInfo={peopleInfo?.Peoples}
       PeopleCount={peopleInfo?.PeopleCount}
     >

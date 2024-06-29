@@ -1,4 +1,3 @@
-import { isChurchAndTagValid } from "@/aggregation/Tags";
 import dbConnect from "@/lib/DbConnect";
 import { verifyToken } from "@/lib/JsonWebToken";
 import OwnerModel from "@/model/Owner";
@@ -20,7 +19,7 @@ export async function POST(req: NextRequest) {
 
     const verifiedData = verifyToken(access_token);
 
-    if (verifiedData?.role !== "owner") {
+    if (verifiedData?.role !== "owner" || !verifiedData.ownerId) {
       return NextResponse.json<ApiResponse>({
         success: false,
         message: "You are not logged in",
@@ -85,7 +84,7 @@ export async function PATCH(req: NextRequest) {
 
     const verifiedData = verifyToken(access_token);
 
-    if (verifiedData?.role !== "owner") {
+    if (verifiedData?.role !== "owner" || !verifiedData.ownerId) {
       return NextResponse.json<ApiResponse>({
         success: false,
         message: "You are not logged in",
@@ -98,25 +97,6 @@ export async function PATCH(req: NextRequest) {
         message: "Provide tagItem",
       });
     }
-
-    console.log(tagItem);
-    console.log(value);
-
-    // const isValid = await isChurchAndTagValid(verifiedData.ownerId, tagItem);
-
-    // if (!isValid?.length) {
-    //   return NextResponse.json<ApiResponse>({
-    //     success: false,
-    //     message: "Tag not found",
-    //   });
-    // }
-
-    // if (!isValid[0]?.isTagExist) {
-    //   return NextResponse.json<ApiResponse>({
-    //     success: false,
-    //     message: "Problem with the tag",
-    //   });
-    // }
 
     const isUpdated = await TagGroupModel.updateOne(
       { _id: tagItem },
@@ -159,7 +139,7 @@ export async function DELETE(req: NextRequest) {
 
     const verifiedData = verifyToken(access_token);
 
-    if (verifiedData?.role !== "owner") {
+    if (verifiedData?.role !== "owner" || !verifiedData.ownerId) {
       return NextResponse.json<ApiResponse>({
         success: false,
         message: "You are not logged in",
@@ -172,22 +152,6 @@ export async function DELETE(req: NextRequest) {
         message: "Provide tagItem",
       });
     }
-
-    // const isValid = await isChurchAndTagValid(verifiedData.ownerId, tagItem);
-
-    // if (!isValid?.length) {
-    //   return NextResponse.json<ApiResponse>({
-    //     success: false,
-    //     message: "Tag not found",
-    //   });
-    // }
-
-    // if (!isValid[0]?.isTagExist) {
-    //   return NextResponse.json<ApiResponse>({
-    //     success: false,
-    //     message: "Problem with the tag",
-    //   });
-    // }
 
     const isUpdated = await TagGroupModel.deleteOne({ _id: tagItem });
 

@@ -36,6 +36,18 @@ function DashboardPage() {
       console.log(err);
     }
   }, []);
+  const onButtonClick = async () => {
+    try {
+      const { data } = await axios.delete(`/api/v1/dashboard`);
+      if (data.success) {
+        window.location.reload();
+      } else {
+        console.log(data);
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
   return (
     <div className="pt-24">
       <div className="flex items-center justify-between mb-8">
@@ -47,7 +59,7 @@ function DashboardPage() {
           />
         )}
         {UserInfo?.role === "admin" && (
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={onButtonClick}>
             Change Church
           </Button>
         )}

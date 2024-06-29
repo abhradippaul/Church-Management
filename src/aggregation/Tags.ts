@@ -1,141 +1,6 @@
-import AdminModel from "@/model/Admin";
 import OwnerModel from "@/model/Owner";
 import PeopleModel from "@/model/People";
 import mongoose from "mongoose";
-
-interface VerifiedDataValue {
-  role: "admin" | "owner" | "people";
-  adminId?: string;
-  ownerId: string;
-  peopleId?: string;
-}
-
-export async function getTagsInfoAggregate({
-  role,
-  adminId,
-  ownerId,
-  peopleId,
-}: VerifiedDataValue) {
-  async function modelAggregate() {
-    return await OwnerModel.aggregate([
-      {
-        $match: {
-          _id: new mongoose.Types.ObjectId(ownerId),
-        },
-      },
-      {
-        $lookup: {
-          from: "taggroups",
-          localField: "_id",
-          foreignField: "church",
-          as: "SubItems",
-          pipeline: [
-            {
-              $lookup: {
-                from: "tagitems",
-                localField: "_id",
-                foreignField: "tag_group",
-                as: "SubItem",
-              },
-            },
-          ],
-        },
-      },
-      {
-        $lookup: {
-          from: "tagitems",
-          localField: "_id",
-          foreignField: "church",
-          as: "items",
-          pipeline: [
-            {
-              $redact: {
-                $cond: {
-                  if: {
-                    $gt: ["$tag_group", null],
-                  },
-                  then: "$$PRUNE",
-                  else: "$$KEEP",
-                },
-              },
-            },
-          ],
-        },
-      },
-      {
-        $project: {
-          _id: 0,
-          name: 1,
-          image: 1,
-          "items._id": 1,
-          "items.name": 1,
-          "SubItems.SubItem._id": 1,
-          "SubItems.SubItem.name": 1,
-          "SubItems.name": 1,
-          "SubItems._id": 1,
-        },
-      },
-    ]);
-  }
-  if (role === "admin" && adminId) {
-    const isAdminExist = await AdminModel.findOne({ _id: adminId }, { _id: 1 });
-    if (!isAdminExist) return [];
-    return await modelAggregate();
-  } else if (role === "owner") {
-    return await modelAggregate();
-  } else if (role === "people" && peopleId) {
-    const isOwnerExist = await OwnerModel.findOne({ _id: ownerId }, { _id: 1 });
-    if (!isOwnerExist) return [];
-    return await PeopleModel.aggregate([
-      {
-        $match: {
-          _id: new mongoose.Types.ObjectId(peopleId),
-        },
-      },
-      {
-        $lookup: {
-          from: "tagjoineds",
-          localField: "_id",
-          foreignField: "people",
-          as: "Tags",
-          pipeline: [
-            {
-              $lookup: {
-                from: "tagitems",
-                localField: "tag_item",
-                foreignField: "_id",
-                as: "Tags_Info",
-              },
-            },
-            {
-              $addFields: {
-                Tags_Info: {
-                  $first: "$Tags_Info",
-                },
-              },
-            },
-          ],
-        },
-      },
-      {
-        $addFields: {
-          items: "$Tags.Tags_Info",
-        },
-      },
-      {
-        $project: {
-          _id: 0,
-          name: 1,
-          image: 1,
-          "items.name": 1,
-          "items._id": 1,
-        },
-      },
-    ]);
-  } else {
-    return [];
-  }
-}
 
 export async function isChurchAndTagValid(ownerId: string, tagId: string) {
   return await OwnerModel.aggregate([
@@ -174,98 +39,113 @@ export async function isChurchAndTagValid(ownerId: string, tagId: string) {
   ]);
 }
 
-export async function getSpecificTagInfoAggregate(
-  { ownerId, role, adminId, peopleId }: VerifiedDataValue,
-  tagId: string
-) {
-  async function modelAggregate() {
-    return await OwnerModel.aggregate([
-      {
-        $match: {
-          _id: new mongoose.Types.ObjectId(ownerId),
-        },
+export async function getTagsInfoAggregateForOwner(ownerId: string) {
+  return await OwnerModel.aggregate([
+    {
+      $match: {
+        _id: new mongoose.Types.ObjectId(ownerId),
       },
-      {
-        $lookup: {
-          from: "tagitems",
-          localField: "_id",
-          foreignField: "church",
-          as: "Tag_Info",
-          pipeline: [
-            {
-              $match: {
-                _id: new mongoose.Types.ObjectId(tagId),
+    },
+    {
+      $lookup: {
+        from: "taggroups",
+        localField: "_id",
+        foreignField: "church",
+        as: "SubItems",
+        pipeline: [
+          {
+            $lookup: {
+              from: "tagitems",
+              localField: "_id",
+              foreignField: "tag_group",
+              as: "SubItem",
+            },
+          },
+        ],
+      },
+    },
+    {
+      $lookup: {
+        from: "tagitems",
+        localField: "_id",
+        foreignField: "church",
+        as: "items",
+        pipeline: [
+          {
+            $redact: {
+              $cond: {
+                if: {
+                  $gt: ["$tag_group", null],
+                },
+                then: "$$PRUNE",
+                else: "$$KEEP",
               },
             },
-            {
-              $lookup: {
-                from: "tagjoineds",
-                localField: "_id",
-                foreignField: "tag_item",
-                as: "Tag_Joined",
-                pipeline: [
-                  {
-                    $lookup: {
-                      from: "peoples",
-                      localField: "people",
-                      foreignField: "_id",
-                      as: "People_Info",
-                    },
-                  },
-                  {
-                    $addFields: {
-                      People_Info: {
-                        $first: "$People_Info",
-                      },
-                    },
-                  },
-                ],
+          },
+        ],
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        name: 1,
+        image: 1,
+        "items._id": 1,
+        "items.name": 1,
+        "SubItems.SubItem._id": 1,
+        "SubItems.SubItem.name": 1,
+        "SubItems.name": 1,
+        "SubItems._id": 1,
+      },
+    },
+  ]);
+}
+
+export async function getTagsInfoAggregateForPeople(peopleId: string) {
+  return await PeopleModel.aggregate([
+    {
+      $match: {
+        _id: new mongoose.Types.ObjectId(peopleId),
+      },
+    },
+    {
+      $lookup: {
+        from: "tagjoineds",
+        localField: "_id",
+        foreignField: "people",
+        as: "Tags",
+        pipeline: [
+          {
+            $lookup: {
+              from: "tagitems",
+              localField: "tag_item",
+              foreignField: "_id",
+              as: "Tags_Info",
+            },
+          },
+          {
+            $addFields: {
+              Tags_Info: {
+                $first: "$Tags_Info",
               },
             },
-          ],
-        },
-      },
-      {
-        $addFields: {
-          People_Info: {
-            $first: "$Tag_Info.Tag_Joined.People_Info",
           },
-        },
+        ],
       },
-      {
-        $addFields: {
-          Tag_Info: {
-            $first: "$Tag_Info",
-          },
-        },
+    },
+    {
+      $addFields: {
+        items: "$Tags.Tags_Info",
       },
-      {
-        $project: {
-          _id: 0,
-          "Tag_Info._id": 1,
-          "Tag_Info.name": 1,
-          "People_Info._id": 1,
-          "People_Info.name": 1,
-          "People_Info.email": 1,
-          "People_Info.image": 1,
-          "People_Info.date_of_birth": 1,
-        },
+    },
+    {
+      $project: {
+        _id: 0,
+        name: 1,
+        image: 1,
+        "items.name": 1,
+        "items._id": 1,
       },
-    ]);
-  }
-
-  if (role === "admin") {
-    if (!adminId || !ownerId) return [];
-
-    const isAdminExist = await AdminModel.findOne({ _id: adminId }, { _id: 1 });
-    if (!isAdminExist) return [];
-    return await modelAggregate();
-  } else if (role === "owner") {
-    if (!ownerId) return [];
-
-    return await modelAggregate();
-  } else if (role === "people") {
-  } else {
-    return [];
-  }
+    },
+  ]);
 }

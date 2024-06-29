@@ -1,5 +1,4 @@
 import {
-  GetDashboardInfoForAdmin,
   GetDashboardInfoForOwner,
   GetDashboardInfoForUser,
 } from "@/aggregation/Dashboard";
@@ -51,7 +50,7 @@ export async function GET(req: NextRequest) {
       }
 
       if (verifiedData.ownerId) {
-        data = await GetDashboardInfoForAdmin(verifiedData.ownerId);
+        data = await GetDashboardInfoForOwner(verifiedData.ownerId);
       } else {
         const churchInfo = await OwnerModel.aggregate([
           {
@@ -138,6 +137,46 @@ export async function POST(req: NextRequest) {
     const { access_token, refresh_token } = createToken({
       adminId: verifiedData.adminId,
       ownerId: _id,
+      role: "admin",
+    });
+    const response = NextResponse.json<ApiResponse>({
+      message: "Logged in successfully",
+      success: true,
+    });
+    response.cookies.set("access_token", access_token, cookieSettings);
+    response.cookies.set("refresh_token", refresh_token, cookieSettings);
+    return response;
+  } catch (err: any) {
+    return NextResponse.json<ApiResponse>({
+      success: false,
+      message: err.message,
+    });
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  const cookieSettings = { httpOnly: true, secure: true };
+  try {
+    const token = req.cookies.get("access_token")?.value;
+
+    if (!token) {
+      return NextResponse.json<ApiResponse>({
+        success: false,
+        message: "You are not logged in",
+      });
+    }
+
+    const verifiedData = verifyToken(token);
+
+    if (verifiedData?.role !== "admin" || !verifiedData.adminId) {
+      return NextResponse.json<ApiResponse>({
+        success: false,
+        message: "You are not logged in",
+      });
+    }
+
+    const { access_token, refresh_token } = createToken({
+      adminId: verifiedData.adminId,
       role: "admin",
     });
     const response = NextResponse.json<ApiResponse>({

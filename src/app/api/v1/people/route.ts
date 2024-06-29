@@ -33,7 +33,7 @@ export async function GET(req: NextRequest) {
 
     const verifiedData = verifyToken(access_token);
 
-    if (!verifiedData?.role) {
+    if (!verifiedData?.role || !verifiedData.ownerId) {
       return NextResponse.json<ApiResponse>({
         success: false,
         message: "You are not logged in",
@@ -116,7 +116,7 @@ export async function POST(req: NextRequest) {
       });
     }
     const verifiedData = verifyToken(access_token);
-    if (verifiedData?.role !== "owner") {
+    if (verifiedData?.role !== "owner" || !verifiedData.ownerId) {
       return NextResponse.json<ApiResponse>({
         success: false,
         message: "You are not logged in",
@@ -200,7 +200,7 @@ export async function PATCH(req: NextRequest) {
 
     const verifiedData = verifyToken(access_token);
 
-    if (verifiedData?.role !== "owner") {
+    if (verifiedData?.role !== "owner" || !verifiedData.ownerId) {
       return NextResponse.json<ApiResponse>({
         success: false,
         message: "You are not logged in",
@@ -238,13 +238,13 @@ export async function PATCH(req: NextRequest) {
     if (!isPeopleUpdated?.modifiedCount) {
       return NextResponse.json<ApiResponse>({
         success: false,
-        message: "Failed to delete user",
+        message: "Failed to update user",
       });
     }
 
     return NextResponse.json<ApiResponse>({
       success: true,
-      message: "User deleted successfully",
+      message: "User update successfully",
       data: isPeopleExist,
     });
   } catch (err: any) {
@@ -271,7 +271,7 @@ export async function DELETE(req: NextRequest) {
 
     const verifiedData = verifyToken(access_token);
 
-    if (verifiedData?.role !== "owner") {
+    if (verifiedData?.role !== "owner" || !verifiedData.ownerId) {
       return NextResponse.json<ApiResponse>({
         success: false,
         message: "You are not logged in",
@@ -324,7 +324,6 @@ export async function DELETE(req: NextRequest) {
     return NextResponse.json<ApiResponse>({
       success: true,
       message: "User deleted successfully",
-      data: isPeopleExist,
     });
   } catch (err: any) {
     return NextResponse.json<ApiResponse>({

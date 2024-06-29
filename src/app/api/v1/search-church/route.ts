@@ -6,19 +6,19 @@ import { NextRequest, NextResponse } from "next/server";
 export async function GET(req: NextRequest) {
   dbConnect();
   try {
-    const peopleName = req.nextUrl.searchParams.get("peopleName");
-    if (!peopleName) {
+    const churchName = req.nextUrl.searchParams.get("churchName");
+    if (!churchName) {
       return NextResponse.json<ApiResponse>({
         success: false,
-        message: "peopleName is required",
+        message: "Church name is required",
       });
     }
 
-    const userInfo = await PeopleModel.aggregate([
+    const churchInfo = await PeopleModel.aggregate([
       {
         $search: {
           autocomplete: {
-            query: `${peopleName}`,
+            query: `${churchName}`,
             path: "name",
           },
         },
@@ -37,8 +37,8 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json<ApiResponse>({
       success: true,
-      message: "People successfully retrieved",
-      data: userInfo,
+      message: "Church successfully retrieved",
+      data: churchInfo,
     });
   } catch (err: any) {
     return NextResponse.json<ApiResponse>({

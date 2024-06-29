@@ -8,7 +8,90 @@ import { verifyToken } from "@/lib/JsonWebToken";
 import AdminModel from "@/model/Admin";
 import EventModel from "@/model/Event";
 import { ApiResponse } from "@/types/ApiResponse";
+import mongoose from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
+
+export async function GET(req: NextRequest) {
+  dbConnect();
+  try {
+    const access_token = req.cookies.get("access_token")?.value;
+    const month = Number(req.nextUrl.searchParams.get("month"));
+    if (!access_token) {
+      return NextResponse.json<ApiResponse>({
+        success: false,
+        message: "You are not logged in",
+      });
+    }
+    const verifiedData = verifyToken(access_token);
+    if (!verifiedData?.role || !verifiedData.ownerId) {
+      return NextResponse.json<ApiResponse>({
+        success: false,
+        message: "You are not logged in",
+      });
+    }
+
+    let data: any = [];
+
+    if (verifiedData.role === "admin" && verifiedData.adminId) {
+      const isAdminExist = await AdminModel.aggregate([
+        {
+          $match: {
+            _id: new mongoose.Types.ObjectId(verifiedData.adminId),
+          },
+        },
+        {
+          $project: {
+            name: 1,
+            image: 1,
+          },
+        },
+      ]);
+
+      if (!isAdminExist.length) {
+        return NextResponse.json<ApiResponse>({
+          success: false,
+          message: "Admin not found",
+        });
+      }
+
+      data = await GetEventsInfoForOwnerAggregate(verifiedData.ownerId, month);
+    } else if (verifiedData.role === "owner") {
+      data = await GetEventsInfoForOwnerAggregate(verifiedData.ownerId, month);
+    } else if (verifiedData.role === "people" && verifiedData.peopleId) {
+      data = await GetEventsInfoForPeopleAggregate(
+        verifiedData.ownerId,
+        verifiedData.peopleId,
+        month
+      );
+    } else {
+      return NextResponse.json<ApiResponse>({
+        success: false,
+        message: "Some thing went wrong in role",
+      });
+    }
+
+    if (!data?.length) {
+      return NextResponse.json<ApiResponse>({
+        success: false,
+        message: "No events found",
+      });
+    }
+
+    return NextResponse.json<ApiResponse>({
+      success: true,
+      message: "Events found",
+      data: {
+        ...data[0],
+        role: verifiedData.role,
+      },
+    });
+  } catch (err: any) {
+    return NextResponse.json<ApiResponse>({
+      success: false,
+      message: err.message,
+    });
+  }
+}
 
 export async function POST(req: NextRequest) {
   dbConnect();
@@ -41,10 +124,10 @@ export async function POST(req: NextRequest) {
 
     const verifiedData = verifyToken(access_token);
 
-    if (verifiedData?.role !== "owner") {
+    if (verifiedData?.role !== "owner" || !verifiedData.ownerId) {
       return NextResponse.json<ApiResponse>({
         success: false,
-        message: "You are not logged in",
+        message: "Missing owner id or unauthorized access",
       });
     }
 
@@ -85,79 +168,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json<ApiResponse>({
       success: true,
       message: "Event created successfully",
-    });
-  } catch (err: any) {
-    return NextResponse.json<ApiResponse>({
-      success: false,
-      message: err.message,
-    });
-  }
-}
-
-export async function GET(req: NextRequest) {
-  dbConnect();
-  try {
-    const access_token = req.cookies.get("access_token")?.value;
-    const month = Number(req.nextUrl.searchParams.get("month"));
-    if (!access_token) {
-      return NextResponse.json<ApiResponse>({
-        success: false,
-        message: "You are not logged in",
-      });
-    }
-    const verifiedData = verifyToken(access_token);
-    if (!verifiedData?.role || !verifiedData.ownerId) {
-      return NextResponse.json<ApiResponse>({
-        success: false,
-        message: "You are not logged in",
-      });
-    }
-
-    let data: any = [];
-
-    if (verifiedData.role === "admin" && verifiedData.adminId) {
-      const isAdminExist = await AdminModel.findOne(
-        { _id: verifiedData.adminId },
-        { name: 1, image: 1 }
-      );
-
-      if (!isAdminExist) {
-        return NextResponse.json<ApiResponse>({
-          success: false,
-          message: "You are not logged in",
-        });
-      }
-
-      data = await GetEventsInfoForOwnerAggregate(verifiedData.ownerId, month);
-    } else if (verifiedData.role === "owner") {
-      data = await GetEventsInfoForOwnerAggregate(verifiedData.ownerId, month);
-    } else if (verifiedData.role === "people" && verifiedData.peopleId) {
-      data = await GetEventsInfoForPeopleAggregate(
-        verifiedData.ownerId,
-        verifiedData.peopleId,
-        month
-      );
-    } else {
-      return NextResponse.json<ApiResponse>({
-        success: false,
-        message: "Some thing went wrong in role",
-      });
-    }
-
-    if (!data?.length) {
-      return NextResponse.json<ApiResponse>({
-        success: false,
-        message: "No events found",
-      });
-    }
-
-    return NextResponse.json<ApiResponse>({
-      success: true,
-      message: "Events found",
-      data: {
-        ...data[0],
-        role: verifiedData.role,
-      },
     });
   } catch (err: any) {
     return NextResponse.json<ApiResponse>({

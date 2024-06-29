@@ -8,7 +8,7 @@ import PeopleFilterOptions from "./PeopleFilterOptions";
 const UserCreateDialog = dynamic(() => import("./UserCreateDialog"));
 
 function PeopleNavbar({ type }: { type: "create" | "edit" }) {
-  const { peopleCount } = usePeopleContext();
+  const { peopleCount, role } = usePeopleContext();
   return (
     <div className="mb-8 mt-4 flex items-center justify-between">
       {type === "create" && (
@@ -18,7 +18,7 @@ function PeopleNavbar({ type }: { type: "create" | "edit" }) {
         <h1 className="text-lg text-zinc-200">People Infomation : </h1>
       )}
       {type == "create" && <PeopleFilterOptions />}
-      <UserCreateDialog type={type} />
+      {role === "owner" && <UserCreateDialog type={type} />}
     </div>
   );
 }

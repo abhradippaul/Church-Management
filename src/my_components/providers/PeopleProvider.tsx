@@ -44,6 +44,7 @@ interface CreatePeopleContextValue {
   setIsChatSheetOpen: Dispatch<SetStateAction<boolean>>;
   chatInfo: PeopleInfoForMessage | null;
   setChatInfo: Dispatch<SetStateAction<PeopleInfoForMessage | null>>;
+  role:string
 }
 
 const CreatePeopleContext = createContext<CreatePeopleContextValue>({
@@ -59,6 +60,7 @@ const CreatePeopleContext = createContext<CreatePeopleContextValue>({
   setIsChatSheetOpen: () => {},
   chatInfo: null,
   setChatInfo: () => {},
+  role: ""
 });
 
 const PeopleContextProvider = CreatePeopleContext.Provider;
@@ -92,6 +94,7 @@ function PeopleProvider({
   children,
   tagInfo,
   PeopleCount,
+  role
 }: {
   peopleInfo: PeopleInfoProps | SpecificPeople;
   children: ReactNode;
@@ -100,6 +103,7 @@ function PeopleProvider({
     _id: string;
     name: string;
   };
+  role:string
 }) {
   const [isFormError, setIsFormError] = useState(false);
   const [filterOptions, setFilterOptions] = useState<FilterOptionsValue>({});
@@ -123,6 +127,7 @@ function PeopleProvider({
         setIsChatSheetOpen,
         chatInfo,
         setChatInfo,
+        role
       }}
     >
       {children}

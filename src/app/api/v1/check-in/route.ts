@@ -1,8 +1,8 @@
+import { isEventAndTagValidForThePeople } from "@/aggregation/CheckIn";
 import dbConnect from "@/lib/DbConnect";
 import { verifyToken } from "@/lib/JsonWebToken";
 import CheckInModel from "@/model/CheckIn";
 import OwnerModel from "@/model/Owner";
-import PeopleModel from "@/model/People";
 import { ApiResponse } from "@/types/ApiResponse";
 import mongoose from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
@@ -20,12 +20,13 @@ export async function GET(req: NextRequest) {
 
     const verifiedData = verifyToken(access_token);
 
-    if (!verifiedData?.role || !verifiedData.ownerId) {
+    if (verifiedData?.role !== "owner" || !verifiedData.ownerId) {
       return NextResponse.json<ApiResponse>({
         success: false,
         message: "You are not logged in",
       });
     }
+
     const isExist = await OwnerModel.aggregate([
       {
         $match: {
@@ -39,12 +40,14 @@ export async function GET(req: NextRequest) {
         },
       },
     ]);
+
     if (!isExist.length) {
       return NextResponse.json<ApiResponse>({
         success: false,
         message: "No data found",
       });
     }
+
     return NextResponse.json<ApiResponse>({
       success: true,
       message: "User found",
@@ -75,7 +78,7 @@ export async function POST(req: NextRequest) {
 
     const verifiedData = verifyToken(access_token);
 
-    if (!verifiedData?.role || !verifiedData.ownerId) {
+    if (verifiedData?.role !== "owner" || !verifiedData.ownerId) {
       return NextResponse.json<ApiResponse>({
         success: false,
         message: "You are not logged in",
@@ -85,63 +88,17 @@ export async function POST(req: NextRequest) {
     if (!peopleId) {
       return NextResponse.json<ApiResponse>({
         success: false,
-        message: "Provide peopleId and eventId",
+        message: "Provide peopleId",
       });
     }
 
     let isCheckedIn = null;
 
     if (eventId) {
-      const isEventValid = await PeopleModel.aggregate([
-        {
-          $match: {
-            _id: new mongoose.Types.ObjectId(peopleId),
-          },
-        },
-        {
-          $lookup: {
-            from: "tagjoineds",
-            localField: "_id",
-            foreignField: "people",
-            as: "TagInfo",
-            pipeline: [
-              {
-                $lookup: {
-                  from: "events",
-                  localField: "tag_item",
-                  foreignField: "tag",
-                  as: "Events_Info",
-                },
-              },
-              {
-                $unwind: "$Events_Info",
-              },
-            ],
-          },
-        },
-        {
-          $addFields: {
-            isValid: {
-              $cond: {
-                if: {
-                  $in: [
-                    new mongoose.Types.ObjectId(eventId || ""),
-                    "$TagInfo.Events_Info._id",
-                  ],
-                },
-                then: true,
-                else: false,
-              },
-            },
-          },
-        },
-        {
-          $project: {
-            _id: 0,
-            isValid: 1,
-          },
-        },
-      ]);
+      const isEventValid = await isEventAndTagValidForThePeople(
+        peopleId,
+        eventId
+      );
 
       if (!isEventValid?.length) {
         return NextResponse.json<ApiResponse>({
@@ -163,7 +120,7 @@ export async function POST(req: NextRequest) {
     if (!isCheckedIn) {
       return NextResponse.json<ApiResponse>({
         success: false,
-        message: "Check in not created",
+        message: "Check in is not created",
       });
     }
 

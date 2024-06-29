@@ -1,9 +1,11 @@
 import {
-  getSpecificTagInfoAggregate,
+  getTagsInfoAggregateForOwner,
+  getTagsInfoAggregateForPeople,
   isChurchAndTagValid,
 } from "@/aggregation/Tags";
 import dbConnect from "@/lib/DbConnect";
 import { verifyToken } from "@/lib/JsonWebToken";
+import AdminModel from "@/model/Admin";
 import OwnerModel from "@/model/Owner";
 import TagItemModel from "@/model/TagsItem";
 import { ApiResponse } from "@/types/ApiResponse";
@@ -23,7 +25,7 @@ export async function GET(req: NextRequest) {
 
     const verifiedData = verifyToken(access_token);
 
-    if (!verifiedData?.role) {
+    if (!verifiedData?.role || !verifiedData.ownerId) {
       return NextResponse.json<ApiResponse>({
         success: false,
         message: "You are not logged in",
@@ -37,12 +39,29 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    const isChurchAndTagValid = await getSpecificTagInfoAggregate(
-      verifiedData,
-      tagItem
-    );
+    let tagsItem: any = [];
 
-    if (!isChurchAndTagValid) {
+    if (verifiedData.role === "admin" && verifiedData.adminId) {
+      const isAdminExist = await AdminModel.findOne(
+        { _id: verifiedData.adminId },
+        { _id: 1 }
+      );
+
+      if (!isAdminExist) {
+        return NextResponse.json<ApiResponse>({
+          success: false,
+          message: "You are not authorized to access this tag",
+        });
+      }
+
+      tagsItem = await getTagsInfoAggregateForOwner(verifiedData.ownerId);
+    } else if (verifiedData.role === "owner") {
+      tagsItem = await getTagsInfoAggregateForOwner(verifiedData.ownerId);
+    } else if (verifiedData.role === "people" && verifiedData.peopleId) {
+      tagsItem = await getTagsInfoAggregateForPeople(verifiedData.peopleId);
+    }
+
+    if (!tagsItem?.length) {
       return NextResponse.json<ApiResponse>({
         success: false,
         message: "You are not authorized to access this tag",
@@ -52,7 +71,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json<ApiResponse>({
       success: true,
       message: "Tag found",
-      data: isChurchAndTagValid[0],
+      data: tagsItem[0],
     });
   } catch (err) {
     return NextResponse.json<ApiResponse>({
@@ -76,7 +95,7 @@ export async function POST(req: NextRequest) {
 
     const verifiedData = verifyToken(access_token);
 
-    if (verifiedData?.role !== "owner") {
+    if (verifiedData?.role !== "owner" || !verifiedData.ownerId) {
       return NextResponse.json<ApiResponse>({
         success: false,
         message: "You are not logged in",
@@ -102,7 +121,7 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    let isTagCreated;
+    let isTagCreated = null;
 
     if (group) {
       isTagCreated = await TagItemModel.create({
@@ -151,7 +170,7 @@ export async function PATCH(req: NextRequest) {
 
     const verifiedData = verifyToken(access_token);
 
-    if (verifiedData?.role !== "owner") {
+    if (verifiedData?.role !== "owner" || !verifiedData.ownerId) {
       return NextResponse.json<ApiResponse>({
         success: false,
         message: "You are not logged in",
@@ -204,7 +223,7 @@ export async function PATCH(req: NextRequest) {
       );
     }
 
-    if (!isUpdated.modifiedCount) {
+    if (!isUpdated?.modifiedCount) {
       return NextResponse.json<ApiResponse>({
         success: false,
         message: "Tag not updated",
@@ -213,7 +232,7 @@ export async function PATCH(req: NextRequest) {
 
     return NextResponse.json<ApiResponse>({
       success: true,
-      message: "Insert people successfully",
+      message: "Tag is successfully updated",
     });
   } catch (err: any) {
     return NextResponse.json<ApiResponse>({
@@ -237,7 +256,7 @@ export async function DELETE(req: NextRequest) {
 
     const verifiedData = verifyToken(access_token);
 
-    if (verifiedData?.role !== "owner") {
+    if (verifiedData?.role !== "owner" || !verifiedData.ownerId) {
       return NextResponse.json<ApiResponse>({
         success: false,
         message: "You are not logged in",

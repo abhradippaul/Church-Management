@@ -43,6 +43,7 @@ function TableComponent({ tableHeading, type }: TableComponentProps) {
     peopleCount,
     setIsChatSheetOpen,
     setChatInfo,
+    role,
   } = usePeopleContext();
   const [peopleInfo, setPeopleInfo] = useState(info);
   const [page, setPage] = useState<number>(0);
@@ -101,14 +102,24 @@ function TableComponent({ tableHeading, type }: TableComponentProps) {
 
   const methodForFilterRequest = useCallback(async () => {
     try {
-      if (filterOptions.gender || filterOptions.order || page) {
+      if (filterOptions.gender || filterOptions.order) {
         setIsLoading(true);
         const { data } = await axios.get(
           `/api/v1/people?page=${page + 1}${
             filterOptions.gender && `&gender=${filterOptions.gender}`
           }`
         );
-        console.log(data);
+        if (data.success) {
+          setPeopleInfo(data.data.Peoples);
+          setPeopleCount(data.data?.PeopleCount);
+        }
+      } else if (page) {
+        setIsLoading(true);
+        const { data } = await axios.get(
+          `/api/v1/people?page=${page + 1}${
+            filterOptions.gender && `&gender=${filterOptions.gender}`
+          }`
+        );
         if (data.success) {
           setPeopleInfo((prev: any) => [...prev, ...data.data.Peoples]);
           setPeopleCount(data.data?.PeopleCount);
@@ -159,40 +170,46 @@ function TableComponent({ tableHeading, type }: TableComponentProps) {
                   {new Date().getFullYear() -
                     new Date(date_of_birth).getFullYear()}
                 </TableCell>
-                <TableCell>
-                  <MessageSquare
-                    className="size-4"
-                    onClick={(e) => onMsgButtonClick(e, _id, name, image)}
-                  />
-                </TableCell>
-                <TableCell>
-                  <AlertDialogComponent
-                    description={
-                      type === "people"
-                        ? `Data of ${name} will be permanently deleted.`
-                        : `Delete the people ${name} from the tag ${tagInfo?.name}.`
-                    }
-                    title={
-                      type === "tagpeople"
-                        ? `Are you want to delete the user from the ${tagInfo?.name}`
-                        : `Are you want to delete ${name} ?`
-                    }
-                    _id={_id}
-                    onActionClick={deletePeople}
-                    trigger={
-                      <TooltipComponent
-                        hoverElement={
-                          <Trash className="size-4 text-red-700 hover:text-red-600 transition" />
-                        }
-                      >
-                        <div>
-                          {type === "people" && <h1>Delete People</h1>}
-                          {type === "tagpeople" && <h1>Delete From the tag</h1>}
-                        </div>
-                      </TooltipComponent>
-                    }
-                  />
-                </TableCell>
+                {role === "owner" && (
+                  <TableCell>
+                    <MessageSquare
+                      className="size-4"
+                      onClick={(e) => onMsgButtonClick(e, _id, name, image)}
+                    />
+                  </TableCell>
+                )}
+                {role === "owner" && (
+                  <TableCell>
+                    <AlertDialogComponent
+                      description={
+                        type === "people"
+                          ? `Data of ${name} will be permanently deleted.`
+                          : `Delete the people ${name} from the tag ${tagInfo?.name}.`
+                      }
+                      title={
+                        type === "tagpeople"
+                          ? `Are you want to delete the user from the ${tagInfo?.name}`
+                          : `Are you want to delete ${name} ?`
+                      }
+                      _id={_id}
+                      onActionClick={deletePeople}
+                      trigger={
+                        <TooltipComponent
+                          hoverElement={
+                            <Trash className="size-4 text-red-700 hover:text-red-600 transition" />
+                          }
+                        >
+                          <div>
+                            {type === "people" && <h1>Delete People</h1>}
+                            {type === "tagpeople" && (
+                              <h1>Delete From the tag</h1>
+                            )}
+                          </div>
+                        </TooltipComponent>
+                      }
+                    />
+                  </TableCell>
+                )}
               </TableRow>
             )
           )}

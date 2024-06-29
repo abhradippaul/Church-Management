@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
 
     const verifiedData = verifyToken(access_token);
 
-    if (!verifiedData?.role || !verifiedData.ownerId) {
+    if (verifiedData?.role!=="owner" || !verifiedData.ownerId) {
       return NextResponse.json<ApiResponse>({
         success: false,
         message: "You are not logged in",
@@ -40,13 +40,6 @@ export async function GET(req: NextRequest) {
         },
       },
     ]);
-
-    if (!isExist) {
-      return NextResponse.json<ApiResponse>({
-        success: false,
-        message: "No data found",
-      });
-    }
 
     if (!isExist?.length) {
       return NextResponse.json<ApiResponse>({
@@ -85,7 +78,7 @@ export async function POST(req: NextRequest) {
 
     const verifiedData = verifyToken(access_token);
 
-    if (!verifiedData?.role || !verifiedData.ownerId) {
+    if (verifiedData?.role!=="owner" || !verifiedData.ownerId) {
       return NextResponse.json<ApiResponse>({
         success: false,
         message: "You are not logged in",
