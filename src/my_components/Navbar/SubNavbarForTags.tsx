@@ -9,6 +9,7 @@ import {
   MenubarSubTrigger,
   MenubarTrigger,
 } from "@/components/ui/menubar";
+import Link from "next/link";
 import { memo } from "react";
 
 interface ItemValue {
@@ -40,7 +41,12 @@ function SubNavbarForTags({ menu }: SubNavbarForTagsProps) {
             <MenubarContent>
               {items?.map(
                 ({ name, _id }) =>
-                  name && _id && <MenubarItem key={_id}>{name}</MenubarItem>
+                  name &&
+                  _id && (
+                    <MenubarItem key={_id}>
+                      <Link href={`/tags/${_id}`}>{name}</Link>
+                    </MenubarItem>
+                  )
               )}
             </MenubarContent>
           </MenubarMenu>
@@ -55,7 +61,9 @@ function SubNavbarForTags({ menu }: SubNavbarForTagsProps) {
                   <MenubarSubTrigger>{name}</MenubarSubTrigger>
                   <MenubarSubContent>
                     {SubItem?.map(({ name, _id }) => (
-                      <MenubarItem key={_id}>{name}</MenubarItem>
+                      <MenubarItem key={_id}>
+                        <Link href={`/tags/${_id}`}>{name}</Link>
+                      </MenubarItem>
                     ))}
                   </MenubarSubContent>
                 </MenubarSub>

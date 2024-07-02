@@ -1,5 +1,6 @@
 import dbConnect from "@/lib/DbConnect";
 import { verifyToken } from "@/lib/JsonWebToken";
+import { pusherServer } from "@/lib/Pusher";
 import ChatModel from "@/model/Chat";
 import OwnerModel from "@/model/Owner";
 import { ApiResponse } from "@/types/ApiResponse";
@@ -34,10 +35,20 @@ export async function GET(req: NextRequest) {
         {
           $match: {
             $or: [
-              { sender: new mongoose.Types.ObjectId(verifiedData.ownerId) },
-              { receiver: new mongoose.Types.ObjectId(peopleId) },
-              { sender: new mongoose.Types.ObjectId(peopleId) },
-              { receiver: new mongoose.Types.ObjectId(verifiedData.ownerId) },
+              {
+                $and: [
+                  { sender: new mongoose.Types.ObjectId(verifiedData.ownerId) },
+                  { receiver: new mongoose.Types.ObjectId(peopleId) },
+                ],
+              },
+              {
+                $and: [
+                  { sender: new mongoose.Types.ObjectId(peopleId) },
+                  {
+                    receiver: new mongoose.Types.ObjectId(verifiedData.ownerId),
+                  },
+                ],
+              },
             ],
           },
         },
@@ -45,19 +56,46 @@ export async function GET(req: NextRequest) {
           $project: {
             message: 1,
             createdAt: 1,
-            receiver: 1,
+            sender: 1,
           },
         },
       ]);
-    } else {
+
+      await ChatModel.updateMany(
+        {
+          sender: peopleId,
+          receiver: verifiedData.ownerId,
+          seen: false,
+        },
+        {
+          $set: { seen: true },
+        }
+      );
+    } else if (verifiedData.role === "people" && verifiedData.peopleId) {
       chatInfo = await ChatModel.aggregate([
         {
           $match: {
             $or: [
-              { sender: new mongoose.Types.ObjectId(verifiedData.ownerId) },
-              { receiver: new mongoose.Types.ObjectId(verifiedData.peopleId) },
-              { sender: new mongoose.Types.ObjectId(verifiedData.peopleId) },
-              { receiver: new mongoose.Types.ObjectId(verifiedData.ownerId) },
+              {
+                $and: [
+                  { sender: new mongoose.Types.ObjectId(verifiedData.ownerId) },
+                  {
+                    receiver: new mongoose.Types.ObjectId(
+                      verifiedData.peopleId
+                    ),
+                  },
+                ],
+              },
+              {
+                $and: [
+                  {
+                    sender: new mongoose.Types.ObjectId(verifiedData.peopleId),
+                  },
+                  {
+                    receiver: new mongoose.Types.ObjectId(verifiedData.ownerId),
+                  },
+                ],
+              },
             ],
           },
         },
@@ -80,7 +118,7 @@ export async function GET(req: NextRequest) {
           $project: {
             message: 1,
             createdAt: 1,
-            receiver: 1,
+            sender: 1,
           },
         },
       ]);
@@ -130,19 +168,28 @@ export async function POST(req: NextRequest) {
     if (!message) {
       return NextResponse.json<ApiResponse>({
         success: false,
-        message: "Provide the message",
+        message: "Provide the message and people id",
       });
     }
 
     let isChatCreated = null;
 
     if (verifiedData.role === "owner" && peopleId) {
+      pusherServer.trigger(`from${peopleId}`, "messages", {
+        message,
+        receiver: peopleId,
+      });
       isChatCreated = await ChatModel.create({
         sender: verifiedData.ownerId,
         receiver: peopleId,
         message,
       });
     } else if (verifiedData?.role === "people" && verifiedData?.peopleId) {
+      pusherServer.trigger(`to${verifiedData?.peopleId}`, "messages", {
+        message,
+        receiver: verifiedData.ownerId,
+      });
+
       isChatCreated = await ChatModel.create({
         sender: verifiedData?.peopleId,
         receiver: verifiedData.ownerId,

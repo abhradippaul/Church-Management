@@ -1,5 +1,5 @@
 import dbConnect from "@/lib/DbConnect";
-import PeopleModel from "@/model/People";
+import OwnerModel from "@/model/Owner";
 import { ApiResponse } from "@/types/ApiResponse";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -7,6 +7,7 @@ export async function GET(req: NextRequest) {
   dbConnect();
   try {
     const churchName = req.nextUrl.searchParams.get("churchName");
+
     if (!churchName) {
       return NextResponse.json<ApiResponse>({
         success: false,
@@ -14,16 +15,16 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    const churchInfo = await PeopleModel.aggregate([
+    const churchInfo = await OwnerModel.aggregate([
       {
         $search: {
+          index: "church",
           autocomplete: {
             query: `${churchName}`,
             path: "name",
           },
         },
       },
-
       {
         $limit: 5,
       },

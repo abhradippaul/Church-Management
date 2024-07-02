@@ -15,28 +15,28 @@ function DashboardPage() {
     PaymentAmount,
     setIsChatSheetOpen,
     setChatInfo,
+    setMessage,
+    setIsChatLoading,
   } = useDashboardContext();
   const onMsgButtonClick = useCallback(async () => {
     try {
       setIsChatSheetOpen(true);
-      setChatInfo({
-        // imageUrl: image,
-        // name,
-        isChatLoading: true,
-      });
+      // setChatInfo((prev: any) => ({
+      //   imageUrl: UserInfo?.imageUrl,
+      //   name: UserInfo?.name,
+      // }));
+      setIsChatLoading(true);
       const { data } = await axios.get(`/api/v1/chat`);
       if (data.success) {
-        setChatInfo((prev: any) => ({
-          ...prev,
-          chatDetails: data.data,
-          isChatLoading: false,
-        }));
+        setMessage(data.data);
+        setIsChatLoading(false);
       }
     } catch (err) {
       console.log(err);
     }
   }, []);
-  const onButtonClick = async () => {
+
+  const onButtonClick = useCallback(async () => {
     try {
       const { data } = await axios.delete(`/api/v1/dashboard`);
       if (data.success) {
@@ -47,7 +47,8 @@ function DashboardPage() {
     } catch (err) {
       console.log(err);
     }
-  };
+  }, []);
+
   return (
     <div className="pt-24">
       <div className="flex items-center justify-between mb-8">
@@ -80,7 +81,7 @@ function DashboardPage() {
                 People Donated in the Last 7 Days
               </h1>
               <div className="size-full flex items-center justify-center">
-                {PaymentAmount}
+                {PaymentAmount || 0}
               </div>
             </div>
           </div>

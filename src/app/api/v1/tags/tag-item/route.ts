@@ -1,5 +1,5 @@
 import {
-  getTagsInfoAggregateForOwner,
+  getPeopleInfoFromTagsForOwner,
   getTagsInfoAggregateForPeople,
   isChurchAndTagValid,
 } from "@/aggregation/Tags";
@@ -54,9 +54,9 @@ export async function GET(req: NextRequest) {
         });
       }
 
-      tagsItem = await getTagsInfoAggregateForOwner(verifiedData.ownerId);
+      tagsItem = await getPeopleInfoFromTagsForOwner(verifiedData.ownerId,tagItem);
     } else if (verifiedData.role === "owner") {
-      tagsItem = await getTagsInfoAggregateForOwner(verifiedData.ownerId);
+      tagsItem = await getPeopleInfoFromTagsForOwner(verifiedData.ownerId,tagItem);
     } else if (verifiedData.role === "people" && verifiedData.peopleId) {
       tagsItem = await getTagsInfoAggregateForPeople(verifiedData.peopleId);
     }

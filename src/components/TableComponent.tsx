@@ -44,6 +44,8 @@ function TableComponent({ tableHeading, type }: TableComponentProps) {
     setIsChatSheetOpen,
     setChatInfo,
     role,
+    setMessage,
+    setIsChatLoading,
   } = usePeopleContext();
   const [peopleInfo, setPeopleInfo] = useState(info);
   const [page, setPage] = useState<number>(0);
@@ -83,15 +85,12 @@ function TableComponent({ tableHeading, type }: TableComponentProps) {
           _id,
           imageUrl: image,
           name,
-          isChatLoading: true,
         });
+        setIsChatLoading(true);
         const { data } = await axios.get(`/api/v1/chat?peopleId=${_id}`);
         if (data.success) {
-          setChatInfo((prev: any) => ({
-            ...prev,
-            chatDetails: data.data,
-            isChatLoading: false,
-          }));
+          setMessage(data.data);
+          setIsChatLoading(false);
         }
       } catch (err) {
         console.log(err);
@@ -147,7 +146,7 @@ function TableComponent({ tableHeading, type }: TableComponentProps) {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {peopleInfo.map(
+          {peopleInfo?.map(
             ({ email, name, date_of_birth, _id, image }: PeopleInfoValue) => (
               <TableRow
                 key={_id}
@@ -215,7 +214,7 @@ function TableComponent({ tableHeading, type }: TableComponentProps) {
           )}
         </TableBody>
       </Table>
-      {peopleInfo.length < Number(peopleCount) && (
+      {peopleInfo?.length < Number(peopleCount) && (
         <Button
           variant="outline"
           size="sm"

@@ -1,6 +1,9 @@
-import { getPeopleInfoAggregate } from "@/aggregation/PeopleInfo";
+import {
+  getPeopleInfoAggregateForOwner,
+} from "@/aggregation/PeopleInfo";
 import dbConnect from "@/lib/DbConnect";
 import { verifyToken } from "@/lib/JsonWebToken";
+import AdminModel from "@/model/Admin";
 import { ApiResponse } from "@/types/ApiResponse";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -19,15 +22,46 @@ export async function GET(
       });
     }
     const verifiedData = verifyToken(access_token);
-    if (!verifiedData?.role) {
+    if (verifiedData?.role === "people" || !verifiedData.ownerId) {
       return NextResponse.json<ApiResponse>({
         success: false,
         message: "You are not logged in",
       });
     }
 
+    if (!peopleId) {
+      return NextResponse.json<ApiResponse>({
+        success: false,
+        message: "Provide people id",
+      });
+    }
+
     // Getting data of the specific people
-    const peopleInfo = await getPeopleInfoAggregate(verifiedData, peopleId);
+    let peopleInfo: any = [];
+
+    if (verifiedData.role === "admin" && verifiedData.adminId) {
+      const isAdminExist = await AdminModel.findOne(
+        { _id: verifiedData.adminId },
+        { _id: 1 }
+      );
+
+      if (!isAdminExist) {
+        return NextResponse.json<ApiResponse>({
+          success: false,
+          message: "Admin does not exist",
+        });
+      }
+
+      peopleInfo = await getPeopleInfoAggregateForOwner(
+        verifiedData.ownerId,
+        peopleId
+      );
+    } else if (verifiedData.role === "owner") {
+      peopleInfo = await getPeopleInfoAggregateForOwner(
+        verifiedData.ownerId,
+        peopleId
+      );
+    }
 
     if (!peopleInfo?.length) {
       return NextResponse.json<ApiResponse>({

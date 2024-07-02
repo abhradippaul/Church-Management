@@ -230,6 +230,13 @@ export async function GetDashboardInfoForUser(
       },
     },
     {
+      $addFields: {
+        name: "$$ROOT.People.name",
+        image: "$$ROOT.People.image",
+        _id: "$$ROOT.People._id",
+      },
+    },
+    {
       $project: {
         name: 1,
         image: 1,

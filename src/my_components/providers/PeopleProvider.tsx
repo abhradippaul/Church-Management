@@ -19,13 +19,12 @@ interface PeopleInfoForMessage {
   _id: string;
   name: string;
   imageUrl: string;
-  isChatLoading: boolean;
-  chatDetails?: {
-    _id: string;
-    message: string;
-    createdAt: string;
-    receiver: string;
-  }[];
+}
+interface MessageValue {
+  _id: string;
+  message: string;
+  createdAt: string;
+  sender: string;
 }
 
 interface CreatePeopleContextValue {
@@ -44,7 +43,11 @@ interface CreatePeopleContextValue {
   setIsChatSheetOpen: Dispatch<SetStateAction<boolean>>;
   chatInfo: PeopleInfoForMessage | null;
   setChatInfo: Dispatch<SetStateAction<PeopleInfoForMessage | null>>;
-  role:string
+  role: string;
+  message: MessageValue[] | null;
+  setMessage: Dispatch<SetStateAction<MessageValue[] | null>>;
+  isChatLoading: boolean;
+  setIsChatLoading: Dispatch<SetStateAction<boolean>>;
 }
 
 const CreatePeopleContext = createContext<CreatePeopleContextValue>({
@@ -60,7 +63,11 @@ const CreatePeopleContext = createContext<CreatePeopleContextValue>({
   setIsChatSheetOpen: () => {},
   chatInfo: null,
   setChatInfo: () => {},
-  role: ""
+  role: "",
+  message: null,
+  setMessage: () => {},
+  isChatLoading: false,
+  setIsChatLoading: () => {},
 });
 
 const PeopleContextProvider = CreatePeopleContext.Provider;
@@ -94,7 +101,7 @@ function PeopleProvider({
   children,
   tagInfo,
   PeopleCount,
-  role
+  role,
 }: {
   peopleInfo: PeopleInfoProps | SpecificPeople;
   children: ReactNode;
@@ -103,7 +110,7 @@ function PeopleProvider({
     _id: string;
     name: string;
   };
-  role:string
+  role: string;
 }) {
   const [isFormError, setIsFormError] = useState(false);
   const [filterOptions, setFilterOptions] = useState<FilterOptionsValue>({});
@@ -112,6 +119,8 @@ function PeopleProvider({
   );
   const [isChatSheetOpen, setIsChatSheetOpen] = useState<boolean>(false);
   const [chatInfo, setChatInfo] = useState<PeopleInfoForMessage | null>(null);
+  const [message, setMessage] = useState<MessageValue[] | null>(null);
+  const [isChatLoading, setIsChatLoading] = useState(false);
   return (
     <PeopleContextProvider
       value={{
@@ -127,7 +136,11 @@ function PeopleProvider({
         setIsChatSheetOpen,
         chatInfo,
         setChatInfo,
-        role
+        role,
+        message,
+        setMessage,
+        isChatLoading,
+        setIsChatLoading,
       }}
     >
       {children}

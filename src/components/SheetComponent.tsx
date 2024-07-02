@@ -17,6 +17,8 @@ interface UserInfoValue {
   }[];
 }
 
+const imageUrl = process.env.NEXT_PUBLIC_IMAGE_URL;
+
 function SheetComponent({ userInfo, Pages }: UserInfoValue) {
   return (
     <Sheet>
@@ -27,7 +29,7 @@ function SheetComponent({ userInfo, Pages }: UserInfoValue) {
         <SheetHeader>
           <div className="w-full my-4 flex items-center px-4">
             <img
-              src={userInfo.imageUrl}
+              src={`${imageUrl}/${userInfo.imageUrl}`}
               alt="image"
               className="size-12 rounded-full mr-4"
             />

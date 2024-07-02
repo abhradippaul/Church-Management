@@ -9,86 +9,117 @@ import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import axios from "axios";
 import { Loader2 } from "lucide-react";
 import { useDashboardContext } from "@/my_components/providers/DashboardProvider";
+import { pusherClient } from "@/lib/Pusher";
 
 const imageUrl = process.env.NEXT_PUBLIC_IMAGE_URL;
 
 function ChatSheetComponent({ role }: { role: string }) {
-  const { isChatSheetOpen, setIsChatSheetOpen, chatInfo, setChatInfo } =
-    usePeopleContext();
+  const {
+    isChatSheetOpen,
+    setIsChatSheetOpen,
+    chatInfo,
+    setChatInfo,
+    message: peopleMessage,
+    setMessage: setPeopleMessage,
+    isChatLoading: isPeopleChatLoading,
+    setIsChatLoading: setIsPeopleChatLoading,
+  } = usePeopleContext();
   const {
     isChatSheetOpen: dashboardOpen,
     setIsChatSheetOpen: setDashboardOpen,
     chatInfo: dashboardChatInfo,
     setChatInfo: setDashboardChatInfo,
     UserInfo,
+    message: dashboardMessage,
+    setMessage: setDashboardMessage,
+    isChatLoading: isDashboardChatLoading,
+    setIsChatLoading: setIsDashboardChatLoading,
   } = useDashboardContext();
-  const [message, setMessage] = useState<string | undefined>();
+  const [message, setMessage] = useState("");
   const lastMessage: any = useRef(null);
+
+  const setSendMessageFunction = useCallback(
+    (message: string) => {
+      if (peopleMessage?.length || dashboardMessage?.length) {
+        if (role === "people") {
+          setDashboardMessage((prev: any) => [
+            ...prev,
+            {
+              _id: Math.floor(Math.random() * 9999).toString(),
+              createdAt: new Date(),
+              message,
+              sender: UserInfo?._id,
+            },
+          ]);
+        } else {
+          setPeopleMessage((prev: any) => [
+            ...prev,
+            {
+              _id: Math.floor(Math.random() * 9999).toString(),
+              createdAt: new Date(),
+              message,
+              sender: Math.floor(Math.random() * 9999).toString(),
+            },
+          ]);
+        }
+      } else {
+        if (role === "people") {
+          setDashboardMessage([
+            {
+              _id: Math.floor(Math.random() * 9999).toString(),
+              createdAt: new Date().toString(),
+              message,
+              sender: UserInfo?._id || "",
+            },
+          ]);
+        } else {
+          setPeopleMessage([
+            {
+              _id: Math.floor(Math.random() * 9999).toString(),
+              createdAt: new Date().toString(),
+              message,
+              sender: Math.floor(Math.random() * 9999).toString(),
+            },
+          ]);
+        }
+      }
+    },
+    [peopleMessage, dashboardMessage]
+  );
+
+  const setReceiveMessageFunction = (message: string) => {
+    if (role === "owner") {
+      setPeopleMessage((prev: any) => [
+        ...prev,
+        {
+          _id: Math.floor(Math.random() * 9999).toString(),
+          createdAt: new Date(),
+          message,
+          sender: chatInfo?._id || "",
+        },
+      ]);
+    } else if (role === "people") {
+      setDashboardMessage((prev: any) => [
+        ...prev,
+        {
+          _id: Math.floor(Math.random() * 9999).toString(),
+          createdAt: new Date(),
+          message,
+          sender: chatInfo?._id || "",
+        },
+      ]);
+    }
+  };
 
   const submitMessage = useCallback(async () => {
     try {
-      if (message && chatInfo?._id) {
+      if (message) {
         const { data } = await axios.post("/api/v1/chat", {
           message,
           peopleId: chatInfo?._id,
         });
-        console.log(data);
         if (data.success) {
-          if (chatInfo.chatDetails?.length) {
-            if (role === "people") {
-              setDashboardChatInfo((prev: any) => ({
-                ...prev,
-                chatDetails: [
-                  ...prev?.chatDetails,
-                  {
-                    _id: Math.floor(Math.random() * 9999).toString(),
-                    createdAt: new Date(),
-                    message,
-                    receiver: chatInfo._id,
-                  },
-                ],
-              }));
-            } else {
-              setChatInfo((prev: any) => ({
-                ...prev,
-                chatDetails: [
-                  ...prev?.chatDetails,
-                  {
-                    _id: Math.floor(Math.random() * 9999).toString(),
-                    createdAt: new Date(),
-                    message,
-                    receiver: chatInfo._id,
-                  },
-                ],
-              }));
-            }
-          } else {
-            if (role === "people") {
-              setDashboardChatInfo((prev: any) => ({
-                ...prev,
-                chatDetails: [
-                  {
-                    _id: Math.floor(Math.random() * 9999).toString(),
-                    createdAt: new Date(),
-                    message,
-                    receiver: chatInfo._id,
-                  },
-                ],
-              }));
-            } else {
-              setChatInfo((prev: any) => ({
-                ...prev,
-                chatDetails: [
-                  {
-                    _id: Math.floor(Math.random() * 9999).toString(),
-                    createdAt: new Date(),
-                    message,
-                    receiver: chatInfo._id,
-                  },
-                ],
-              }));
-            }
-          }
+          setSendMessageFunction(message);
           setMessage("");
         }
       }
@@ -99,9 +130,30 @@ function ChatSheetComponent({ role }: { role: string }) {
 
   useEffect(() => {
     lastMessage?.current?.scrollIntoView([{ behavior: "smooth" }]);
-  }, [chatInfo]);
+  }, [peopleMessage, dashboardMessage]);
 
-  console.log(dashboardChatInfo);
+  useEffect(() => {
+    if (role === "owner" && chatInfo?._id) {
+      pusherClient.subscribe(`to${chatInfo?._id}`);
+      pusherClient.bind(`messages`, (data: any) => {
+        setReceiveMessageFunction(data.message);
+        console.log(UserInfo, chatInfo);
+      });
+    } else if (role === "people" && UserInfo?._id) {
+      pusherClient.subscribe(`from${UserInfo?._id}`);
+      pusherClient.bind(`messages`, (data: any) => {
+        setReceiveMessageFunction(data.message);
+        console.log(UserInfo, chatInfo);
+      });
+    }
+    return () => {
+      if (role === "owner" && chatInfo?._id) {
+        pusherClient.unsubscribe(`to${chatInfo?._id}`);
+      } else if (role === "people" && UserInfo?._id) {
+        pusherClient.unsubscribe(`from${UserInfo?._id}`);
+      }
+    };
+  }, [chatInfo]);
 
   return (
     <Sheet
@@ -119,53 +171,63 @@ function ChatSheetComponent({ role }: { role: string }) {
           {chatInfo?.name}
         </div>
         <div className="size-full flex flex-col items-center justify-between pb-16 my-4">
-          {chatInfo?.isChatLoading ? (
+          {isPeopleChatLoading ? (
             <div className="size-full">
               <Loader2 className="size-8 animate-spin text-zinc-300" />
             </div>
           ) : (
             <div className="size-full border my-1 max-h-[80dvh] overflow-y-auto">
               {role === "people"
-                ? dashboardChatInfo?.chatDetails?.map(
-                    ({ message, _id, createdAt, receiver }) => (
+                ? dashboardMessage?.map(
+                    ({ message, _id, createdAt, sender }) => (
                       <div
                         key={_id}
                         className={`w-full flex items-center justify-between  ${
-                          UserInfo?._id === receiver && "flex-row-reverse"
+                          UserInfo?._id === sender && "flex-row-reverse"
                         }`}
                       >
                         <div className="bg-slate-900 rounded-md p-2 m-1 w-1/2">
                           <p className="text-zinc-300">{message}</p>
                           <h1 className="text-end mt-2 text-white">
-                            {`${new Date(createdAt).getHours()}:${new Date(
-                              createdAt
-                            ).getMinutes()}`}
+                            {`${
+                              new Date(createdAt).getHours() < 10
+                                ? `0${new Date(createdAt).getHours()}`
+                                : new Date(createdAt).getHours()
+                            }:${
+                              new Date(createdAt).getMinutes() < 10
+                                ? `0${new Date(createdAt).getMinutes()}`
+                                : new Date(createdAt).getMinutes()
+                            }`}
                           </h1>
                         </div>
                         <div className="w-1/2"></div>
                       </div>
                     )
                   )
-                : chatInfo?.chatDetails?.map(
-                    ({ message, _id, createdAt, receiver }) => (
-                      <div
-                        key={_id}
-                        className={`w-full flex items-center justify-between  ${
-                          chatInfo._id === receiver && "flex-row-reverse"
-                        }`}
-                      >
-                        <div className="bg-slate-900 rounded-md p-2 m-1 w-1/2">
-                          <p className="text-zinc-300">{message}</p>
-                          <h1 className="text-end mt-2 text-white">
-                            {`${new Date(createdAt).getHours()}:${new Date(
-                              createdAt
-                            ).getMinutes()}`}
-                          </h1>
-                        </div>
-                        <div className="w-1/2"></div>
+                : peopleMessage?.map(({ message, _id, createdAt, sender }) => (
+                    <div
+                      key={_id}
+                      className={`w-full flex items-center justify-between  ${
+                        chatInfo?._id === sender ? "" : "flex-row-reverse"
+                      }`}
+                    >
+                      <div className="bg-slate-900 rounded-md p-2 m-1 w-1/2">
+                        <p className="text-zinc-300">{message}</p>
+                        <h1 className="text-end mt-2 text-white">
+                          {`${
+                            new Date(createdAt).getHours() < 10
+                              ? `0${new Date(createdAt).getHours()}`
+                              : new Date(createdAt).getHours()
+                          }:${
+                            new Date(createdAt).getMinutes() < 10
+                              ? `0${new Date(createdAt).getMinutes()}`
+                              : new Date(createdAt).getMinutes()
+                          }`}
+                        </h1>
                       </div>
-                    )
-                  )}
+                      <div className="w-1/2"></div>
+                    </div>
+                  ))}
               <div ref={lastMessage}></div>
             </div>
           )}
@@ -177,7 +239,7 @@ function ChatSheetComponent({ role }: { role: string }) {
             />
             <Button
               size="sm"
-              disabled={chatInfo?.isChatLoading}
+              disabled={isPeopleChatLoading || isDashboardChatLoading}
               onClick={submitMessage}
               className="absolute right-2 bottom-2"
             >

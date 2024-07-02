@@ -24,13 +24,13 @@ interface EventInfoValue {
 interface ChurchInfoForMessage {
   name?: string;
   imageUrl?: string;
-  isChatLoading: boolean;
-  chatDetails?: {
-    _id: string;
-    message: string;
-    createdAt: string;
-    receiver: string;
-  }[];
+}
+
+interface MessageValue {
+  _id: string;
+  message: string;
+  createdAt: string;
+  sender: string;
 }
 
 interface UserInfoValue {
@@ -49,6 +49,10 @@ interface DashboardContextValue {
   setIsChatSheetOpen: Dispatch<SetStateAction<boolean>>;
   chatInfo: ChurchInfoForMessage | null;
   setChatInfo: Dispatch<SetStateAction<ChurchInfoForMessage | null>>;
+  message: MessageValue[] | null;
+  setMessage: Dispatch<SetStateAction<MessageValue[] | null>>;
+  isChatLoading: boolean;
+  setIsChatLoading: Dispatch<SetStateAction<boolean>>;
 }
 
 const CreateDashboardContext = createContext<DashboardContextValue>({
@@ -60,6 +64,10 @@ const CreateDashboardContext = createContext<DashboardContextValue>({
   setIsChatSheetOpen: () => {},
   chatInfo: null,
   setChatInfo: () => {},
+  message: null,
+  setMessage: () => {},
+  isChatLoading: false,
+  setIsChatLoading: () => {},
 });
 
 const CreateDashboardProvider = CreateDashboardContext.Provider;
@@ -83,6 +91,8 @@ function DashboardProvider({
 }) {
   const [isChatSheetOpen, setIsChatSheetOpen] = useState<boolean>(false);
   const [chatInfo, setChatInfo] = useState<ChurchInfoForMessage | null>(null);
+  const [message, setMessage] = useState<MessageValue[] | null>(null);
+  const [isChatLoading, setIsChatLoading] = useState<boolean>(false);
   return (
     <CreateDashboardProvider
       value={{
@@ -94,6 +104,10 @@ function DashboardProvider({
         isChatSheetOpen,
         setIsChatSheetOpen,
         setChatInfo,
+        message,
+        setMessage,
+        isChatLoading,
+        setIsChatLoading,
       }}
     >
       {children}

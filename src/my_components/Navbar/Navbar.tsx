@@ -7,6 +7,7 @@ import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import axios from "axios";
 
 const CommandComponent = dynamic(() => import("@/components/CommandComponent"));
 const TooltipComponent = dynamic(() => import("@/components/TooltipComponent"));
@@ -81,9 +82,12 @@ const Pages = [
 
 const imageUrl = process.env.NEXT_PUBLIC_IMAGE_URL;
 
-const onSignOutButtonClick = () => {
+const onSignOutButtonClick = async () => {
   try {
-    console.log("sign out");
+    const { data } = await axios.delete("/api/v1/sign-in");
+    if (data.success) {
+      window.location.href = "/sign-in";
+    }
   } catch (err: any) {
     console.log(err);
   }
@@ -122,17 +126,20 @@ function Navbar({ userInfo }: { userInfo: UserInfoValue }) {
         </div>
         <div
           className={`flex items-center ${
-            (pathname === "/people" || pathname === "/dashboard") &&
-            userInfo.role !== "people" &&
-            "max-w-[300px] w-[90%]"
+            ((pathname === "/people" || pathname === "/dashboard") &&
+              userInfo.role === "admin") ||
+            (pathname === "/people" &&
+              userInfo.role === "owner" &&
+              "max-w-[300px] w-[90%]")
           }`}
         >
           {pathname === "/people" && userInfo.role === "owner" && (
             <CommandComponent pathName="/people" />
           )}
-          {userInfo.role === "admin" && (
-            <CommandComponent pathName={pathname} />
-          )}
+          {userInfo.role === "admin" &&
+            (pathname === "/dashboard" || pathname === "/people") && (
+              <CommandComponent pathName={pathname} />
+            )}
           <TooltipComponent
             hoverElement={
               <img

@@ -102,3 +102,21 @@ export async function POST(req: NextRequest) {
     });
   }
 }
+
+export async function DELETE(req: NextRequest) {
+  dbConnect();
+  try {
+    const response = NextResponse.json<ApiResponse>({
+      message: "Logged in successfully",
+      success: true,
+    });
+    response.cookies.delete("access_token");
+    response.cookies.delete("refresh_token");
+    return response;
+  } catch (err: any) {
+    return NextResponse.json<ApiResponse>({
+      success: false,
+      message: err.message,
+    });
+  }
+}

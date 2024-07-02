@@ -28,7 +28,7 @@ function AccordionComponent({
   itemKey,
   trigger,
 }: AccordionComponentProps) {
-  const { setTagIdForUpdate, setDialogType, setGroupIdForUpdate } =
+  const { setTagIdForUpdate, setDialogType, setGroupIdForUpdate, UserInfo } =
     useTagsContext();
   const router = useRouter();
   const deletePeople = useCallback(async (id: string) => {
@@ -61,43 +61,45 @@ function AccordionComponent({
               <Link href={`/tags/${_id}`} className="flex-1">
                 {name}
               </Link>
-              <div>
-                <TagsDialog
-                  type="update"
-                  descriptions={`Update the tag ${name}`}
-                  trigger={
-                    <TooltipComponent
-                      hoverElement={
-                        <Pencil
-                          onClick={() => {
-                            setTagIdForUpdate(_id);
-                            setDialogType("tags");
-                            setGroupIdForUpdate(itemKey);
-                          }}
-                          className="size-4 mr-4 invisible group-hover:visible text-zinc-300"
-                        />
-                      }
-                    >
-                      <h1>Update Tag</h1>
-                    </TooltipComponent>
-                  }
-                ></TagsDialog>
-                <AlertDialogComponent
-                  description={`Only the tag ${name} will be deleted not the people data.`}
-                  title={`Are you want to delete ${name} the tag ?`}
-                  _id={_id}
-                  onActionClick={deletePeople}
-                  trigger={
-                    <TooltipComponent
-                      hoverElement={
-                        <Trash className="size-4 mr-4 invisible group-hover:visible text-red-500" />
-                      }
-                    >
-                      <h1>Delete Tag</h1>
-                    </TooltipComponent>
-                  }
-                />
-              </div>
+              {UserInfo?.role === "owner" && (
+                <div>
+                  <TagsDialog
+                    type="update"
+                    descriptions={`Update the tag ${name}`}
+                    trigger={
+                      <TooltipComponent
+                        hoverElement={
+                          <Pencil
+                            onClick={() => {
+                              setTagIdForUpdate(_id);
+                              setDialogType("tags");
+                              setGroupIdForUpdate(itemKey);
+                            }}
+                            className="size-4 mr-4 invisible group-hover:visible text-zinc-300"
+                          />
+                        }
+                      >
+                        <h1>Update Tag</h1>
+                      </TooltipComponent>
+                    }
+                  ></TagsDialog>
+                  <AlertDialogComponent
+                    description={`Only the tag ${name} will be deleted not the people data.`}
+                    title={`Are you want to delete ${name} the tag ?`}
+                    _id={_id}
+                    onActionClick={deletePeople}
+                    trigger={
+                      <TooltipComponent
+                        hoverElement={
+                          <Trash className="size-4 mr-4 invisible group-hover:visible text-red-500" />
+                        }
+                      >
+                        <h1>Delete Tag</h1>
+                      </TooltipComponent>
+                    }
+                  />
+                </div>
+              )}
             </div>
           </AccordionContent>
         ))}

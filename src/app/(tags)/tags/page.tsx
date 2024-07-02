@@ -69,43 +69,45 @@ function Page() {
                   itemKey={_id}
                   trigger={name}
                 />
-                <div className="flex items-center justify-between">
-                  <TagsDialog
-                    title="Update group"
-                    type="update"
-                    descriptions={`Update the group ${name}`}
-                    trigger={
-                      <TooltipComponent
-                        hoverElement={
-                          <Pencil
-                            onClick={() => {
-                              setGroupIdForUpdate(_id);
-                              setDialogType("groups");
-                            }}
-                            className="size-4 mr-4 text-zinc-300 hover:text-white transition invisible group-hover:visible"
-                          />
-                        }
-                      >
-                        <h1>Update Group</h1>
-                      </TooltipComponent>
-                    }
-                  ></TagsDialog>
-                  <AlertDialogComponent
-                    description={`Only the tag ${name} will be deleted not the people data.`}
-                    title={`Are you want to delete ${name} the tag ?`}
-                    _id={_id}
-                    onActionClick={deleteGroup}
-                    trigger={
-                      <TooltipComponent
-                        hoverElement={
-                          <Trash className="size-4 mr-4 text-red-700 hover:text-red-600 transition invisible group-hover:visible" />
-                        }
-                      >
-                        <h1>Delete Group</h1>
-                      </TooltipComponent>
-                    }
-                  />
-                </div>
+                {UserInfo?.role === "owner" && (
+                  <div className="flex items-center justify-between">
+                    <TagsDialog
+                      title="Update group"
+                      type="update"
+                      descriptions={`Update the group ${name}`}
+                      trigger={
+                        <TooltipComponent
+                          hoverElement={
+                            <Pencil
+                              onClick={() => {
+                                setGroupIdForUpdate(_id);
+                                setDialogType("groups");
+                              }}
+                              className="size-4 mr-4 text-zinc-300 hover:text-white transition invisible group-hover:visible"
+                            />
+                          }
+                        >
+                          <h1>Update Group</h1>
+                        </TooltipComponent>
+                      }
+                    ></TagsDialog>
+                    <AlertDialogComponent
+                      description={`Only the tag ${name} will be deleted not the people data.`}
+                      title={`Are you want to delete ${name} the tag ?`}
+                      _id={_id}
+                      onActionClick={deleteGroup}
+                      trigger={
+                        <TooltipComponent
+                          hoverElement={
+                            <Trash className="size-4 mr-4 text-red-700 hover:text-red-600 transition invisible group-hover:visible" />
+                          }
+                        >
+                          <h1>Delete Group</h1>
+                        </TooltipComponent>
+                      }
+                    />
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -119,7 +121,7 @@ function Page() {
               <Link href={`/tags/${_id}`} className="flex-grow">
                 {name}
               </Link>
-              {UserInfo?.role !== "people" && (
+              {UserInfo?.role === "owner" && (
                 <TagsDialog
                   type="update"
                   descriptions={`Update the tag ${name}`}
@@ -141,7 +143,7 @@ function Page() {
                   }
                 ></TagsDialog>
               )}
-              {UserInfo?.role !== "people" && (
+              {UserInfo?.role === "owner" && (
                 <AlertDialogComponent
                   description={`Only the tag ${name} will be deleted not the people data.`}
                   title={`Are you want to delete ${name} the tag ?`}

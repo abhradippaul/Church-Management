@@ -11,7 +11,8 @@ import {
 import { getPeopleSearchInfo } from "@/helpers/db";
 import axios from "axios";
 import { Search } from "lucide-react";
-import { memo, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { memo, useCallback, useEffect, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 
 interface PeopleItemValue {
@@ -27,6 +28,7 @@ interface Props {
 function CommandComponent({ pathName }: Props) {
   const [open, setOpen] = useState(false);
   const [people, setPeople] = useState<PeopleItemValue[]>([]);
+  const navigate = useRouter();
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -59,6 +61,23 @@ function CommandComponent({ pathName }: Props) {
     }
   }, 500);
 
+  const onCommandItemOnclick = useCallback(async (_id: string) => {
+    if (pathName === "/people" && _id) {
+      navigate.push(`/people/${_id}`);
+    } else if (pathName === "/dashboard" && _id) {
+      try {
+        const { data } = await axios.post(`/api/v1/dashboard`, {
+          _id,
+        });
+        if (data.success) {
+          window.location.reload();
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    }
+  }, []);
+
   return (
     <>
       <div
@@ -87,7 +106,12 @@ function CommandComponent({ pathName }: Props) {
           {people.length ? (
             <CommandGroup heading="Suggestions">
               {people.map(({ _id, name }) => (
-                <CommandItem key={_id}>{name}</CommandItem>
+                <CommandItem
+                  key={_id}
+                  onClickCapture={() => onCommandItemOnclick(_id)}
+                >
+                  {name}
+                </CommandItem>
               ))}
             </CommandGroup>
           ) : (

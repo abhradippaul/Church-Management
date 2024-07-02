@@ -14,7 +14,7 @@ function TooltipComponent({ children, hoverElement }: TooltipContentValue) {
   return (
     <TooltipProvider>
       <Tooltip>
-        <TooltipTrigger>{hoverElement}</TooltipTrigger>
+        <TooltipTrigger asChild>{hoverElement}</TooltipTrigger>
         <TooltipContent>{children}</TooltipContent>
       </Tooltip>
     </TooltipProvider>

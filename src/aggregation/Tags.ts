@@ -149,3 +149,76 @@ export async function getTagsInfoAggregateForPeople(peopleId: string) {
     },
   ]);
 }
+
+export async function getPeopleInfoFromTagsForOwner(
+  ownerId: string,
+  tagId: string
+) {
+  return await OwnerModel.aggregate([
+    {
+      $match: {
+        _id: new mongoose.Types.ObjectId(ownerId),
+      },
+    },
+    {
+      $lookup: {
+        from: "tagitems",
+        localField: "_id",
+        foreignField: "church",
+        as: "Tag_Info",
+        pipeline: [
+          {
+            $match: {
+              _id: new mongoose.Types.ObjectId(tagId),
+            },
+          },
+          {
+            $lookup: {
+              from: "tagjoineds",
+              localField: "_id",
+              foreignField: "tag_item",
+              as: "Tag_Joined",
+              pipeline: [
+                {
+                  $lookup: {
+                    from: "peoples",
+                    localField: "people",
+                    foreignField: "_id",
+                    as: "People",
+                  },
+                },
+                {
+                  $addFields: {
+                    People: {
+                      $first: "$People",
+                    },
+                  },
+                },
+                {
+                  $unwind: "$People",
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    {
+      $addFields: {
+        People_Info: {
+          $first: "$Tag_Info.Tag_Joined.People",
+        },
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        "People_Info._id": 1,
+        "People_Info.name": 1,
+        "People_Info.email": 1,
+        "People_Info.image": 1,
+        "People_Info.date_of_birth": 1,
+      },
+    },
+  ]);
+}
