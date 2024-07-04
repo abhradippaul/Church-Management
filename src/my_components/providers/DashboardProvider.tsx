@@ -22,6 +22,7 @@ interface EventInfoValue {
 }
 
 interface ChurchInfoForMessage {
+  _id?: string;
   name?: string;
   imageUrl?: string;
 }
@@ -53,6 +54,7 @@ interface DashboardContextValue {
   setMessage: Dispatch<SetStateAction<MessageValue[] | null>>;
   isChatLoading: boolean;
   setIsChatLoading: Dispatch<SetStateAction<boolean>>;
+  UnseenChatCount: number;
 }
 
 const CreateDashboardContext = createContext<DashboardContextValue>({
@@ -68,6 +70,7 @@ const CreateDashboardContext = createContext<DashboardContextValue>({
   setMessage: () => {},
   isChatLoading: false,
   setIsChatLoading: () => {},
+  UnseenChatCount: 0,
 });
 
 const CreateDashboardProvider = CreateDashboardContext.Provider;
@@ -82,12 +85,14 @@ function DashboardProvider({
   Events,
   UserInfo,
   PaymentAmount,
+  UnseenChatCount,
 }: {
   children: ReactNode;
   recentJoined: number;
   Events: EventInfoValue[];
   UserInfo: UserInfoValue;
   PaymentAmount: number;
+  UnseenChatCount: number;
 }) {
   const [isChatSheetOpen, setIsChatSheetOpen] = useState<boolean>(false);
   const [chatInfo, setChatInfo] = useState<ChurchInfoForMessage | null>(null);
@@ -108,6 +113,7 @@ function DashboardProvider({
         setMessage,
         isChatLoading,
         setIsChatLoading,
+        UnseenChatCount,
       }}
     >
       {children}

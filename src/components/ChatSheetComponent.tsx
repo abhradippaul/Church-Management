@@ -133,24 +133,33 @@ function ChatSheetComponent({ role }: { role: string }) {
   }, [peopleMessage, dashboardMessage]);
 
   useEffect(() => {
-    if (role === "owner" && chatInfo?._id) {
-      pusherClient.subscribe(`to${chatInfo?._id}`);
-      pusherClient.bind(`messages`, (data: any) => {
-        setReceiveMessageFunction(data.message);
+    console.log("how many times use effect running");
+    if (role === "people" && dashboardChatInfo?._id) {
+      pusherClient.subscribe(`from${UserInfo?._id}`);
+      pusherClient.bind(`messages`, (message: string) => {
+        setReceiveMessageFunction(message);
         console.log(UserInfo, chatInfo);
       });
-    } else if (role === "people" && UserInfo?._id) {
-      pusherClient.subscribe(`from${UserInfo?._id}`);
-      pusherClient.bind(`messages`, (data: any) => {
-        setReceiveMessageFunction(data.message);
+    }
+    return () => {
+      if (role === "people" && UserInfo?._id) {
+        pusherClient.unsubscribe(`from${UserInfo?._id}`);
+      }
+    };
+  }, [dashboardChatInfo]);
+
+  useEffect(() => {
+    console.log("how many times use effect running");
+    if (role === "owner" && chatInfo?._id) {
+      pusherClient.subscribe(`to${chatInfo?._id}`);
+      pusherClient.bind(`messages`, (message: string) => {
+        setReceiveMessageFunction(message);
         console.log(UserInfo, chatInfo);
       });
     }
     return () => {
       if (role === "owner" && chatInfo?._id) {
         pusherClient.unsubscribe(`to${chatInfo?._id}`);
-      } else if (role === "people" && UserInfo?._id) {
-        pusherClient.unsubscribe(`from${UserInfo?._id}`);
       }
     };
   }, [chatInfo]);

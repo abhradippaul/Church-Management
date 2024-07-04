@@ -75,7 +75,7 @@ function EventItemForm() {
       tags: event?.Tag_Id || "",
       event_date: event?._id
         ? new Date(
-            `${event?.date_month}-${event?.date_day}-${event?.date_year}`
+            `${event?.date_month + 1}-${event?.date_day}-${event?.date_year}`
           )
         : new Date(),
       event_hour: event?.time.split(":")[0] || "00",
@@ -89,7 +89,7 @@ function EventItemForm() {
     async (values: z.infer<typeof CreateEventSchema>) => {
       try {
         if (event?._id) {
-          const { data } = await axios.put(
+          const { data } = await axios.patch(
             `/api/v1/events?eventId=${event?._id}`,
             {
               name: values.name,
@@ -135,7 +135,7 @@ function EventItemForm() {
         });
       }
     },
-    []
+    [eventIdForUpdate]
   );
 
   const methodForUseEffect = useCallback(() => {

@@ -30,6 +30,7 @@ interface PeopleInfoValue {
   email: string;
   date_of_birth: string;
   image: string;
+  UnseenChatCount?: number;
 }
 
 const imageUrl = process.env.NEXT_PUBLIC_IMAGE_URL;
@@ -135,6 +136,8 @@ function TableComponent({ tableHeading, type }: TableComponentProps) {
     methodForFilterRequest();
   }, [filterOptions, page]);
 
+  console.log(role);
+
   return (
     <div className="flex items-center justify-center flex-col">
       <Table>
@@ -147,7 +150,14 @@ function TableComponent({ tableHeading, type }: TableComponentProps) {
         </TableHeader>
         <TableBody>
           {peopleInfo?.map(
-            ({ email, name, date_of_birth, _id, image }: PeopleInfoValue) => (
+            ({
+              email,
+              name,
+              date_of_birth,
+              _id,
+              image,
+              UnseenChatCount,
+            }: PeopleInfoValue) => (
               <TableRow
                 key={_id}
                 className="cursor-pointer"
@@ -169,12 +179,15 @@ function TableComponent({ tableHeading, type }: TableComponentProps) {
                   {new Date().getFullYear() -
                     new Date(date_of_birth).getFullYear()}
                 </TableCell>
-                {role === "owner" && (
+                {role === "owner" && type === "people" && (
                   <TableCell>
-                    <MessageSquare
-                      className="size-4"
-                      onClick={(e) => onMsgButtonClick(e, _id, name, image)}
-                    />
+                    <div className="flex items-center justify-center text-zinc-300 hover:text-white size-full">
+                      <MessageSquare
+                        className="size-4 mr-1"
+                        onClick={(e) => onMsgButtonClick(e, _id, name, image)}
+                      />
+                      {Boolean(UnseenChatCount) && <h1>{UnseenChatCount}</h1>}
+                    </div>
                   </TableCell>
                 )}
                 {role === "owner" && (

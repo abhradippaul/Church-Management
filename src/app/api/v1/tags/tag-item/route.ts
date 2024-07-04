@@ -54,9 +54,15 @@ export async function GET(req: NextRequest) {
         });
       }
 
-      tagsItem = await getPeopleInfoFromTagsForOwner(verifiedData.ownerId,tagItem);
+      tagsItem = await getPeopleInfoFromTagsForOwner(
+        verifiedData.ownerId,
+        tagItem
+      );
     } else if (verifiedData.role === "owner") {
-      tagsItem = await getPeopleInfoFromTagsForOwner(verifiedData.ownerId,tagItem);
+      tagsItem = await getPeopleInfoFromTagsForOwner(
+        verifiedData.ownerId,
+        tagItem
+      );
     } else if (verifiedData.role === "people" && verifiedData.peopleId) {
       tagsItem = await getTagsInfoAggregateForPeople(verifiedData.peopleId);
     }
@@ -71,7 +77,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json<ApiResponse>({
       success: true,
       message: "Tag found",
-      data: tagsItem[0],
+      data: { ...tagsItem[0], role: verifiedData.role },
     });
   } catch (err) {
     return NextResponse.json<ApiResponse>({

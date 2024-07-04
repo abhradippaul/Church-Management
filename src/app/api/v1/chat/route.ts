@@ -122,6 +122,16 @@ export async function GET(req: NextRequest) {
           },
         },
       ]);
+      await ChatModel.updateMany(
+        {
+          sender: verifiedData.ownerId,
+          receiver: verifiedData.peopleId,
+          seen: false,
+        },
+        {
+          $set: { seen: true },
+        }
+      );
     }
 
     if (!chatInfo?.length) {
@@ -175,20 +185,15 @@ export async function POST(req: NextRequest) {
     let isChatCreated = null;
 
     if (verifiedData.role === "owner" && peopleId) {
-      pusherServer.trigger(`from${peopleId}`, "messages", {
-        message,
-        receiver: peopleId,
-      });
+      pusherServer.trigger(`from${peopleId}`, "messages", message);
+
       isChatCreated = await ChatModel.create({
         sender: verifiedData.ownerId,
         receiver: peopleId,
         message,
       });
     } else if (verifiedData?.role === "people" && verifiedData?.peopleId) {
-      pusherServer.trigger(`to${verifiedData?.peopleId}`, "messages", {
-        message,
-        receiver: verifiedData.ownerId,
-      });
+      pusherServer.trigger(`to${verifiedData?.peopleId}`, "messages", message);
 
       isChatCreated = await ChatModel.create({
         sender: verifiedData?.peopleId,

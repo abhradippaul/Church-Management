@@ -43,7 +43,7 @@ interface CreatePeopleContextValue {
   setIsChatSheetOpen: Dispatch<SetStateAction<boolean>>;
   chatInfo: PeopleInfoForMessage | null;
   setChatInfo: Dispatch<SetStateAction<PeopleInfoForMessage | null>>;
-  role: string;
+  role?: string;
   message: MessageValue[] | null;
   setMessage: Dispatch<SetStateAction<MessageValue[] | null>>;
   isChatLoading: boolean;
@@ -82,6 +82,7 @@ interface PeopleInfoProps {
   email: string;
   date_of_birth: string;
   image: string;
+  UnseenChatCount?: number;
 }
 [];
 
@@ -110,7 +111,7 @@ function PeopleProvider({
     _id: string;
     name: string;
   };
-  role: string;
+  role?: string;
 }) {
   const [isFormError, setIsFormError] = useState(false);
   const [filterOptions, setFilterOptions] = useState<FilterOptionsValue>({});

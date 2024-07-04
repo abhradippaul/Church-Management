@@ -6,19 +6,8 @@ import axios from "axios";
 import PeopleProvider from "@/my_components/providers/PeopleProvider";
 
 export const metadata = {
-  title: "XYZ | Tags",
-  description: "Tags",
-};
-
-interface UserInfoValue {
-  name: string;
-  imageUrl: string;
-  role: string;
-}
-const UserInfo: UserInfoValue = {
-  name: "Abhradip Paul",
-  imageUrl: "",
-  role: "Admin",
+  title: "XYZ | People",
+  description: "People",
 };
 
 async function layout({
@@ -50,9 +39,15 @@ async function layout({
   return (
     <PeopleProvider peopleInfo={peopleInfo.PeopleInfo}>
       <div>
-        <Navbar userInfo={UserInfo} />
-        <div className="px-2 md:px-4 max-w-7xl mx-auto min-h-dvh">
-          <div className="flex flex-col">
+        <Navbar
+          userInfo={{
+            imageUrl: peopleInfo.image,
+            name: peopleInfo.name,
+            role: peopleInfo.role,
+          }}
+        />
+        <div className="px-2 md:px-4 max-w-7xl mx-auto min-h-[90dvh] border">
+          <div className="flex flex-col size-full">
             <PeopleNavbar type="edit" />
             {children}
           </div>

@@ -221,3 +221,88 @@ export async function GetEventsInfoForPeopleAggregate(
     },
   ]);
 }
+
+export async function GetTagsPeoplesInfo(ownerId: string, tagId: string) {
+  return await OwnerModel.aggregate([
+    {
+      $match: {
+        _id: new mongoose.Types.ObjectId(ownerId),
+      },
+    },
+    {
+      $lookup: {
+        from: "tagitems",
+        localField: "_id",
+        foreignField: "church",
+        as: "Tag_Item",
+        pipeline: [
+          {
+            $match: {
+              _id: new mongoose.Types.ObjectId(tagId),
+            },
+          },
+          {
+            $lookup: {
+              from: "tagjoineds",
+              localField: "_id",
+              foreignField: "tag_item",
+              as: "Tag_Joined",
+              pipeline: [
+                {
+                  $lookup: {
+                    from: "peoples",
+                    localField: "people",
+                    foreignField: "_id",
+                    as: "People_Info",
+                  },
+                },
+                {
+                  $addFields: {
+                    People_Info: {
+                      $first: "$People_Info",
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    {
+      $addFields: {
+        isTagExist: {
+          $cond: {
+            if: {
+              $in: [new mongoose.Types.ObjectId(tagId), "$Tag_Item._id"],
+            },
+            then: true,
+            else: false,
+          },
+        },
+      },
+    },
+    {
+      $addFields: {
+        Tag_Item: {
+          $first: "$Tag_Item",
+        },
+      },
+    },
+    {
+      $addFields: {
+        People_Info: "$Tag_Item.Tag_Joined.People_Info",
+      },
+    },
+
+    {
+      $project: {
+        _id: 0,
+        name: 1,
+        "People_Info.email": 1,
+        "People_Info.name": 1,
+        isTagExist: 1,
+      },
+    },
+  ]);
+}

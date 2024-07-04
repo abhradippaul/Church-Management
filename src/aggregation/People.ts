@@ -63,6 +63,38 @@ export async function peopleDetailsAggregate(
         localField: "_id",
         foreignField: "church",
         as: "Peoples",
+        pipeline: [
+          {
+            $lookup: {
+              from: "chats",
+              localField: "_id",
+              foreignField: "sender",
+              as: "Chats_Info",
+              pipeline: [
+                {
+                  $group: {
+                    _id: "$seen",
+                    count: {
+                      $sum: 1,
+                    },
+                  },
+                },
+                {
+                  $match: {
+                    _id: false,
+                  },
+                },
+              ],
+            },
+          },
+          {
+            $addFields: {
+              UnseenChatCount: {
+                $first: "$Chats_Info.count",
+              },
+            },
+          },
+        ],
       },
     },
     {
@@ -106,6 +138,7 @@ export async function peopleDetailsAggregate(
         "Peoples.date_of_birth": 1,
         "Peoples.email": 1,
         "Peoples.image": 1,
+        "Peoples.UnseenChatCount": 1,
         PeopleCount: 1,
       },
     },

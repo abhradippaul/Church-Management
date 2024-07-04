@@ -34,28 +34,26 @@ function Page() {
   ];
 
   return (
-    <>
-      <div className="flex w-full flex-col items-center flex-grow md:flex-row">
-        <div className="w-1/2 flex items-center justify-center">
-          <img
-            src={`${imageUrl}/w_250/q_25/f_auto/${peopleInfo.image}`}
-            alt="user image"
-            className="size-48 rounded-full object-cover"
-          />
-        </div>
-        <div className="flex flex-col w-1/2">
-          <h1 className="text-xl font-semibold text-zinc-300 mb-4">
-            {peopleInfo.name}
-          </h1>
-          {info.map((e) => (
-            <div className="px-2 py-4 flex" key={e.value}>
-              {e.title}
-              <p className="ml-4">{e.value}</p>
-            </div>
-          ))}
-        </div>
+    <div className="flex w-full flex-col items-center flex-grow md:flex-row h-full justify-center border">
+      <div className="w-1/2 flex items-center justify-center">
+        <img
+          src={`${imageUrl}/w_250/q_25/f_auto/${peopleInfo.image}`}
+          alt="user image"
+          className="size-48 rounded-full object-cover"
+        />
       </div>
-    </>
+      <div className="flex flex-col w-1/2">
+        <h1 className="text-xl font-semibold text-zinc-300 mb-4">
+          {peopleInfo.name}
+        </h1>
+        {info.map((e) => (
+          <div className="px-2 py-4 flex" key={e.value}>
+            {e.title}
+            <p className="ml-4">{e.value}</p>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 

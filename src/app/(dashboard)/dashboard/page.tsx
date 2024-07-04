@@ -17,14 +17,16 @@ function DashboardPage() {
     setChatInfo,
     setMessage,
     setIsChatLoading,
+    UnseenChatCount,
   } = useDashboardContext();
   const onMsgButtonClick = useCallback(async () => {
     try {
       setIsChatSheetOpen(true);
-      // setChatInfo((prev: any) => ({
-      //   imageUrl: UserInfo?.imageUrl,
-      //   name: UserInfo?.name,
-      // }));
+      setChatInfo({
+        _id: UserInfo?._id,
+        imageUrl: UserInfo?.imageUrl,
+        name: UserInfo?.name,
+      });
       setIsChatLoading(true);
       const { data } = await axios.get(`/api/v1/chat`);
       if (data.success) {
@@ -54,10 +56,13 @@ function DashboardPage() {
       <div className="flex items-center justify-between mb-8">
         <h1>This is our dashboard page</h1>
         {UserInfo?.role === "people" && (
-          <MessageSquare
-            className="size-4 cursor-pointer text-zinc-300 hover:text-white"
+          <div
+            className="cursor-pointer text-zinc-300 hover:text-white flex items-center justify-center"
             onClick={onMsgButtonClick}
-          />
+          >
+            <MessageSquare className="size-4 mr-2" />
+            {UnseenChatCount ?? <h1>{UnseenChatCount}</h1>}
+          </div>
         )}
         {UserInfo?.role === "admin" && (
           <Button variant="outline" size="sm" onClick={onButtonClick}>

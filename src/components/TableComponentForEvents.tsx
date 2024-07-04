@@ -45,6 +45,7 @@ function TableComponentForEvents({ Events }: { Events: EventInfoValue[] }) {
       console.log(err.message);
     }
   }, []);
+  
 
   return (
     <Table className="my-8">

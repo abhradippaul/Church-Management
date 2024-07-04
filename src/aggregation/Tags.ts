@@ -211,8 +211,16 @@ export async function getPeopleInfoFromTagsForOwner(
       },
     },
     {
+      $addFields: {
+        Tag_Info: {
+          $first: "$Tag_Info",
+        },
+      },
+    },
+    {
       $project: {
         _id: 0,
+        "Tag_Info.name" : 1,
         "People_Info._id": 1,
         "People_Info.name": 1,
         "People_Info.email": 1,

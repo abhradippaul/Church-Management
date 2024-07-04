@@ -1,6 +1,4 @@
-import {
-  getPeopleInfoAggregateForOwner,
-} from "@/aggregation/PeopleInfo";
+import { getPeopleInfoAggregateForOwner } from "@/aggregation/PeopleInfo";
 import dbConnect from "@/lib/DbConnect";
 import { verifyToken } from "@/lib/JsonWebToken";
 import AdminModel from "@/model/Admin";
@@ -73,7 +71,7 @@ export async function GET(
     return NextResponse.json<ApiResponse>({
       success: true,
       message: "Successfully fetched users information",
-      data: peopleInfo[0],
+      data: { ...peopleInfo[0], role: verifiedData.role },
     });
   } catch (err: any) {
     return NextResponse.json<ApiResponse>({

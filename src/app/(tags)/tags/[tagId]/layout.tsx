@@ -40,9 +40,9 @@ async function layout({
 
   return (
     <PeopleProvider
-      role={response.role}
       peopleInfo={response.People_Info}
       tagInfo={response.Tag_Info}
+      role={response.role}
     >
       <SpecificNavbarForTag />
       {children}

@@ -214,9 +214,33 @@ export async function GetDashboardInfoForUser(
               ],
             },
           },
+          {
+            $lookup: {
+              from: "chats",
+              localField: "_id",
+              foreignField: "receiver",
+              as: "Chats_Info",
+              pipeline: [
+                {
+                  $group: {
+                    _id: "$seen",
+                    count: {
+                      $sum: 1,
+                    },
+                  },
+                },
+                {
+                  $match: {
+                    _id: false,
+                  },
+                },
+              ],
+            },
+          },
         ],
       },
     },
+
     {
       $addFields: {
         People: {
@@ -227,6 +251,13 @@ export async function GetDashboardInfoForUser(
     {
       $addFields: {
         Events: "$People.Tags.Events",
+      },
+    },
+    {
+      $addFields: {
+        UnseenChatCount: {
+          $first: "$People.Chats_Info.count",
+        },
       },
     },
     {
@@ -248,6 +279,7 @@ export async function GetDashboardInfoForUser(
         "Events.description": 1,
         "Events._id": 1,
         "Events.Tag_Name": 1,
+        UnseenChatCount: 1,
       },
     },
   ]);

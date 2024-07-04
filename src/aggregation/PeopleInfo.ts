@@ -78,7 +78,10 @@ interface VerifiedDataValue {
 //   }
 // }
 
-export async function getPeopleInfoAggregateForOwner (ownerId: string, userId: string) {
+export async function getPeopleInfoAggregateForOwner(
+  ownerId: string,
+  userId: string
+) {
   return await OwnerModel.aggregate([
     {
       $match: {
@@ -97,6 +100,93 @@ export async function getPeopleInfoAggregateForOwner (ownerId: string, userId: s
               _id: new mongoose.Types.ObjectId(userId),
             },
           },
+          // {
+          //   $lookup: {
+          //     from: "checkins",
+          //     localField: "_id",
+          //     foreignField: "people",
+          //     as: "Attendance",
+          //     pipeline: [
+          //       {
+          //         $lookup: {
+          //           from: "events",
+          //           localField: "event",
+          //           foreignField: "_id",
+          //           as: "Event_Info",
+          //         },
+          //       },
+          //       {
+          //         $addFields: {
+          //           Event_Info: {
+          //             $first: "$Event_Info",
+          //           },
+          //         },
+          //       },
+          //     ],
+          //   },
+          // },
+          {
+            $lookup: {
+              from: "tagjoineds",
+              localField: "_id",
+              foreignField: "people",
+              as: "TagJoineds",
+              pipeline: [
+                {
+                  $lookup: {
+                    from: "tagitems",
+                    localField: "tag_item",
+                    foreignField: "_id",
+                    as: "TagItems",
+                  },
+                },
+                {
+                  $addFields: {
+                    TagItems: {
+                      $first: "$TagItems",
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    // {
+    //   $lookup: {
+    //     from: "payments",
+    //     localField: "_id",
+    //     foreignField: "church",
+    //     as: "Payments",
+    //     pipeline: [
+    //       {
+    //         $match: {
+    //           people: new mongoose.Types.ObjectId(userId),
+    //         },
+    //       },
+    //     ],
+    //   },
+    {
+      $lookup: {
+        from: "payments",
+        localField: "_id",
+        foreignField: "church",
+        as: "Payments",
+        pipeline: [
+          {
+            $match: {
+              people: new mongoose.Types.ObjectId(userId),
+            },
+          },
+          {
+            $group: {
+              _id: null,
+              amount: {
+                $sum: "$amount",
+              },
+            },
+          },
         ],
       },
     },
@@ -107,9 +197,37 @@ export async function getPeopleInfoAggregateForOwner (ownerId: string, userId: s
         },
       },
     },
+    // {
+    //   $addFields: {
+    //     Attendance: "$PeopleInfo.Attendance",
+    //   },
+    // },
+    {
+      $addFields: {
+        TotalPayment: {
+          $first: "$Payments.amount",
+        },
+      },
+    },
+    {
+      $addFields: {
+        Tags: "$PeopleInfo.TagJoineds.TagItems",
+      },
+    },
     {
       $project: {
         _id: 0,
+        name: 1,
+        image: 1,
+        "Tags._id": 1,
+        "Tags.name": 1,
+        // "Attendance._id": 1,
+        // "Attendance.createdAt": 1,
+        // "Attendance.Event_Info.name": 1,
+        // "Payments._id": 1,
+        // "Payments.amount": 1,
+        // "Payments.createdAt": 1,
+        TotalPayment: 1,
         "PeopleInfo._id": 1,
         "PeopleInfo.email": 1,
         "PeopleInfo.name": 1,

@@ -49,11 +49,12 @@ export default async function RootLayout({
   }
 
   if (dashboardInfo?.ChurchInfo?.length && dashboardInfo.role === "admin") {
-    return <RightSideNavbar ChurchInfo={dashboardInfo.ChurchInfo}/>;
+    return <RightSideNavbar ChurchInfo={dashboardInfo.ChurchInfo} />;
   }
 
   return (
     <DashboardProvider
+      UnseenChatCount={dashboardInfo.UnseenChatCount}
       recentJoined={dashboardInfo.PeopleCount}
       Events={dashboardInfo.Events}
       UserInfo={{

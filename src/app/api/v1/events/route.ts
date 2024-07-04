@@ -1,8 +1,9 @@
 import {
   GetEventsInfoForOwnerAggregate,
   GetEventsInfoForPeopleAggregate,
+  GetTagsPeoplesInfo,
 } from "@/aggregation/Events";
-import { isChurchAndTagValid } from "@/aggregation/Tags";
+import { SendEventInvitationEmail } from "@/helpers/SendEventInvitationEmail";
 import dbConnect from "@/lib/DbConnect";
 import { verifyToken } from "@/lib/JsonWebToken";
 import AdminModel from "@/model/Admin";
@@ -131,7 +132,14 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    let isValid = await isChurchAndTagValid(verifiedData.ownerId, tag);
+    let isValid = (await GetTagsPeoplesInfo(verifiedData.ownerId, tag)) as {
+      name: string;
+      isTagExist: boolean;
+      People_Info: {
+        name: string;
+        email: string;
+      }[];
+    }[];
 
     if (!isValid?.length) {
       return NextResponse.json<ApiResponse>({
@@ -140,10 +148,10 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    if (!isValid[0]?.isTagExist) {
+    if (!isValid[0].isTagExist) {
       return NextResponse.json<ApiResponse>({
         success: false,
-        message: "Problem with the tag",
+        message: "Tag not found in your people's list",
       });
     }
 
@@ -165,6 +173,15 @@ export async function POST(req: NextRequest) {
       });
     }
 
+    await SendEventInvitationEmail({
+      churchName: isValid[0].name,
+      eventDate: new Date(`${date_month}-${date_day}-${date_year}`),
+      eventDescription: description,
+      eventName: name,
+      eventTime: time,
+      peopleInfo: isValid[0].People_Info,
+    });
+
     return NextResponse.json<ApiResponse>({
       success: true,
       message: "Event created successfully",
@@ -177,7 +194,7 @@ export async function POST(req: NextRequest) {
   }
 }
 
-export async function PUT(req: NextRequest) {
+export async function PATCH(req: NextRequest) {
   dbConnect();
   try {
     const eventId = req.nextUrl.searchParams.get("eventId");
