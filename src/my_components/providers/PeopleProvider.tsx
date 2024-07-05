@@ -48,6 +48,13 @@ interface CreatePeopleContextValue {
   setMessage: Dispatch<SetStateAction<MessageValue[] | null>>;
   isChatLoading: boolean;
   setIsChatLoading: Dispatch<SetStateAction<boolean>>;
+  TotalPayment?: string;
+  Tags?:
+    | {
+        _id: string;
+        name: string;
+      }[]
+    | null;
 }
 
 const CreatePeopleContext = createContext<CreatePeopleContextValue>({
@@ -68,6 +75,8 @@ const CreatePeopleContext = createContext<CreatePeopleContextValue>({
   setMessage: () => {},
   isChatLoading: false,
   setIsChatLoading: () => {},
+  TotalPayment: "",
+  Tags: null,
 });
 
 const PeopleContextProvider = CreatePeopleContext.Provider;
@@ -103,6 +112,8 @@ function PeopleProvider({
   tagInfo,
   PeopleCount,
   role,
+  TotalPayment,
+  Tags,
 }: {
   peopleInfo: PeopleInfoProps | SpecificPeople;
   children: ReactNode;
@@ -112,6 +123,13 @@ function PeopleProvider({
     name: string;
   };
   role?: string;
+  TotalPayment?: string;
+  Tags?:
+    | {
+        _id: string;
+        name: string;
+      }[]
+    | null;
 }) {
   const [isFormError, setIsFormError] = useState(false);
   const [filterOptions, setFilterOptions] = useState<FilterOptionsValue>({});
@@ -142,6 +160,8 @@ function PeopleProvider({
         setMessage,
         isChatLoading,
         setIsChatLoading,
+        TotalPayment,
+        Tags,
       }}
     >
       {children}

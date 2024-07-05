@@ -37,20 +37,23 @@ async function layout({
     console.log(err);
   }
   return (
-    <PeopleProvider peopleInfo={peopleInfo.PeopleInfo}>
+    <PeopleProvider
+      peopleInfo={peopleInfo?.PeopleInfo}
+      role={peopleInfo?.role}
+      TotalPayment={peopleInfo?.TotalPayment}
+      Tags={peopleInfo?.Tags}
+    >
       <div>
         <Navbar
           userInfo={{
-            imageUrl: peopleInfo.image,
-            name: peopleInfo.name,
-            role: peopleInfo.role,
+            imageUrl: peopleInfo?.image,
+            name: peopleInfo?.name,
+            role: peopleInfo?.role,
           }}
         />
-        <div className="px-2 md:px-4 max-w-7xl mx-auto min-h-[90dvh] border">
-          <div className="flex flex-col size-full">
-            <PeopleNavbar type="edit" />
-            {children}
-          </div>
+        <PeopleNavbar type="edit" />
+        <div className="px-2 md:px-4 max-w-7xl mx-auto min-h-[75dvh] flex items-center justify-center">
+          {children}
         </div>
       </div>
     </PeopleProvider>
