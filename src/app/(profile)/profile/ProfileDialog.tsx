@@ -10,22 +10,20 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Toaster } from "@/components/ui/toaster";
-import { useEventsContext } from "@/my_components/providers/EventsProvider";
-import { useTagsContext } from "@/my_components/providers/TagsProvider";
+import { useProfileContext } from "@/my_components/providers/ProfileProvider";
 import dynamic from "next/dynamic";
 import { ReactNode, memo, useEffect, useState } from "react";
 
-const EventItemForm = dynamic(() => import("./EventItemForm"));
+const ProfileFormChurch = dynamic(() => import("./ProfileFormChurch"));
 
 interface EventsDialogProps {
   trigger: ReactNode;
-  type: "create" | "update";
+  role: string;
 }
 
-function EventDialog({ trigger, type }: EventsDialogProps) {
+function EventDialog({ trigger, role }: EventsDialogProps) {
   const [isMounted, setIsMounted] = useState(false);
-  const { isFormError } = useTagsContext();
-  const { setEventIdForUpdate } = useEventsContext();
+  const { UserInfo } = useProfileContext();
   useEffect(() => {
     setIsMounted(true);
   }, []);
@@ -34,20 +32,26 @@ function EventDialog({ trigger, type }: EventsDialogProps) {
     return null;
   }
   return (
-    <Dialog onOpenChange={() => type === "create" && setEventIdForUpdate("")}>
-      <DialogTrigger>{trigger}</DialogTrigger>
+    <Dialog>
+      <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Create a new event</DialogTitle>
+          <DialogTitle>Update Profile</DialogTitle>
         </DialogHeader>
-        <DialogDescription>Attach event for a tag.</DialogDescription>
-        <EventItemForm />
+        <DialogDescription>Update Profile</DialogDescription>
+        {role === "owner" && (
+          <ProfileFormChurch
+            name={UserInfo?.name || ""}
+            razorpay_api_key={UserInfo?.razorpay_api_key}
+            razorpay_secret_key={UserInfo?.razorpay_secret_key}
+          />
+        )}
       </DialogContent>
-      {isFormError && (
+      {/* {isFormError && (
         <DialogFooter>
           <Toaster />
         </DialogFooter>
-      )}
+      )} */}
     </Dialog>
   );
 }

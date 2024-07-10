@@ -2,6 +2,7 @@ import dbConnect from "@/lib/DbConnect";
 import { verifyToken } from "@/lib/JsonWebToken";
 import OwnerModel from "@/model/Owner";
 import TagGroupModel from "@/model/TagsGroup";
+import TagItemModel from "@/model/TagsItem";
 import { ApiResponse } from "@/types/ApiResponse";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -154,8 +155,19 @@ export async function DELETE(req: NextRequest) {
     }
 
     const isUpdated = await TagGroupModel.deleteOne({ _id: tagItem });
+    const isChanged = await TagItemModel.updateMany(
+      {
+        church: verifiedData.ownerId,
+        tag_group: tagItem,
+      },
+      {
+        $set: {
+          tag_group: null,
+        },
+      }
+    );
 
-    if (!isUpdated.deletedCount) {
+    if (!isUpdated.deletedCount || !isChanged.modifiedCount) {
       return NextResponse.json<ApiResponse>({
         success: false,
         message: "Group is not deleted",

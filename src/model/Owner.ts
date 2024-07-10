@@ -9,6 +9,8 @@ export interface OwnerInterfaceValue extends Document {
   is_verified: boolean;
   verify_code: string;
   verify_expiry: number;
+  razorpay_api_key: string;
+  razorpay_secret_key: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -44,6 +46,12 @@ const OwnerSchema = new Schema<OwnerInterfaceValue>(
     },
     verify_expiry: {
       type: Number,
+    },
+    razorpay_api_key: {
+      type: String,
+    },
+    razorpay_secret_key: {
+      type: String,
     },
   },
   { timestamps: true }

@@ -44,8 +44,8 @@ interface CreatePeopleContextValue {
   chatInfo: PeopleInfoForMessage | null;
   setChatInfo: Dispatch<SetStateAction<PeopleInfoForMessage | null>>;
   role?: string;
-  message: MessageValue[] | null;
-  setMessage: Dispatch<SetStateAction<MessageValue[] | null>>;
+  message: MessageValue[] | [];
+  setMessage: Dispatch<SetStateAction<MessageValue[] | []>>;
   isChatLoading: boolean;
   setIsChatLoading: Dispatch<SetStateAction<boolean>>;
   TotalPayment?: string;
@@ -71,7 +71,7 @@ const CreatePeopleContext = createContext<CreatePeopleContextValue>({
   chatInfo: null,
   setChatInfo: () => {},
   role: "",
-  message: null,
+  message: [],
   setMessage: () => {},
   isChatLoading: false,
   setIsChatLoading: () => {},
@@ -138,7 +138,7 @@ function PeopleProvider({
   );
   const [isChatSheetOpen, setIsChatSheetOpen] = useState<boolean>(false);
   const [chatInfo, setChatInfo] = useState<PeopleInfoForMessage | null>(null);
-  const [message, setMessage] = useState<MessageValue[] | null>(null);
+  const [message, setMessage] = useState<MessageValue[] | []>([]);
   const [isChatLoading, setIsChatLoading] = useState(false);
   return (
     <PeopleContextProvider

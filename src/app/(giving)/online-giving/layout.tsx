@@ -43,6 +43,7 @@ async function layout({ children }: { children: ReactNode }) {
         email: OnlineGiving.email,
         imageUrl: OnlineGiving.image,
         name: OnlineGiving.name,
+        razorpay_api_key: OnlineGiving.razorpay_api_key,
       }}
     >
       <Navbar

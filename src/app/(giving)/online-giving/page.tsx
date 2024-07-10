@@ -22,15 +22,16 @@ function Page() {
       const { data } = await axios.post("/api/v1/payment", {
         amount,
       });
-      if (data.success) {
+      console.log(ChurchInfo?.razorpay_api_key);
+      if (data.success && ChurchInfo?.razorpay_api_key) {
         const options = {
-          key: process.env.NEXT_PUBLIC_RAZORPAY_API_KEY!,
-          amount: data.data.amount,
+          key: ChurchInfo?.razorpay_api_key,
+          amount: amount,
           currency: "INR",
           name: ChurchInfo?.name,
           description: "Test Transaction",
           image: `${imageUrl}/${ChurchInfo?.imageUrl}`,
-          order_id: data.data.id,
+          order_id: data.data.orderId,
           handler: async function (response: ResponseValue) {
             const { data } = await axios.post("/api/v1/payment-verification", {
               ...response,

@@ -3,6 +3,7 @@ import { ReactNode } from "react";
 import { cookies, headers } from "next/headers";
 import axios from "axios";
 import ProfileProvider from "@/my_components/providers/ProfileProvider";
+import SubNavbar from "./SubNavbar";
 
 export const metadata = {
   title: "XYZ | Profile",
@@ -38,6 +39,8 @@ async function layout({ children }: { children: ReactNode }) {
         name: profileInfo.name,
         imageUrl: profileInfo.image,
         role: profileInfo.role,
+        razorpay_api_key: profileInfo.razorpay_api_key,
+        razorpay_secret_key: profileInfo.razorpay_secret_key,
       }}
     >
       <Navbar
@@ -48,9 +51,7 @@ async function layout({ children }: { children: ReactNode }) {
         }}
       />
       <div className="px-2 pt-24 md:px-4 max-w-7xl mx-auto flex flex-col min-h-dvh">
-        <div className="flex items-center justify-between">
-          <h1>Profile page </h1>
-        </div>
+        <SubNavbar />
         {children}
       </div>
     </ProfileProvider>

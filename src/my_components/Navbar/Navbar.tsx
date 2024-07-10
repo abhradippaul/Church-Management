@@ -78,6 +78,10 @@ const Pages = [
     title: "Events",
     path: "/events",
   },
+  {
+    title: "Online Giving",
+    path: "/online-giving",
+  },
 ];
 
 const imageUrl = process.env.NEXT_PUBLIC_IMAGE_URL;

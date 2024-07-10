@@ -90,7 +90,7 @@ function TableComponent({ tableHeading, type }: TableComponentProps) {
         setIsChatLoading(true);
         const { data } = await axios.get(`/api/v1/chat?peopleId=${_id}`);
         if (data.success) {
-          setMessage(data.data);
+          setMessage(data?.data || []);
           setIsChatLoading(false);
         }
       } catch (err) {

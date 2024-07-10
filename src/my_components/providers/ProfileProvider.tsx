@@ -1,5 +1,6 @@
 "use client";
-import { ReactNode, createContext, memo, useContext, useState } from "react";
+
+import { ReactNode, createContext, memo, useContext } from "react";
 
 interface UserInfoValue {
   _id: string;
@@ -11,6 +12,8 @@ interface UserInfoValue {
   date_of_birth?: string;
   gender?: string;
   address?: string;
+  razorpay_api_key?: string;
+  razorpay_secret_key?: string;
 }
 
 interface CreateContextValue {

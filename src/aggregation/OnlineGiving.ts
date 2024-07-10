@@ -37,7 +37,9 @@ export async function GetOnlineGivingInfoAggregate(
       $project: {
         name: 1,
         email: 1,
-        image : 1,
+        image: 1,
+        razorpay_api_key: 1,
+        razorpay_secret_key: 1,
         "User_Info._id": 1,
         "User_Info.name": 1,
         "User_Info.email": 1,

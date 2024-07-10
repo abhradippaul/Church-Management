@@ -60,7 +60,7 @@ function NewEventEmail({
           <Text style={{ fontSize: "16px", color: "#555555" }}>
             {eventDescription}
           </Text>
-          <Row style={{ textAlign: "center", marginTop: "20px" }}>
+          {/* <Row style={{ textAlign: "center", marginTop: "20px" }}>
             <Button
               href="#"
               style={{
@@ -73,7 +73,7 @@ function NewEventEmail({
             >
               RSVP Now
             </Button>
-          </Row>
+          </Row> */}
         </Container>
       </Body>
     </Html>

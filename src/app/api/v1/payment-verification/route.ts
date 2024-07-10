@@ -25,32 +25,6 @@ export async function POST(req: NextRequest) {
         message: "You are not logged in",
       });
     }
-    if (
-      !razorpay_order_id ||
-      !razorpay_payment_id ||
-      !razorpay_signature ||
-      !amount
-    ) {
-      return NextResponse.json<ApiResponse>({
-        success: false,
-        message:
-          "razorpay_order_id, razorpay_payment_id and razorpay_signature are required",
-      });
-    }
-
-    let body = razorpay_order_id + "|" + razorpay_payment_id;
-
-    const expectedSignature = crypto
-      .createHmac("sha256", process.env.RAZORPAY_API_SECRET!)
-      .update(body.toString())
-      .digest("hex");
-
-    if (expectedSignature !== razorpay_signature) {
-      return NextResponse.json<ApiResponse>({
-        success: false,
-        message: "Signature is not valid",
-      });
-    }
 
     const verifiedData = verifyToken(access_token);
 
@@ -96,6 +70,7 @@ export async function POST(req: NextRequest) {
       {
         $project: {
           _id: 0,
+          razorpay_secret_key: 1,
           "PeopleInfo._id": 1,
         },
       },
@@ -112,6 +87,33 @@ export async function POST(req: NextRequest) {
       return NextResponse.json<ApiResponse>({
         success: false,
         message: "Church or the people is not valid",
+      });
+    }
+
+    if (
+      !razorpay_order_id ||
+      !razorpay_payment_id ||
+      !razorpay_signature ||
+      !amount
+    ) {
+      return NextResponse.json<ApiResponse>({
+        success: false,
+        message:
+          "razorpay_order_id, razorpay_payment_id and razorpay_signature are required",
+      });
+    }
+
+    let body = razorpay_order_id + "|" + razorpay_payment_id;
+
+    const expectedSignature = crypto
+      .createHmac("sha256", process.env.RAZORPAY_API_SECRET!)
+      .update(body.toString())
+      .digest("hex");
+
+    if (expectedSignature !== razorpay_signature) {
+      return NextResponse.json<ApiResponse>({
+        success: false,
+        message: "Signature is not valid",
       });
     }
 

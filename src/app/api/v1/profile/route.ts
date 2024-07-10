@@ -1,4 +1,3 @@
-import { getPeopleInfoAggregate } from "@/aggregation/PeopleInfo";
 import dbConnect from "@/lib/DbConnect";
 import { verifyToken } from "@/lib/JsonWebToken";
 import OwnerModel from "@/model/Owner";
@@ -40,6 +39,8 @@ export async function GET(req: NextRequest) {
             name: 1,
             image: 1,
             email: 1,
+            razorpay_api_key: 1,
+            razorpay_secret_key: 1,
           },
         },
       ]);
@@ -83,6 +84,55 @@ export async function GET(req: NextRequest) {
         role: verifiedData.role,
         ...info[0],
       },
+    });
+  } catch (err: any) {
+    return NextResponse.json<ApiResponse>({
+      success: false,
+      message: err.message,
+    });
+  }
+}
+
+export async function POST(req: NextRequest) {
+  dbConnect();
+  try {
+    const access_token = req.cookies.get("access_token")?.value;
+    const value = await req.json();
+    if (!access_token) {
+      return NextResponse.json<ApiResponse>({
+        success: false,
+        message: "You are not logged in or does not provide people id",
+      });
+    }
+    const verifiedData = verifyToken(access_token);
+    if (!verifiedData?.role || !verifiedData.ownerId) {
+      return NextResponse.json<ApiResponse>({
+        success: false,
+        message: "You are not logged in",
+      });
+    }
+
+    let isUpdated;
+
+    if (verifiedData.role === "owner") {
+      isUpdated = await OwnerModel.updateOne(
+        { _id: verifiedData.ownerId },
+        {
+          $set: value,
+        }
+      );
+    }
+
+    if (!isUpdated?.modifiedCount) {
+      return NextResponse.json<ApiResponse>({
+        success: false,
+        message: "Failed to update user information",
+      });
+    }
+
+    return NextResponse.json<ApiResponse>({
+      success: true,
+      message: "Successfully fetched users information",
     });
   } catch (err: any) {
     return NextResponse.json<ApiResponse>({

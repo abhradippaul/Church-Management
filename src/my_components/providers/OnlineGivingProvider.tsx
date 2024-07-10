@@ -1,6 +1,7 @@
 "use client";
 
-import { ReactNode, createContext, useContext } from "react";
+import { ReactNode, createContext, memo, useContext } from "react";
+
 interface UserInfo {
   name: string;
   _id: string;
@@ -13,6 +14,7 @@ interface ChurchInfo {
   name: string;
   imageUrl: string;
   email: string;
+  razorpay_api_key?: string;
 }
 
 interface OnlineGivingValue {
@@ -47,4 +49,4 @@ function OnlineGivingProvider({
   );
 }
 
-export default OnlineGivingProvider;
+export default memo(OnlineGivingProvider);

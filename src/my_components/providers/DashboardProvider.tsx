@@ -50,8 +50,8 @@ interface DashboardContextValue {
   setIsChatSheetOpen: Dispatch<SetStateAction<boolean>>;
   chatInfo: ChurchInfoForMessage | null;
   setChatInfo: Dispatch<SetStateAction<ChurchInfoForMessage | null>>;
-  message: MessageValue[] | null;
-  setMessage: Dispatch<SetStateAction<MessageValue[] | null>>;
+  message: MessageValue[] | [];
+  setMessage: Dispatch<SetStateAction<MessageValue[] | []>>;
   isChatLoading: boolean;
   setIsChatLoading: Dispatch<SetStateAction<boolean>>;
   UnseenChatCount: number;
@@ -66,7 +66,7 @@ const CreateDashboardContext = createContext<DashboardContextValue>({
   setIsChatSheetOpen: () => {},
   chatInfo: null,
   setChatInfo: () => {},
-  message: null,
+  message: [],
   setMessage: () => {},
   isChatLoading: false,
   setIsChatLoading: () => {},
@@ -96,7 +96,7 @@ function DashboardProvider({
 }) {
   const [isChatSheetOpen, setIsChatSheetOpen] = useState<boolean>(false);
   const [chatInfo, setChatInfo] = useState<ChurchInfoForMessage | null>(null);
-  const [message, setMessage] = useState<MessageValue[] | null>(null);
+  const [message, setMessage] = useState<MessageValue[] | []>([]);
   const [isChatLoading, setIsChatLoading] = useState<boolean>(false);
   return (
     <CreateDashboardProvider
