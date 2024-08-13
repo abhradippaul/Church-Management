@@ -12,7 +12,7 @@ function Page() {
     <Card className="w-[90%] max-w-[500px]">
       <CardHeader>
         <CardTitle>Signup Form</CardTitle>
-        <CardDescription>Create an account</CardDescription>
+        <CardDescription>Create an account for church</CardDescription>
       </CardHeader>
       <SignupForm />
     </Card>

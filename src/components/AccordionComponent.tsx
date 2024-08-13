@@ -75,7 +75,7 @@ function AccordionComponent({
                               setDialogType("tags");
                               setGroupIdForUpdate(itemKey);
                             }}
-                            className="size-4 mr-4 invisible group-hover:visible text-zinc-300"
+                            className="size-4 mr-4 invisible group-hover:visible text-zinc-500 hover:text-zinc-700"
                           />
                         }
                       >

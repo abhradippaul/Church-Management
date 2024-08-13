@@ -13,6 +13,7 @@ function Page() {
   if (!isMounted) {
     return null;
   }
+  console.log(eventsInfo);
   return (
     <div>
       <EventCalender />

@@ -127,7 +127,7 @@ function CheckInForm() {
                   setSelectedEvent(null);
                   setEventInfo(null);
                 }}
-                className="size-6 text-zinc-300 hover:text-white transition cursor-pointer"
+                className="size-6 text-zinc-700 hover:text-black transition cursor-pointer"
               />
             </div>
           </div>

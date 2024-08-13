@@ -13,7 +13,7 @@ function Page() {
     <Card className="w-[90%] max-w-[500px]">
       <CardHeader>
         <CardTitle>Signin Form</CardTitle>
-        <CardDescription>Sign in here for church to go to the dashboard</CardDescription>
+        <CardDescription>Sign in here to go to the dashboard</CardDescription>
       </CardHeader>
       <SigninForm />
     </Card>

@@ -82,11 +82,11 @@ function CommandComponent({ pathName }: Props) {
     <>
       <div
         onClick={() => setOpen((prev) => !prev)}
-        className="group px-2 py-1 cursor-pointer border rounded-md flex items-center justify-between gap-x-2 w-full hover:bg-zinc-700/10 dark:hover:bg-zinc-700/50 transition"
+        className="group px-2 py-1 cursor-pointer border border-zinc-500 rounded-md flex items-center justify-between gap-x-2 w-full"
       >
-        <div className="flex items-center justify-center gap-x-2">
-          <Search className="size-4 text-zinc-500 dark:text-zinc-300" />
-          <h1 className="font-semibold max-w-max text-sm text-zinc-500 dark:text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-zinc-300 transition">
+        <div className="flex items-center justify-center gap-x-2 text-zinc-400 group-hover:text-zinc-200">
+          <Search className="size-4 " />
+          <h1 className="font-semibold max-w-max text-sm transition">
             Search {pathName === "/dashboard" ? " Church" : " People"}
           </h1>
         </div>

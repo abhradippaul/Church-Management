@@ -74,7 +74,7 @@ const itemsForSelectInput = [
   },
 ];
 
-function UserCreateForm() {
+function UserCreateForm({ type }: { type: string | null | undefined }) {
   const { setIsFormError, peopleInfo } = usePeopleContext();
   const router = useRouter();
   const [isUploadedImage, setIsUploadedImage] = useState(
@@ -97,7 +97,6 @@ function UserCreateForm() {
   const onSubmit = useCallback(
     async (values: z.infer<typeof CreateUserSchema>) => {
       values.image = isUploadedImage;
-      console.log(peopleInfo);
       try {
         if (peopleInfo._id) {
           const { data } = await axios.patch(
@@ -123,6 +122,7 @@ function UserCreateForm() {
               title: "Error",
               description: data.message,
             });
+            form.reset();
           }
         }
       } catch (err: any) {
@@ -131,6 +131,7 @@ function UserCreateForm() {
           title: "Error",
           description: err.message,
         });
+        form.reset();
       }
     },
     [isUploadedImage]
@@ -158,18 +159,35 @@ function UserCreateForm() {
           onSubmit={form.handleSubmit(onSubmit)}
           className="max-h-[80dvh] px-6"
         >
-          {CreateUserFormValue.map((e) => (
-            <CustomFormInput
-              key={e.inputName}
-              control={form.control}
-              inputName={e.inputName}
-              label={e.label}
-              type={e.type}
-              placeholder={e.placeholder}
-              disabled={form.formState.isSubmitting}
-              autoComplete={e.autoComplete}
-            />
-          ))}
+          {type === "edit"
+            ? CreateUserFormValue.map(
+                ({ autoComplete, inputName, label, placeholder, type }) =>
+                  inputName !== "email" &&
+                  inputName !== "phone_number" && (
+                    <CustomFormInput
+                      key={inputName}
+                      control={form.control}
+                      inputName={inputName}
+                      label={label}
+                      type={type}
+                      placeholder={placeholder}
+                      disabled={form.formState.isSubmitting}
+                      autoComplete={autoComplete}
+                    />
+                  )
+              )
+            : CreateUserFormValue.map((e) => (
+                <CustomFormInput
+                  key={e.inputName}
+                  control={form.control}
+                  inputName={e.inputName}
+                  label={e.label}
+                  type={e.type}
+                  placeholder={e.placeholder}
+                  disabled={form.formState.isSubmitting}
+                  autoComplete={e.autoComplete}
+                />
+              ))}
           <CustomSelectImput
             control={form.control}
             inputName="gender"

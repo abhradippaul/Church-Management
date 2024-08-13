@@ -53,7 +53,7 @@ async function layout({ children }: { children: ReactNode }) {
           role: OnlineGiving.role,
         }}
       />
-      <div className="px-2 pt-24 md:px-4 max-w-7xl mx-auto flex flex-col min-h-dvh">
+      <div className="px-2 pt-24 md:px-4 max-w-7xl mx-auto flex items-center justify-center min-h-dvh">
         {children}
       </div>
     </OnlineGivingProvider>

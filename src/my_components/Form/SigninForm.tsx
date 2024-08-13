@@ -46,7 +46,6 @@ function SigninForm() {
   const onSubmit = useCallback(async (values: z.infer<typeof SignInSchema>) => {
     try {
       const { data } = await axios.post("/api/v1/sign-in", values);
-      console.log(data);
       if (data.success) {
         router.push("/dashboard");
       } else {
@@ -54,12 +53,14 @@ function SigninForm() {
           title: "Error",
           description: data.message,
         });
+        form.reset();
       }
     } catch (err: any) {
       toast({
         title: "Error",
         description: err?.response?.data?.message,
       });
+      form.reset();
     }
   }, []);
 
@@ -101,7 +102,7 @@ function SigninForm() {
               />
             ))}
 
-            <Button variant="secondary" size="lg" className="text-lg mt-8">
+            <Button size="lg" className="text-lg mt-8">
               {form.formState.isSubmitting ? (
                 <Loader2 className="size-6 animate-spin" />
               ) : (
@@ -112,13 +113,20 @@ function SigninForm() {
         </Form>
       </CardContent>
       <CardFooter>
-        <div className="flex w-full items-center justify-end text-zinc-300 text-base md:text-lg">
+        <div className="flex w-full items-center justify-end  text-base md:text-lg gap-x-2">
           Create Account.
           <Link
             href="/sign-up"
-            className="ml-2 hover:text-white transition font-semibold text-lg md:text-xl"
+            className="transition font-semibold text-lg md:text-xl text-slate-700 hover:text-black hover:underline"
           >
-            Sign Up
+            As Church
+          </Link>
+          /
+          <Link
+            href="/sign-up/people"
+            className="transition font-semibold text-lg md:text-xl text-slate-700 hover:text-black hover:underline"
+          >
+            As Visitor
           </Link>
         </div>
       </CardFooter>

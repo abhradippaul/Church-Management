@@ -48,7 +48,7 @@ function CustomImageInput({
         name="input"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Upload Image : </FormLabel>
+            <FormLabel className="text-lg">Upload Image : </FormLabel>
             <FormControl>
               <Input
                 type="file"

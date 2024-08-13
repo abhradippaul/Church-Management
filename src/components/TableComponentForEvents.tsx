@@ -45,7 +45,6 @@ function TableComponentForEvents({ Events }: { Events: EventInfoValue[] }) {
       console.log(err.message);
     }
   }, []);
-  
 
   return (
     <Table className="my-8">
@@ -109,7 +108,7 @@ function TableComponentForEvents({ Events }: { Events: EventInfoValue[] }) {
                             onClick={() => {
                               setEventIdForUpdate(_id);
                             }}
-                            className="size-4 text-zinc-300 hover:text-white transition"
+                            className="size-4 text-zinc-700 hover:text-black transition"
                           />
                         }
                       >

@@ -16,6 +16,7 @@ import {
 import { useDebouncedCallback } from "use-debounce";
 import { getPeopleSearchInfo, insertPeopleToTag } from "@/helpers/db";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { usePeopleContext } from "../providers/PeopleProvider";
 
 interface PeopleItemValue {
   name: string;
@@ -28,6 +29,7 @@ const imageUrl = process.env.NEXT_PUBLIC_IMAGE_URL;
 function InsertUserToTagForm() {
   const router = useRouter();
   const { tagId }: { tagId: string } = useParams();
+  const { peopleInfo } = usePeopleContext();
   const [people, setPeople] = useState<PeopleItemValue[]>([]);
   const [selectedPeople, setSelectedPeople] = useState<PeopleItemValue[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -38,7 +40,6 @@ function InsertUserToTagForm() {
         setIsLoading(true);
         const newArr = selectedPeople.map(({ _id }) => ({ _id }));
         const data = await insertPeopleToTag(newArr, tagId);
-        console.log(data);
         if (data.success) {
           router.refresh();
         } else {
@@ -60,29 +61,35 @@ function InsertUserToTagForm() {
   const debounced = useDebouncedCallback(async (value) => {
     const data = await getPeopleSearchInfo(value);
     if (data.success) {
-      setPeople(data.data);
+      if (peopleInfo.length) {
+        const peopleArray = data.data.filter((e: any) =>
+          Boolean(peopleInfo.find((p: any) => e._id !== p._id))
+        );
+        setPeople(peopleArray);
+      } else {
+        setPeople(data.data);
+      }
     }
   }, 500);
 
-  const removeSelectedPeople = useCallback(async (removeId: string) => {
-    setSelectedPeople((prev) =>
-      prev.filter(
-        ({ _id, image, name }) =>
-          _id !== removeId && {
-            _id,
-            image,
-            name,
-          }
-      )
-    );
-  }, []);
+  const removeSelectedPeople = useCallback(
+    async (removeId: string) => {
+      const removedPeople =
+        selectedPeople.find(({ _id }) => _id === removeId) || null;
+      setSelectedPeople((prev) => prev.filter(({ _id }) => _id !== removeId));
+      if (removedPeople) {
+        setPeople((prev) => [...prev, removedPeople]);
+      }
+    },
+    [selectedPeople]
+  );
 
   return (
     <div>
       {selectedPeople?.length ? (
         <div>
           <h1>Selected People :</h1>
-          <div className="w-full p-2 flex items-center justify-center gap-2">
+          <div className="w-full p-2 flex items-center justify-center gap-2 flex-wrap">
             {selectedPeople.map(({ _id, image, name }) => (
               <div
                 key={_id}
@@ -95,7 +102,7 @@ function InsertUserToTagForm() {
                 <h1>{name}</h1>
                 <X
                   onClick={() => removeSelectedPeople(_id)}
-                  className="size-6 text-zinc-300 hover:text-white transition cursor-pointer"
+                  className="size-6 text-zinc-500 hover:text-zinc-700 transition cursor-pointer"
                 />
               </div>
             ))}
@@ -116,9 +123,10 @@ function InsertUserToTagForm() {
               <CommandItem
                 key={_id}
                 className="flex items-center"
-                onSelect={() =>
-                  setSelectedPeople((prev) => [...prev, { _id, image, name }])
-                }
+                onSelect={() => {
+                  setSelectedPeople((prev) => [...prev, { _id, image, name }]);
+                  setPeople((prev) => prev.filter(({ _id: id }) => id !== _id));
+                }}
               >
                 {name}
               </CommandItem>
@@ -127,12 +135,7 @@ function InsertUserToTagForm() {
         </CommandList>
       </Command>
 
-      <Button
-        variant="secondary"
-        size="lg"
-        className="text-lg mt-8"
-        onClick={onSubmit}
-      >
+      <Button size="lg" className="text-lg mt-8" onClick={onSubmit}>
         {isLoading ? <Loader2 className="size-6 animate-spin" /> : "Submit"}
       </Button>
     </div>

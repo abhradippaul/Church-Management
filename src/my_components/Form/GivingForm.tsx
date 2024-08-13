@@ -90,7 +90,7 @@ function GivingForm() {
               <h1>{selectedPeople.name}</h1>
               <X
                 onClick={() => setSelectedPeople(null)}
-                className="size-6 text-zinc-300 hover:text-white transition cursor-pointer"
+                className="size-6 text-zinc-700 hover:text-black transition cursor-pointer"
               />
             </div>
           </div>

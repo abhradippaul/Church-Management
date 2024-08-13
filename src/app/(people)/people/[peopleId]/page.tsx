@@ -55,7 +55,7 @@ function Page() {
         />
       </div>
       <div className="flex flex-col w-1/2">
-        <h1 className="text-xl font-semibold text-zinc-300 mb-4">
+        <h1 className="text-xl font-semibold text-zinc-700 mb-4">
           {peopleInfo.name}
         </h1>
         {info.map((e) => (

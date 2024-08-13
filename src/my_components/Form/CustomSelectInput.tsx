@@ -46,7 +46,7 @@ function CustomSelectInput({
         name={inputName}
         render={({ field }) => (
           <FormItem>
-            <FormLabel>{label} : </FormLabel>
+            <FormLabel className="text-lg">{label} : </FormLabel>
             <Select
               onValueChange={field.onChange}
               defaultValue={field.value}

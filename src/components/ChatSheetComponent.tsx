@@ -185,7 +185,7 @@ function ChatSheetComponent({ role }: { role: string }) {
               <Loader2 className="size-8 animate-spin text-zinc-300" />
             </div>
           ) : (
-            <div className="size-full border my-1 max-h-[80dvh] overflow-y-auto">
+            <div className="size-full border rounded-lg my-1 max-h-[80dvh] overflow-y-auto">
               {role === "people"
                 ? dashboardMessage?.map(
                     ({ message, _id, createdAt, sender }) => (
@@ -195,8 +195,8 @@ function ChatSheetComponent({ role }: { role: string }) {
                           UserInfo?._id === sender && "flex-row-reverse"
                         }`}
                       >
-                        <div className="bg-slate-900 rounded-md p-2 m-1 w-1/2">
-                          <p className="text-zinc-300">{message}</p>
+                        <div className="bg-slate-500 rounded-md p-2 m-1 w-1/2">
+                          <p className="text-zinc-100">{message}</p>
                           <h1 className="text-end mt-2 text-white">
                             {`${
                               new Date(createdAt).getHours() < 10
@@ -220,8 +220,8 @@ function ChatSheetComponent({ role }: { role: string }) {
                         chatInfo?._id === sender ? "" : "flex-row-reverse"
                       }`}
                     >
-                      <div className="bg-slate-900 rounded-md p-2 m-1 w-1/2">
-                        <p className="text-zinc-300">{message}</p>
+                      <div className="bg-slate-500 rounded-md p-2 m-1 w-1/2">
+                        <p className="text-zinc-100">{message}</p>
                         <h1 className="text-end mt-2 text-white">
                           {`${
                             new Date(createdAt).getHours() < 10

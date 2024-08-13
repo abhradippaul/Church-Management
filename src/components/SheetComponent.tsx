@@ -23,7 +23,7 @@ function SheetComponent({ userInfo, Pages }: UserInfoValue) {
   return (
     <Sheet>
       <SheetTrigger>
-        <Menu className="size-8" />
+        <Menu className="size-8 text-zinc-100 hover:text-white" />
       </SheetTrigger>
       <SheetContent side="left">
         <SheetHeader>
@@ -40,7 +40,7 @@ function SheetComponent({ userInfo, Pages }: UserInfoValue) {
           </div>
         </SheetHeader>
         <ScrollAreaComponent>
-          <NavigationMenuComponent heading="Pages" props={Pages} />
+          <NavigationMenuComponent props={Pages} />
         </ScrollAreaComponent>
       </SheetContent>
     </Sheet>

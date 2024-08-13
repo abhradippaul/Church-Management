@@ -100,7 +100,7 @@ const onSignOutButtonClick = async () => {
 function Navbar({ userInfo }: { userInfo: UserInfoValue }) {
   const pathname = usePathname();
   return (
-    <div className="w-full flex items-center justify-between fixed top-0 left-0 right-0  bg-slate-900">
+    <div className="w-full flex items-center justify-between fixed top-0 left-0 right-0 bg-slate-900">
       <div className="max-w-7xl w-full mx-auto flex items-center justify-between py-4 px-2 gap-x-4 md:px-4">
         <div className="flex lg:hidden">
           <SheetComponent
@@ -155,26 +155,23 @@ function Navbar({ userInfo }: { userInfo: UserInfoValue }) {
           >
             <div className="flex flex-col justify-center">
               <div className="my-1">
-                <h1 className="text-base text-zinc-200">{userInfo.name}</h1>
-                <p className="text-zinc-300 text-sm">{userInfo.role}</p>
+                <h1 className="text-base">{userInfo.name}</h1>
+                <p className="text-sm">{userInfo.role}</p>
               </div>
               <Link
                 href="/profile"
-                className="my-1 w-full hover:bg-slate-900 rounded-md cursor-pointer p-1 text-base text-zinc-200 hover:text-white justify-center"
+                className="my-1 w-full rounded-md cursor-pointer p-1 text-base justify-center text-slate-700 hover:text-slate-950 hover:bg-slate-100"
               >
                 Profile
               </Link>
               <Button
                 size="sm"
                 variant="link"
-                className="flex w-full items-center justify-between my-1 group hover:bg-slate-900 rounded-md cursor-pointer p-1"
+                className="flex w-full items-center justify-between my-1 group hover:bg-slate-100 rounded-md cursor-pointer p-1 text-slate-700 hover:text-slate-950"
                 onClick={onSignOutButtonClick}
               >
-                {" "}
-                <h1 className="text-base text-zinc-200 group-hover:text-white">
-                  Sign Out
-                </h1>{" "}
-                <LogOut className="size-4 ml-4 text-zinc-300 group-hover:text-white" />
+                <h1 className="text-base">Sign Out</h1>
+                <LogOut className="size-4 ml-2" />
               </Button>
             </div>
           </TooltipComponent>

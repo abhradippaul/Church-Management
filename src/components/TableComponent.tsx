@@ -63,6 +63,7 @@ function TableComponent({ tableHeading, type }: TableComponentProps) {
           console.log(data);
         }
       } else if (type === "tagpeople") {
+        console.log(id, tagInfo?._id);
         const { data } = await axios.delete(
           `/api/v1/tags?peopleId=${id}&tagId=${tagInfo?._id}`
         );
@@ -136,8 +137,6 @@ function TableComponent({ tableHeading, type }: TableComponentProps) {
     methodForFilterRequest();
   }, [filterOptions, page]);
 
-  console.log(role);
-
   return (
     <div className="flex items-center justify-center flex-col">
       <Table>
@@ -181,12 +180,14 @@ function TableComponent({ tableHeading, type }: TableComponentProps) {
                 </TableCell>
                 {role === "owner" && type === "people" && (
                   <TableCell>
-                    <div className="flex items-center justify-center text-zinc-300 hover:text-white size-full">
+                    <div className="flex items-center justify-center text-zinc-500 hover:text-zinc-700 size-full">
                       <MessageSquare
                         className="size-4 mr-1"
                         onClick={(e) => onMsgButtonClick(e, _id, name, image)}
                       />
-                      {Boolean(UnseenChatCount) && <h1>{UnseenChatCount}</h1>}
+                      {Boolean(UnseenChatCount) && (
+                        <h1 className="text-black">{UnseenChatCount}</h1>
+                      )}
                     </div>
                   </TableCell>
                 )}

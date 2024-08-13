@@ -62,6 +62,7 @@ function Page() {
       >
         {UserInfo?.role !== "people" && (
           <div className="flex flex-col w-full gap-y-4">
+            <h1>Group : </h1>
             {groupsInfo?.map(({ _id, name, SubItem }) => (
               <div className="flex w-full group" key={_id}>
                 <AccordionComponent
@@ -83,7 +84,7 @@ function Page() {
                                 setGroupIdForUpdate(_id);
                                 setDialogType("groups");
                               }}
-                              className="size-4 mr-4 text-zinc-300 hover:text-white transition invisible group-hover:visible"
+                              className="size-4 mr-4 text-zinc-500 hover:text-zinc-700 transition invisible group-hover:visible"
                             />
                           }
                         >
@@ -116,7 +117,7 @@ function Page() {
           {tagsInfo.map(({ _id, name }) => (
             <div
               key={_id}
-              className="flex items-center justify-between border-b py-4 text-white hover:cursor-pointer hover:underline group"
+              className="flex items-center justify-between border-b py-4 text-zinc-500 hover:text-zinc-700 hover:cursor-pointer hover:underline group"
             >
               <Link href={`/tags/${_id}`} className="flex-grow">
                 {name}
@@ -134,7 +135,7 @@ function Page() {
                             setDialogType("tags");
                             setGroupIdForUpdate("");
                           }}
-                          className="size-4 mr-4 text-zinc-300 hover:text-white transition invisible group-hover:visible"
+                          className="size-4 mr-4 text-zinc-500 hover:text-zinc-700 transition invisible group-hover:visible"
                         />
                       }
                     >

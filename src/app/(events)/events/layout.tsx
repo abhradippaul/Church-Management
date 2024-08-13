@@ -53,8 +53,7 @@ async function layout({ children }: { children: ReactNode }) {
         }}
       />
       <div className="px-2 pt-24 md:px-4 max-w-7xl mx-auto flex flex-col min-h-dvh">
-        <div className="flex items-center justify-between">
-          <h1>Event page </h1>
+        <div className="flex items-center justify-end">
           {eventsInfo.role === "owner" && (
             <EventDialog
               type="create"
@@ -62,7 +61,7 @@ async function layout({ children }: { children: ReactNode }) {
                 <Button
                   variant="outline"
                   size="lg"
-                  className="hover:bg-gray-900 flex items-center justify-between text-xl text-zinc-300 hover:text-zinc-100"
+                  className="flex items-center justify-between text-xl text-zinc-500 hover:text-zinc-700 hover:bg-slate-100"
                 >
                   <Plus className="size-6 mr-2" />
                   Add Event

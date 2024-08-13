@@ -220,7 +220,8 @@ export async function getPeopleInfoFromTagsForOwner(
     {
       $project: {
         _id: 0,
-        "Tag_Info.name" : 1,
+        "Tag_Info.name": 1,
+        "Tag_Info._id": 1,
         "People_Info._id": 1,
         "People_Info.name": 1,
         "People_Info.email": 1,

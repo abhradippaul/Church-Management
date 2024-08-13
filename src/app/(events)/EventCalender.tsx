@@ -58,19 +58,27 @@ function EventCalender() {
       <div className="flex items-center justify-between">
         <TooltipComponent
           hoverElement={
-            <Button variant="outline" onClick={previousMonth}>
+            <Button
+              variant="outline"
+              onClick={previousMonth}
+              className="text-zinc-700 hover:text-zinc-900"
+            >
               <ArrowLeft className="size-6" />
             </Button>
           }
         >
           <p>Previous month</p>
         </TooltipComponent>
-        <h1 className="text-2xl font-semibold text-zinc-300">
+        <h1 className="text-2xl font-semibold text-zinc-700">
           {format(currentMonth, "MMMM yyyy")}
         </h1>
         <TooltipComponent
           hoverElement={
-            <Button variant="outline" onClick={nextMonth}>
+            <Button
+              variant="outline"
+              onClick={nextMonth}
+              className="text-zinc-700 hover:text-zinc-900"
+            >
               <ArrowRight className="size-6" />
             </Button>
           }
@@ -91,9 +99,9 @@ function EventCalender() {
           <div
             key={i}
             className={clsx(
-              "border rounded-md px-2 text-center overflow-hidden text-zinc-200 h-20 hover:overflow-y-auto scroll-smooth",
+              "border border-zinc-200 rounded-md px-2 text-center overflow-hidden text-zinc-700 h-20 hover:overflow-y-auto scroll-smooth",
               {
-                "bg-gray-900": isToday(day),
+                "bg-slate-100": isToday(day),
                 "text-white": isToday(day),
               }
             )}
@@ -106,7 +114,7 @@ function EventCalender() {
                   new Date(currentMonth).getMonth() === date_month && (
                     <div
                       key={description}
-                      className="my-2 w-full flex flex-wrap text-xs items-center justify-center gap-x-4 bg-blue-800 rounded-md"
+                      className="my-2 w-full flex flex-wrap text-xs items-center justify-center gap-x-4 bg-blue-800 text-white rounded-md"
                     >
                       <p>{name}</p>
                       <p>{time}</p>

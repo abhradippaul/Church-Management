@@ -34,7 +34,7 @@ function CustomFormInput({
         name={inputName}
         render={({ field }) => (
           <FormItem>
-            <FormLabel>{label} : </FormLabel>
+            <FormLabel className="text-lg">{label} : </FormLabel>
             <FormControl>
               <Input
                 placeholder={placeholder}

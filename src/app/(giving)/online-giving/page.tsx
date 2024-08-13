@@ -61,22 +61,33 @@ function Page() {
     [amount]
   );
   return (
-    <div>
-      <h1>Thank You!</h1>
-      <p>
-        We greatly appreciate your contribution. Your support helps us to keep
-        moving forward and achieve our goals.
+    <div className="max-w-md mx-auto bg-white shadow-lg rounded-lg p-6">
+      <h1 className="text-3xl font-bold text-center text-blue-600 mb-4">
+        Thank You!
+      </h1>
+      <p className="text-lg text-gray-700 text-center mb-4">
+        Your generosity is deeply appreciated. Your support empowers us to keep
+        moving forward and reach new heights.
       </p>
-      <p>Thank you once again for your valuable input!</p>
-      <Input
-        placeholder="Amount"
-        type="number"
-        value={amount.toString()}
-        onChange={(e) => setAmount(Number(e.target.value))}
-      />
-      <Button size="lg" className="text-xl my-4" onClick={paymentHandler}>
-        Contribute
-      </Button>
+      <p className="text-lg text-gray-700 text-center mb-6">
+        We are incredibly grateful for your valuable input. Every contribution
+        counts and makes a significant impact.
+      </p>
+      <div className="flex flex-col items-center">
+        <input
+          placeholder="Amount"
+          type="number"
+          value={amount.toString()}
+          onChange={(e) => setAmount(Number(e.target.value))}
+          className="w-full px-4 py-2 border rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
+        />
+        <button
+          className="w-full bg-blue-600 text-white font-semibold text-xl py-3 rounded-lg mt-4 hover:bg-blue-700 transition duration-200 ease-in-out"
+          onClick={paymentHandler}
+        >
+          Contribute
+        </button>
+      </div>
     </div>
   );
 }

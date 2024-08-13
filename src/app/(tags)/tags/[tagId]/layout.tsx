@@ -37,7 +37,7 @@ async function layout({
   if (!response) {
     return null;
   }
-
+  console.log(response.Tag_Info);
   return (
     <PeopleProvider
       peopleInfo={response.People_Info}

@@ -78,12 +78,14 @@ function SignupForm() {
             title: "Error",
             description: data?.message,
           });
+          form.reset();
         }
       } catch (err: any) {
         toast({
           title: "Error",
           description: err?.response?.data?.message,
         });
+        form.reset();
       }
     },
     [isUploadedImage]
@@ -161,7 +163,6 @@ function SignupForm() {
           )}
 
           <Button
-            variant="secondary"
             size="lg"
             disabled={form.formState.isSubmitting || isImageLoading}
             className="text-lg mt-8"

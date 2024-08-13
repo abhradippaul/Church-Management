@@ -15,18 +15,18 @@ function PeopleNavbar({ type }: { type: "create" | "edit" }) {
   return (
     <div className="mb-8 mt-4 flex items-center justify-between">
       {type === "create" && (
-        <h1 className="text-lg text-zinc-200">{peopleCount} people found</h1>
+        <h1 className="text-lg">{peopleCount} people found</h1>
       )}
       {type === "edit" &&
         !pathName.includes("/attendance") &&
         !pathName.includes("/payments") && (
-          <h1 className="text-lg text-zinc-200">People Infomation : </h1>
+          <h1 className="text-lg text-zinc-600">People Infomation : </h1>
         )}
       {type === "edit" && pathName.includes("/attendance") && (
-        <h1 className="text-lg text-zinc-200">Attendance : </h1>
+        <h1 className="text-lg text-zinc-600">Attendance : </h1>
       )}
       {type === "edit" && pathName.includes("/payments") && (
-        <h1 className="text-lg text-zinc-200">Payments : </h1>
+        <h1 className="text-lg text-zinc-600">Payments : </h1>
       )}
       {role !== "people" && type === "edit" && (
         <Navigation

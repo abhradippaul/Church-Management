@@ -11,7 +11,6 @@ import { Loader2 } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import { memo, useCallback, useEffect, useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
-import SignInSchema from "@/schema/SignInSchema";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { verifyPeople } from "@/helpers/db";
@@ -63,7 +62,6 @@ function SignUpForm() {
           `/api/v1/sign-up?type=people`,
           values
         );
-        console.log(data);
         if (data.success) {
           router.push("/sign-in");
         } else {
@@ -71,12 +69,14 @@ function SignUpForm() {
             title: "Error",
             description: data.message,
           });
+          form.reset();
         }
       } catch (err: any) {
         toast({
           title: "Error",
           description: err?.response?.data?.message,
         });
+        form.reset();
       }
     },
     []
@@ -106,18 +106,23 @@ function SignUpForm() {
     const email = form.getValues("email");
     if (email) {
       setIsLoading(true);
-      const data = await verifyPeople({ email, type: "people" });
-      if (data.success) {
-        setIsUserExist(true);
-        toast({
-          title: "Success",
-          description: data.message,
-        });
-      } else {
-        toast({
-          title: "Error",
-          description: data.message,
-        });
+      try {
+        const data = await verifyPeople({ email, type: "people" });
+        if (data.success) {
+          setIsUserExist(true);
+          toast({
+            title: "Success",
+            description: data.message,
+          });
+        } else {
+          toast({
+            title: "Error",
+            description: data.message,
+          });
+          form.reset();
+        }
+      } catch (err) {
+        form.reset();
       }
       setIsLoading(false);
     }
@@ -146,7 +151,7 @@ function SignUpForm() {
             ))}
 
             {isUserExist && (
-              <Button variant="secondary" size="lg" className="text-lg mt-8">
+              <Button size="lg" className="text-lg mt-8">
                 {form.formState.isSubmitting ? (
                   <Loader2 className="size-6 animate-spin" />
                 ) : (
@@ -157,7 +162,6 @@ function SignUpForm() {
           </form>
           {!isUserExist && (
             <Button
-              variant="secondary"
               size="lg"
               className="text-lg mt-8"
               onClick={methodForVerifyButton}
@@ -171,7 +175,7 @@ function SignUpForm() {
           )}
         </Form>
       </CardContent>
-      <CardFooter className="text-zinc-300 text-base">
+      <CardFooter className="text-zinc-600 text-base">
         Give the email that you have provided to the church and write a strong
         password minimum 6 characters.
       </CardFooter>

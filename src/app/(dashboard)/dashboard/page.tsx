@@ -54,10 +54,9 @@ function DashboardPage() {
   return (
     <div className="pt-24">
       <div className="flex items-center justify-between mb-8">
-        <h1>This is our dashboard page</h1>
         {UserInfo?.role === "people" && (
           <div
-            className="cursor-pointer text-zinc-300 hover:text-white flex items-center justify-center"
+            className="cursor-pointer text-zinc-700 hover:text-black flex items-center justify-center"
             onClick={onMsgButtonClick}
           >
             <MessageSquare className="size-4 mr-2" />
@@ -74,7 +73,7 @@ function DashboardPage() {
         {UserInfo?.role !== "people" && (
           <div className="flex gap-4 items-center justify-between w-full">
             <div className="size-48 flex flex-col border rounded-md">
-              <h1 className="bg-gray-900 p-2">
+              <h1 className="bg-gray-900 p-2 text-white rounded-t-md">
                 People Added in the Last 7 Days
               </h1>
               <div className="size-full flex items-center justify-center">
@@ -82,7 +81,7 @@ function DashboardPage() {
               </div>
             </div>
             <div className="size-48 flex flex-col border rounded-md">
-              <h1 className="bg-gray-900 p-2">
+              <h1 className="bg-gray-900 p-2 text-white rounded-t-md">
                 People Donated in the Last 7 Days
               </h1>
               <div className="size-full flex items-center justify-center">

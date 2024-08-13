@@ -37,7 +37,7 @@ function DialogComponent({
   }
   return (
     <Dialog onOpenChange={() => setIsFormError(false)}>
-      <DialogTrigger>{dialogTrigger}</DialogTrigger>
+      <DialogTrigger asChild>{dialogTrigger}</DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{dialogTitle}</DialogTitle>
