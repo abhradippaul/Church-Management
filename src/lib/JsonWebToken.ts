@@ -9,11 +9,15 @@ interface PayloadValue {
 
 export function createToken(payload: PayloadValue) {
   return {
-    access_token: sign(payload, "123", { expiresIn: "1d" }),
-    refresh_token: sign(payload, "123", { expiresIn: "30d" }),
+    access_token: sign(payload, process.env.JWT_SECRET_KEY!, {
+      expiresIn: "1d",
+    }),
+    refresh_token: sign(payload, process.env.JWT_SECRET_KEY!, {
+      expiresIn: "30d",
+    }),
   };
 }
 
 export function verifyToken(token: string): PayloadValue {
-  return verify(token, "123") as PayloadValue;
+  return verify(token, process.env.JWT_SECRET_KEY!) as PayloadValue;
 }

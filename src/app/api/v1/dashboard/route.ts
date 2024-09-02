@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
 
     const verifiedData = verifyToken(access_token);
 
-    if (!verifiedData?.role || !verifiedData.ownerId) {
+    if (!verifiedData?.role) {
       return NextResponse.json<ApiResponse>({
         success: false,
         message: "You are not logged in",
@@ -71,7 +71,11 @@ export async function GET(req: NextRequest) {
       }
     } else if (verifiedData.role === "owner" && verifiedData?.ownerId) {
       data = await GetDashboardInfoForOwner(verifiedData?.ownerId);
-    } else if (verifiedData.role === "people" && verifiedData.peopleId) {
+    } else if (
+      verifiedData.role === "people" &&
+      verifiedData.peopleId &&
+      verifiedData?.ownerId
+    ) {
       data = await GetDashboardInfoForUser(
         verifiedData?.ownerId,
         verifiedData.peopleId

@@ -156,6 +156,7 @@ function EventItemForm() {
     (async () => {
       try {
         const { data } = await axios.get(`/api/v1/events/tags`);
+        console.log(data);
         if (data.success) {
           setTagsIOption(data.data.Tags_Item);
         }
